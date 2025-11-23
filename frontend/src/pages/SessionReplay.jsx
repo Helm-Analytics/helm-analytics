@@ -71,6 +71,9 @@ const SessionReplay = () => {
                 const fetchedEvents = await api.getSessionEvents(selectedSite.id, selectedSession);
                 let eventList = Array.isArray(fetchedEvents) ? fetchedEvents : [];
                 
+                // Sort events by timestamp to ensure playback order
+                eventList.sort((a, b) => a.timestamp - b.timestamp);
+
                 // Pre-process events: Unpack if necessary
                 try {
                      eventList = eventList.map(e => {
