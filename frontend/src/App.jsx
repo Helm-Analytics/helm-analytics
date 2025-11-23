@@ -5,11 +5,7 @@ import Signup from "./pages/SignUp"
 import SessionReplay from "./pages/SessionReplay"
 import FunnelsPage from "./pages/FunnelsPage"
 import FirewallPage from "./pages/FirewallPage"
-
-const ProtectedRoute = ({ children }) => {
-  // The Dashboard component now handles its own authentication check
-  return children
-}
+import Layout from "./components/Layout"
 
 function App() {
   return (
@@ -17,17 +13,15 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route path="/session-replay" element={<SessionReplay />} />
-        <Route path="/funnels" element={<FunnelsPage />} />
-        <Route path="/firewall" element={<FirewallPage />} />
+        
+        {/* Protected Routes wrapped in Layout */}
+        <Route element={<Layout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/session-replay" element={<SessionReplay />} />
+          <Route path="/funnels" element={<FunnelsPage />} />
+          <Route path="/firewall" element={<FirewallPage />} />
+        </Route>
+
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
       </Routes>
     </Router>

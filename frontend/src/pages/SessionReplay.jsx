@@ -1,29 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
+import { PlayCircle, Film, AlertCircle } from 'lucide-react';
 
 const SessionReplay = () => {
+    const { selectedSite } = useOutletContext();
     const playerRef = useRef(null);
-    const [sites, setSites] = useState([]);
-    const [selectedSite, setSelectedSite] = useState(null);
     const [sessions, setSessions] = useState([]);
     const [selectedSession, setSelectedSession] = useState(null);
     const [loadingEvents, setLoadingEvents] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
-
-    useEffect(() => {
-        const fetchSites = async () => {
-            try {
-                const sitesData = await api.getSites();
-                setSites(sitesData || []);
-                if (sitesData && sitesData.length > 0) {
-                    setSelectedSite(sitesData[0]);
-                }
-            } catch (error) {
-                console.error("Failed to fetch sites:", error);
-            }
-        };
-        fetchSites();
-    }, []);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         const fetchSessions = async () => {
@@ -43,26 +30,26 @@ const SessionReplay = () => {
     }, [selectedSite]);
 
     useEffect(() => {
+        // Load rrweb-player assets
         const loadRrwebPlayer = () => {
-            // Inject CSS
+            if (document.querySelector('#rrweb-player-css')) {
+                setPlayerLoaded(true);
+                return;
+            }
+
             const cssLink = document.createElement('link');
+            cssLink.id = 'rrweb-player-css';
             cssLink.rel = 'stylesheet';
             cssLink.href = 'https://cdn.jsdelivr.net/npm/rrweb-player@latest/dist/style.css';
             document.head.appendChild(cssLink);
 
-            // Inject Script
             const script = document.createElement('script');
             script.src = 'https://cdn.jsdelivr.net/npm/rrweb-player@latest/dist/index.js';
             script.async = true;
             document.body.appendChild(script);
 
             script.onload = () => {
-                setPlayerLoaded(true); // Signal that the player script is ready
-            };
-
-            return () => {
-                document.head.removeChild(cssLink);
-                document.body.removeChild(script);
+                setPlayerLoaded(true);
             };
         };
 
@@ -71,87 +58,118 @@ const SessionReplay = () => {
 
     useEffect(() => {
         const fetchAndPlaySession = async () => {
-            if (selectedSite && selectedSession && playerLoaded && window.rrwebPlayer) {
+            // Cleanup previous player
+            if (playerRef.current) {
+                playerRef.current.innerHTML = ''; 
+            }
+            
+            if (!selectedSite || !selectedSession) return;
+            
+            if (playerLoaded && window.rrwebPlayer) {
                 setLoadingEvents(true);
+                setError(null);
                 try {
                     const fetchedEvents = await api.getSessionEvents(selectedSite.id, selectedSession);
+                    
+                    // Ensure events is an array
                     const events = Array.isArray(fetchedEvents) ? fetchedEvents : [];
                     
-                    if (playerRef.current) {
-                        playerRef.current.innerHTML = ''; // Clear previous player
-                        
-                        if (events.length > 0) {
-                            new window.rrwebPlayer({
-                                target: playerRef.current,
-                                props: {
-                                    events,
-                                    width: playerRef.current.clientWidth,
-                                    height: 600, // Adjust as needed
-                                    autoPlay: true,
-                                },
-                            });
-                        } else {
-                            // Optionally, display a message if there are no events for the session
-                            playerRef.current.innerHTML = '<div class="flex items-center justify-center h-64 text-slate-400">No events recorded for this session.</div>';
-                        }
+                    if (events.length > 1) { // rrweb needs at least 2 events to play usually
+                        new window.rrwebPlayer({
+                            target: playerRef.current,
+                            props: {
+                                events,
+                                width: playerRef.current.clientWidth || 800,
+                                height: 500,
+                                autoPlay: true,
+                                showController: true,
+                            },
+                        });
+                    } else {
+                        setError("Not enough events recorded to replay this session.");
                     }
                 } catch (error) {
                     console.error("Failed to fetch session events:", error);
-                    if (playerRef.current) {
-                        playerRef.current.innerHTML = '<div class="flex items-center justify-center h-64 text-red-400">Failed to load session events.</div>';
-                    }
+                    setError("Failed to load session events. Please try again.");
                 } finally {
                     setLoadingEvents(false);
                 }
             }
         };
-        fetchAndPlaySession();
+
+        // Debounce slightly to allow layout to settle
+        const timer = setTimeout(fetchAndPlaySession, 100);
+        return () => clearTimeout(timer);
+        
     }, [selectedSite, selectedSession, playerLoaded]);
 
+    if (!selectedSite) {
+        return (
+            <div className="flex items-center justify-center h-64 text-slate-400">
+                Select a site from the sidebar to view session replays.
+            </div>
+        );
+    }
+
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4 text-slate-200">Session Replay</h1>
-
-            <div className="mb-4 flex space-x-4">
-                <div className="flex-1">
-                    <label htmlFor="site-select" className="block text-sm font-medium text-slate-400">Select Site</label>
-                    <select
-                        id="site-select"
-                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-slate-700 text-slate-200"
-                        value={selectedSite ? selectedSite.id : ''}
-                        onChange={(e) => setSelectedSite(sites.find(site => site.id === e.target.value))}
-                    >
-                        {sites.map(site => (
-                            <option key={site.id} value={site.id}>{site.name}</option>
-                        ))}
-                    </select>
+        <div className="space-y-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-200 flex items-center gap-3">
+                        <PlayCircle className="w-8 h-8 text-indigo-500" />
+                        Session Replay
+                    </h1>
+                    <p className="text-slate-400 mt-1">Watch how users interact with your site.</p>
                 </div>
-
-                <div className="flex-1">
-                    <label htmlFor="session-select" className="block text-sm font-medium text-slate-400">Select Session</label>
-                    <select
-                        id="session-select"
-                        className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-slate-700 text-slate-200"
-                        value={selectedSession || ''}
-                        onChange={(e) => setSelectedSession(e.target.value)}
-                    >
-                        {sessions.map(sessionID => (
-                            <option key={sessionID} value={sessionID}>{sessionID}</option>
-                        ))}
-                    </select>
+                
+                <div className="w-full md:w-64">
+                    <label htmlFor="session-select" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                        Select Session
+                    </label>
+                    <div className="relative">
+                        <select
+                            id="session-select"
+                            className="block w-full pl-3 pr-10 py-2 text-base border border-slate-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-slate-800 text-slate-200"
+                            value={selectedSession || ''}
+                            onChange={(e) => setSelectedSession(e.target.value)}
+                            disabled={sessions.length === 0}
+                        >
+                            {sessions.length > 0 ? (
+                                sessions.map(sessionID => (
+                                    <option key={sessionID} value={sessionID}>
+                                        {sessionID.substring(0, 8)}... ( {sessionID} )
+                                    </option>
+                                ))
+                            ) : (
+                                <option>No sessions found</option>
+                            )}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                            <Film className="h-4 w-4" />
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div className="bg-slate-800 rounded-lg shadow-lg p-4">
+            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg min-h-[600px] flex flex-col">
                 {loadingEvents ? (
-                    <div className="flex items-center justify-center h-64 text-slate-400">
-                        Loading session events...
+                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mb-4"></div>
+                        <p>Loading session data...</p>
+                    </div>
+                ) : error ? (
+                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
+                        <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+                        <p>{error}</p>
                     </div>
                 ) : selectedSession ? (
-                    <div ref={playerRef} className="rrweb-player-container"></div>
+                    <div className="flex-1 bg-slate-900 rounded-lg overflow-hidden border border-slate-700 relative">
+                        <div ref={playerRef} className="w-full h-full"></div>
+                    </div>
                 ) : (
-                    <div className="flex items-center justify-center h-64 text-slate-400">
-                        No session selected or no sessions available for this site.
+                    <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
+                        <Film className="w-16 h-16 mb-4 opacity-20" />
+                        <p>Select a session to start watching</p>
                     </div>
                 )}
             </div>

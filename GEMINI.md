@@ -68,7 +68,7 @@ Phase 1: Core MVP - Status: ✅ COMPLETE
 You have successfully built and deployed the foundation of Sentinel. All F-1xx features from the PRD are complete, including authentication, site management, the core analytics dashboard, and a robust Docker-based deployment system.
 Phase 2: The Differentiator Sprints (1 Week)
 Goal: To build Sentinel's signature security and intelligence features. This is an intense, one-week sprint to create the "wow" factor that will make Sentinel stand out.
-Sprint 1: The Security Foundation (Days 1-2)
+Sprint 1: The Security Foundation (Days 1-2) - ✅ COMPLETE
 Feature: F-201 - Advanced Bot & Threat Detection (v1)
 Backend Tasks:
 Download the GeoLite2-ASN.mmdb file from MaxMind and place it in the backend/ directory.
@@ -83,7 +83,7 @@ Perform an ASN lookup on the visitor's IP. If it belongs to a known data center,
 Ensure the final TrustScore is saved with every event in the events.log.
 Frontend Tasks:
 None. This is a backend-only data enrichment step for now.
-Feature: F-202 - The Sentinel Firewall (v1)
+Feature: F-202 - The Sentinel Firewall (v1) - ✅ COMPLETE
 Backend Tasks:
 Create firewall.go in backend/src/ to handle all firewall logic.
 Update database.go: Add a CREATE TABLE statement for a firewall_rules table (columns: id, site_id, rule_type, value).
@@ -95,8 +95,8 @@ Create FirewallPage.jsx in frontend/src/pages/.
 Add a "Firewall" link to the main navigation in the dashboard sidebar.
 Update api/index.js: Add new functions for getFirewallRules, addFirewallRule, and deleteFirewallRule.
 Build the UI in FirewallPage.jsx with a form to add new rules and a table to list and delete existing rules.
-Sprint 2: Performance & Conversion (Days 3-4)
-Feature: F-203 - Web Vitals Monitoring
+Sprint 2: Performance & Conversion (Days 3-4) - ✅ COMPLETE
+Feature: F-203 - Web Vitals Monitoring - ✅ COMPLETE (Refined)
 Frontend Tasks:
 Install the web-vitals library: npm install web-vitals.
 Update the tracking script (tracker-v3.js) to import and use the library to capture LCP, CLS, and FID metrics and send them in the tracking payload.
@@ -105,7 +105,7 @@ Backend Tasks:
 Update analytics.go: Add optional lcp, cls, fid fields to the Event and EventData structs.
 Update calculateStats to compute the average for each Web Vital.
 Update the Stats struct to include these new averages in the API response.
-Feature: F-204 - Funnels & Goals (v1)
+Feature: F-204 - Funnels & Goals (v1) - ✅ COMPLETE
 Backend Tasks:
 Update database.go: Add a CREATE TABLE statement for a funnels table (columns: id, site_id, name, steps (as JSON)).
 Create funnels.go with a FunnelsApiHandler for full CRUD operations.
@@ -115,9 +115,9 @@ Create FunnelsPage.jsx in frontend/src/pages/.
 Add a "Funnels" link to the dashboard sidebar.
 Update api/index.js: Add functions for funnel CRUD.
 Build the UI to allow users to define a funnel by specifying an ordered list of URL paths (the drag-and-drop UI will be a future enhancement).
-Sprint 3: The Signature KPI (Day 5-6)
+Sprint 3: The Signature KPI (Day 5-6) - ✅ COMPLETE
 Goal: To develop and launch the Traffic Quality Score, Sentinel's most important feature.
-Feature: F-208 - The Traffic Quality Score
+Feature: F-208 - The Traffic Quality Score - ✅ COMPLETE
 Backend Tasks:
 Update analytics.go: In the calculateStats function, add logic to analyze the TrustScore for all events in the selected date range. Calculate the final TrafficQualityScore as the percentage of events with a TrustScore above a certain threshold (e.g., 50).
 Update the Stats struct to include the trafficQualityScore field in the API response.

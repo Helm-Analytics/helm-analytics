@@ -13,27 +13,13 @@
     rrwebScript.src = 'https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.js';
     document.head.appendChild(rrwebScript);
 
-    // Dynamically import and initialize web-vitals
-    const initWebVitals = () => {
-        import('https://unpkg.com/web-vitals@4?module')
-            .then(({ onCLS, onFID, onLCP }) => {
-                const sendVitals = ({ name, value }) => {
-                    window.trackWebVitals({ [name]: value });
-                };
-                onCLS(sendVitals);
-                onFID(sendVitals);
-                onLCP(sendVitals);
-            })
-            .catch(err => {
-                console.error('Sentinel: Failed to load web-vitals library.', err);
-            });
-    };
-
+    // Inject Web Vitals (Standard IIFE)
+    const webVitalsScript = document.createElement('script');
+    webVitalsScript.src = 'https://unpkg.com/web-vitals@3/dist/web-vitals.iife.js';
+    document.head.appendChild(webVitalsScript);
 
     rrwebScript.onload = function() {
-        // Start Web Vitals monitoring
-        initWebVitals();
-
+        // Initialize tracking logic once rrweb is ready
         let events = [];
         let lastUrl = location.href;
 
@@ -58,7 +44,21 @@
 
         // Expose a global function for web-vitals to call
         window.trackWebVitals = (vital) => {
-            track(vital);
+            // vital is like { name: 'LCP', value: 123.45 }
+            // We need to flatten it to { LCP: 123.45 }
+            if (vital && vital.name && vital.value !== undefined) {
+                track({ [vital.name]: vital.value });
+            }
+        };
+        
+        // Initialize Web Vitals when script loads
+        webVitalsScript.onload = function() {
+             if (window.webVitals) {
+                const { onCLS, onFID, onLCP } = window.webVitals;
+                onCLS(window.trackWebVitals);
+                onFID(window.trackWebVitals);
+                onLCP(window.trackWebVitals);
+             }
         };
 
 
@@ -83,11 +83,16 @@
         });
 
         // --- RRWeb Session Recording ---
-        rrweb.record({
-            emit(event) {
-                events.push(event);
-            },
-        });
+        // Check if rrweb is actually available
+        if (window.rrweb) {
+             window.rrweb.record({
+                emit(event) {
+                    events.push(event);
+                },
+            });
+        } else {
+            console.error("Sentinel: rrweb failed to load");
+        }
 
         let sessionId = null;
 
