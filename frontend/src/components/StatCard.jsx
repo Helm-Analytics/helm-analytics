@@ -12,77 +12,78 @@ const StatCard = ({ title, value, icon: CardIcon, change, inverse = false, isQua
 
   const changeType = change >= 0 ? "positive" : "negative";
   const changeColor = isChangeGood ? "text-green-400" : "text-red-400";
-  const changeIcon = change >= 0 ? "↑" : "↓";
-
-  // Quality Score Logic
-  let qualityColor = "text-slate-200";
-  let progressBarColor = "bg-indigo-500";
+    const changeIcon = change >= 0 ? "↑" : "↓";
   
-  if (isQualityScore) {
-      if (numericValue >= 80) {
-          qualityColor = "text-green-400";
-          progressBarColor = "bg-green-500";
-      } else if (numericValue >= 50) {
-          qualityColor = "text-yellow-400";
-          progressBarColor = "bg-yellow-500";
-      } else {
-          qualityColor = "text-red-400";
-          progressBarColor = "bg-red-500";
-      }
-  }
-
-  // Web Vitals Color Logic (Heuristic based on title content or explicit prop could be better, but simple check for now)
-  if (title.includes("LCP")) {
-      if (numericValue <= 2500) qualityColor = "text-green-400";
-      else if (numericValue <= 4000) qualityColor = "text-yellow-400";
-      else qualityColor = "text-red-400";
-  } else if (title.includes("CLS")) {
-       if (numericValue <= 0.1) qualityColor = "text-green-400";
-      else if (numericValue <= 0.25) qualityColor = "text-yellow-400";
-      else qualityColor = "text-red-400";
-  } else if (title.includes("FID")) {
-       if (numericValue <= 100) qualityColor = "text-green-400";
-      else if (numericValue <= 300) qualityColor = "text-yellow-400";
-      else qualityColor = "text-red-400";
-  }
-
-
-  return (
-    <div className="bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700/50 hover:border-indigo-500/30 transition-all duration-300 flex flex-col justify-between h-full relative overflow-hidden">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div className={`p-2 rounded-lg ${isQualityScore ? 'bg-slate-700' : 'bg-indigo-600/20'}`}>
-            <CardIcon className={`w-6 h-6 ${isQualityScore ? qualityColor : 'text-indigo-400'}`} />
+    // Quality Score Logic
+    let qualityColor = "text-slate-200";
+    let progressBarColor = "bg-indigo-500";
+    
+    if (isQualityScore) {
+        if (numericValue >= 80) {
+            qualityColor = "text-green-400";
+            progressBarColor = "bg-green-500";
+        } else if (numericValue >= 50) {
+            qualityColor = "text-yellow-400";
+            progressBarColor = "bg-yellow-500";
+        } else {
+            qualityColor = "text-red-400";
+            progressBarColor = "bg-red-500";
+        }
+    }
+  
+    // Web Vitals Color Logic (Heuristic based on title content or explicit prop could be better, but simple check for now)
+    if (title.includes("LCP")) {
+        if (numericValue <= 2500) qualityColor = "text-green-400";
+        else if (numericValue <= 4000) qualityColor = "text-yellow-400";
+        else qualityColor = "text-red-400";
+    } else if (title.includes("CLS")) {
+         if (numericValue <= 0.1) qualityColor = "text-green-400";
+        else if (numericValue <= 0.25) qualityColor = "text-yellow-400";
+        else qualityColor = "text-red-400";
+    } else if (title.includes("FID")) {
+         if (numericValue <= 100) qualityColor = "text-green-400";
+        else if (numericValue <= 300) qualityColor = "text-yellow-400";
+        else qualityColor = "text-red-400";
+    }
+  
+  
+    return (
+      <div className="bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700/50 hover:border-indigo-500/30 transition-all duration-300 flex flex-col justify-between h-full relative overflow-hidden">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center space-x-3">
+            <div class={`p-2 rounded-lg ${isQualityScore ? 'bg-slate-700' : 'bg-indigo-600/20'}`}>
+              <CardIcon className={`w-6 h-6 ${isQualityScore ? qualityColor : 'text-indigo-400'}`} />
+            </div>
+            <p className="text-slate-400 text-sm font-medium">{title}</p>
           </div>
-          <p className="text-slate-400 text-sm font-medium">{title}</p>
+          {change !== undefined && change !== null && (
+            <div className={`flex items-center text-xs font-bold ${changeColor} bg-slate-900/50 px-2 py-1 rounded-full`}>
+              <span>{changeIcon} {Math.abs(change).toFixed(isQualityScore ? 0 : 1)}{isQualityScore ? '' : '%'}{isQualityScore && ' pts'}</span>
+            </div>
+          )}
         </div>
-        {change !== undefined && change !== null && (
-          <div className={`flex items-center text-xs font-bold ${changeColor} bg-slate-900/50 px-2 py-1 rounded-full`}>
-            <span>{changeIcon} {Math.abs(change).toFixed(1)}%</span>
+  
+        <div>
+          <div className={`text-3xl font-bold ${qualityColor}`}>
+              {value}
           </div>
-        )}
-      </div>
-
-      <div>
-        <div className={`text-3xl font-bold ${qualityColor}`}>
-            {value}
+          
+          {/* Quality Score Progress Bar */}
+          {isQualityScore && (
+              <div className="w-full bg-slate-700 h-1.5 mt-3 rounded-full overflow-hidden">
+                  <div 
+                      className={`h-full rounded-full ${progressBarColor} transition-all duration-1000 ease-out`}
+                      style={{ width: `${Math.min(numericValue, 100)}%` }}
+                  ></div>
+              </div>
+          )}
         </div>
         
-        {/* Quality Score Progress Bar */}
-        {isQualityScore && (
-            <div className="w-full bg-slate-700 h-1.5 mt-3 rounded-full overflow-hidden">
-                <div 
-                    className={`h-full rounded-full ${progressBarColor} transition-all duration-1000 ease-out`}
-                    style={{ width: `${Math.min(numericValue, 100)}%` }}
-                ></div>
-            </div>
-        )}
+        {/* Background decoration */}
+        <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
       </div>
-      
-      {/* Background decoration */}
-      <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-    </div>
-  );
-};
-
-export default StatCard;
+    );
+  };
+  
+  export default StatCard;
+  

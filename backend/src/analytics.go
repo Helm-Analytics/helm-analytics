@@ -623,7 +623,8 @@ func calculateStats(siteID string, days int) (Stats, error) {
 	finalStats.UniqueVisitorsChange = calculateChange(float64(currentStats.UniqueVisitors), float64(previousStats.UniqueVisitors))
 	finalStats.BounceRateChange = calculateChange(currentStats.BounceRate, previousStats.BounceRate)
 	finalStats.AvgVisitTimeChange = calculateChange(currentStats.AvgVisitTime, previousStats.AvgVisitTime)
-	finalStats.TrafficQualityScoreChange = calculateChange(currentStats.TrafficQualityScore, previousStats.TrafficQualityScore)
+	// TrafficQualityScoreChange is an absolute point change, not a percentage change of a percentage.
+	finalStats.TrafficQualityScoreChange = currentStats.TrafficQualityScore - previousStats.TrafficQualityScore
 	finalStats.AvgLCPChange = calculateChange(currentStats.AvgLCP, previousStats.AvgLCP)
 	finalStats.AvgCLSChange = calculateChange(currentStats.AvgCLS, previousStats.AvgCLS)
 	finalStats.AvgFIDChange = calculateChange(currentStats.AvgFID, previousStats.AvgFID)
