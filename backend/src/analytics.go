@@ -505,10 +505,7 @@ func DashboardApiHandler(w http.ResponseWriter, r *http.Request) {
 
 func calculateChange(current, previous float64) float64 {
 	if previous == 0 {
-		if current > 0 {
-			return 100.0 // Infinite growth, capped at 100%
-		}
-		return 0.0
+		return 0.0 // Avoid misleading "100%" or infinite growth for new data
 	}
 	return ((current - previous) / previous) * 100
 }
@@ -565,7 +562,7 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 	}
 
 	// Traffic Quality Score
-	queryGoodTraffic := "SELECT count() FROM events WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND TrustScore > 50"
+	queryGoodTraffic := "SELECT count() FROM events WHERE SiteID = ? AND LCP IS NULL AND CLS IS NULL AND FID IS NULL AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND TrustScore > 50"
 	var goodTrafficCount uint64
 	err = chConn.QueryRow(ctx, queryGoodTraffic, siteID, startDaysAgo, endDaysAgo).Scan(&goodTrafficCount)
 	if err != nil || stats.TotalViews == 0 {
