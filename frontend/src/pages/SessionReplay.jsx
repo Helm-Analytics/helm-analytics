@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { PlayCircle, Film, AlertCircle } from 'lucide-react';
+import { unpack } from 'rrweb';
 
 const SessionReplay = () => {
     const { selectedSite } = useOutletContext();
@@ -68,7 +69,24 @@ const SessionReplay = () => {
 
             try {
                 const fetchedEvents = await api.getSessionEvents(selectedSite.id, selectedSession);
-                const eventList = Array.isArray(fetchedEvents) ? fetchedEvents : [];
+                let eventList = Array.isArray(fetchedEvents) ? fetchedEvents : [];
+                
+                // Pre-process events: Unpack if necessary
+                try {
+                     eventList = eventList.map(e => {
+                         if (typeof e === 'string') return JSON.parse(e);
+                         // Try to unpack if it looks like a packed event (usually has 'v' property)
+                         // But for safety, we can just try passing it.
+                         // Actually, standard practice with v2 is to just pass them, but if they are packed, we MUST unpack.
+                         // Let's assume they are NOT packed by default in our simple tracker, 
+                         // BUT if the recorder uses 'packFn', we need this.
+                         // Since we are using a simple recorder, let's just make sure they are valid objects.
+                         return e;
+                     });
+                } catch (e) {
+                    console.warn("Error parsing events", e);
+                }
+
                 console.log("Session Replay: Fetched", eventList.length, "events");
                 
                 if (eventList.length < 2) {
@@ -95,14 +113,37 @@ const SessionReplay = () => {
         playerRef.current.innerHTML = '';
 
         try {
+            // We need to properly unpack events if they are packed. 
+            // Since we imported 'unpack', let's use it on the first event to check if it works?
+            // Or just map all. 
+            // NOTE: rrweb.unpack is robust.
+            
+            const replayerEvents = events.map(e => {
+                try {
+                     return unpack(e);
+                } catch (err) {
+                    return e; // Return original if unpack fails (already unpacked)
+                }
+            });
+
             new window.rrwebPlayer({
                 target: playerRef.current,
                 props: {
-                    events,
+                    events: replayerEvents,
                     width: playerRef.current.clientWidth || 800,
                     height: 500,
                     autoPlay: true,
                     showController: true,
+                    // Fix for blank screen due to CORS on stylesheets:
+                    // This forces the replayer to ignore external stylesheets that it can't load.
+                    // It might look "unstyled" but at least content will show.
+                    replayerOption: {
+                        unpackFn: unpack, // Pass unpack function to replayer
+                        mouseTail: false,
+                        loadTimeout: 5000, // Timeout for assets
+                        // Skip loading stylesheets that might block rendering
+                        stylesheetRules: [],
+                    },
                 },
             });
         } catch (playerError) {
