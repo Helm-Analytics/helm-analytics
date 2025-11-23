@@ -77,10 +77,15 @@ const SessionReplay = () => {
                     console.log("Session Replay: Fetched", events.length, "events");
 
                     if (events.length > 1) { 
+                        // Wait for ref to be available
                         if (!playerRef.current) {
-                             console.warn("Session Replay: Player container ref is null. Retrying...");
-                             return; // Skip this render cycle, effect will re-run if dependencies change
+                             console.warn("Session Replay: Player container ref is null. Retrying in 100ms...");
+                             setTimeout(fetchAndPlaySession, 100);
+                             return; 
                         }
+
+                        // Clear previous content to avoid duplication
+                        playerRef.current.innerHTML = '';
 
                         try {
                             new window.rrwebPlayer({

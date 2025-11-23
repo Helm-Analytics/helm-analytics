@@ -1,22 +1,2 @@
-Player Error: Cannot read properties of null (reading 'clientWidth')
-session replay
-
-Request URL
-https://api-sentinel.getmusterup.com/api/heatmap?siteId=f2c73d9d-513a-4228-9e4e-e1ce7eb76e15
-Request Method
-GET
-2025/11/23 04:54:53 Sentinel Go server starting on :6060
-2025/11/23 04:54:58 Error querying heatmap data: code: 60, message: Unknown table expression identifier 'sentinel.clicks' in scope SELECT URL, count() AS count FROM sentinel.clicks WHERE (SiteID = 'f2c73d9d-513a-4228-9e4e-e1ce7eb76e15') AND (Timestamp >= (now() - toIntervalDay(7))) GROUP BY URL ORDER BY count DESC LIMIT 50
-2025/11/23 04:54:59 Error querying heatmap data: code: 60, message: Unknown table expression identifier 'sentinel.clicks' in scope SELECT URL, count() AS count FROM sentinel.clicks WHERE (SiteID = 'f2c73d9d-513a-4228-9e4e-e1ce7eb76e15') AND (Timestamp >= (now() - toIntervalDay(7))) GROUP BY URL ORDER BY count DESC LIMIT 50    
-Internal server error
-
-Status Code
-Request URL
-https://api-sentinel.getmusterup.com/api/errors?siteId=f2c73d9d-513a-4228-9e4e-e1ce7eb76e15
-Request Method
-GET
-Status Code
-500 Internal Server Error
-Remote Address
-
-Also funnels ui is bad
+Session Replay: Fetched 14 events
+installHook.js:1 Session Replay: Player container ref is null. Retrying...
