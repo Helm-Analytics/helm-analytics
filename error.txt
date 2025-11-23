@@ -1,14 +1,451 @@
-index-CXiCMf5c.js:262 Uncaught ReferenceError: selectedSession is not defined
-    at LR (index-CXiCMf5c.js:262:43951)
-    at Bc (index-CXiCMf5c.js:48:34137)
-    at eu (index-CXiCMf5c.js:48:62250)
-    at Gg (index-CXiCMf5c.js:48:72752)
-    at xm (index-CXiCMf5c.js:48:106785)
-    at jv (index-CXiCMf5c.js:48:105850)
-    at Eu (index-CXiCMf5c.js:48:105682)
-    at gm (index-CXiCMf5c.js:48:102792)
-    at Dm (index-CXiCMf5c.js:48:114226)
-    at MessagePort.it (index-CXiCMf5c.js:25:1600)
-
-﻿
-
+Session Replay: Fetched 169 events
+installHook.js:1 [replayer] Node with id '154' not found.  {source: 0, texts: Array(0), attributes: Array(0), removes: Array(1), adds: Array(2)}
+overrideMethod @ installHook.js:1
+warn @ index.js:1572
+warnNodeNotFound @ index.js:1560
+(anonymous) @ index.js:1010
+applyMutation @ index.js:1003
+applyIncremental @ index.js:724
+n @ index.js:121
+(anonymous) @ index.js:157
+doAction @ machine.js:125
+t @ timer.js:31
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38Understand this warning
+installHook.js:1 [replayer] Node with id '1093' not found.  {source: 0, texts: Array(0), attributes: Array(0), removes: Array(1), adds: Array(1)}
+overrideMethod @ installHook.js:1
+warn @ index.js:1572
+warnNodeNotFound @ index.js:1560
+(anonymous) @ index.js:1010
+applyMutation @ index.js:1003
+applyIncremental @ index.js:724
+n @ index.js:121
+(anonymous) @ index.js:157
+doAction @ machine.js:125
+t @ timer.js:31
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38Understand this warning
+installHook.js:1 [replayer] Node with id '73' not found.  {source: 0, texts: Array(0), attributes: Array(2), removes: Array(1), adds: Array(2)}
+overrideMethod @ installHook.js:1
+warn @ index.js:1572
+warnNodeNotFound @ index.js:1560
+(anonymous) @ index.js:1010
+applyMutation @ index.js:1003
+applyIncremental @ index.js:724
+n @ index.js:121
+(anonymous) @ index.js:157
+doAction @ machine.js:125
+t @ timer.js:31
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38Understand this warning
+installHook.js:1 [replayer] Node with id '42' not found.  {source: 0, texts: Array(0), attributes: Array(2), removes: Array(1), adds: Array(2)}
+overrideMethod @ installHook.js:1
+warn @ index.js:1572
+warnNodeNotFound @ index.js:1560
+(anonymous) @ index.js:1213
+applyMutation @ index.js:1207
+applyIncremental @ index.js:724
+n @ index.js:121
+(anonymous) @ index.js:157
+doAction @ machine.js:125
+t @ timer.js:31
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38Understand this warning
+installHook.js:1 [replayer] Node with id '48' not found.  {source: 0, texts: Array(0), attributes: Array(2), removes: Array(1), adds: Array(2)}
+overrideMethod @ installHook.js:1
+warn @ index.js:1572
+warnNodeNotFound @ index.js:1560
+(anonymous) @ index.js:1213
+applyMutation @ index.js:1207
+applyIncremental @ index.js:724
+n @ index.js:121
+(anonymous) @ index.js:157
+doAction @ machine.js:125
+t @ timer.js:31
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38Understand this warning
+installHook.js:1 [replayer] Node with id '1096' not found.  {source: 0, texts: Array(0), attributes: Array(0), removes: Array(1), adds: Array(186)}
+overrideMethod @ installHook.js:1
+warn @ index.js:1572
+warnNodeNotFound @ index.js:1560
+(anonymous) @ index.js:1010
+applyMutation @ index.js:1003
+applyIncremental @ index.js:724
+n @ index.js:121
+(anonymous) @ index.js:157
+doAction @ machine.js:125
+t @ timer.js:31
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38
+requestAnimationFrame
+t @ timer.js:38Understand this warning

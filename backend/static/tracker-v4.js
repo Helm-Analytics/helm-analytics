@@ -136,7 +136,12 @@
              window.rrweb.record({
                 emit(event) {
                     events.push(event);
+                    // Optimization: If this is the very first batch (snapshot), send it sooner
+                    if (!sessionId && events.length > 50) {
+                        flushEvents();
+                    }
                 },
+                checkoutEveryNth: 100, // Enforce snapshots periodically
             });
         } else {
             console.error("Sentinel: rrweb failed to load");
@@ -144,16 +149,13 @@
 
         let sessionId = null;
 
-        // Save events every 10 seconds
-        setInterval(() => {
-            if (events.length > 0) {
+        function flushEvents() {
+             if (events.length > 0) {
                 const body = JSON.stringify({ siteId: siteId, events: events, sessionId: sessionId });
                 events = []; // Clear buffer
                 fetch(sessionEndpoint, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: body,
                     keepalive: true
                 })
@@ -165,6 +167,16 @@
                 })
                 .catch(err => console.error('Sentinel session recording error:', err));
             }
-        }, 10 * 1000);
+        }
+
+        // Save events every 5 seconds
+        setInterval(flushEvents, 5 * 1000);
+        
+        // Flush on exit
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                flushEvents();
+            }
+        });
     }
 })();
