@@ -1,16 +1,3 @@
-Request URL
-https://api-sentinel.getmusterup.com/track
-Referrer Policy
-strict-origin-when-cross-origin
-content-type
-application/json
-referer
-https://otakudojo.xyz/
-sec-ch-ua
-"Chromium";v="142", "Google Chrome";v="142", "Not_A Brand";v="99"
-sec-ch-ua-mobile
-?0
-sec-ch-ua-platform
-"Windows"
-user-agent
-Mozilla/5.0 (Windows NT 10.0;
+
+dashboard?siteId=f2c73d9d-513a-4228-9e4e-e1ce7eb76e15&days=30	CORS error	xhr	index-DOH2t8cM.js:207	0.0 kB	419 ms
+dashboard?siteId=f2c73d9d-513a-4228-9e4e-e1ce7eb76e15&days=30	CORS error	xhr
