@@ -181,8 +181,7 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Check Shield Mode
 	var shieldMode bool
-	err := db.QueryRow("SELECT shield_mode FROM sites WHERE id = $1", event.SiteID).Scan(&shieldMode)
-	if err == nil && shieldMode {
+	if err := db.QueryRow("SELECT shield_mode FROM sites WHERE id = $1", event.SiteID).Scan(&shieldMode); err == nil && shieldMode {
 		if trustScore < 80 {
 			http.Error(w, "Blocked by Shield Mode", http.StatusForbidden)
 			return
