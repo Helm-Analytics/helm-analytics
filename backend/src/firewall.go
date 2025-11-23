@@ -14,6 +14,7 @@ type FirewallRule struct {
 	SiteID   string `json:"siteId"`
 	RuleType string `json:"rule_type"` // e.g., "ip", "country", "asn"
 	Value    string `json:"value"`     // The actual IP, country code, or ASN
+	Reason   string `json:"reason,omitempty"`
 }
 
 // FirewallApiHandler routes requests to appropriate functions based on HTTP method.
@@ -28,6 +29,28 @@ func FirewallApiHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+// TrapHandler handles requests to the honeypot URL.
+func TrapHandler(w http.ResponseWriter, r *http.Request) {
+	siteID := r.URL.Query().Get("siteId")
+	if siteID == "" {
+		// Just ignore
+		return
+	}
+
+	ipStr := getClientIP(r)
+
+	// Check if rule already exists to avoid duplicates
+	var exists bool
+	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM firewall_rules WHERE site_id=$1 AND rule_type='ip' AND value=$2)", siteID, ipStr).Scan(&exists)
+	if err == nil && !exists {
+		_, _ = db.Exec("INSERT INTO firewall_rules (site_id, rule_type, value, reason) VALUES ($1, 'ip', $2, 'Caught by Honey Pot')", siteID, ipStr)
+	}
+
+	// Return a generic success to not alert the bot immediately
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
 
 // @Summary List firewall rules
@@ -53,7 +76,7 @@ func handleListFirewallRules(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rows, err := db.Query("SELECT id, site_id, rule_type, value FROM firewall_rules WHERE site_id = $1 ORDER BY rule_type, value", siteID)
+	rows, err := db.Query("SELECT id, site_id, rule_type, value, COALESCE(reason, '') FROM firewall_rules WHERE site_id = $1 ORDER BY rule_type, value", siteID)
 	if err != nil {
 		http.Error(w, "Failed to fetch firewall rules", http.StatusInternalServerError)
 		return
@@ -63,7 +86,7 @@ func handleListFirewallRules(w http.ResponseWriter, r *http.Request) {
 	rules := []FirewallRule{}
 	for rows.Next() {
 		var rule FirewallRule
-		if err := rows.Scan(&rule.ID, &rule.SiteID, &rule.RuleType, &rule.Value); err != nil {
+		if err := rows.Scan(&rule.ID, &rule.SiteID, &rule.RuleType, &rule.Value, &rule.Reason); err != nil {
 			http.Error(w, "Failed to scan firewall rule", http.StatusInternalServerError)
 			return
 		}
@@ -130,7 +153,7 @@ func handleCreateFirewallRule(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var newRuleID string
-	err = db.QueryRow("INSERT INTO firewall_rules (site_id, rule_type, value) VALUES ($1, $2, $3) RETURNING id", siteID, rule.RuleType, rule.Value).Scan(&newRuleID)
+	err = db.QueryRow("INSERT INTO firewall_rules (site_id, rule_type, value, reason) VALUES ($1, $2, $3, $4) RETURNING id", siteID, rule.RuleType, rule.Value, rule.Reason).Scan(&newRuleID)
 	if err != nil {
 		http.Error(w, "Failed to create firewall rule", http.StatusInternalServerError)
 		return

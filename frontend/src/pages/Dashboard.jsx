@@ -5,6 +5,7 @@ import { useOutletContext } from "react-router-dom"
 import { Eye, Users, TrendingDown, Clock, Copy, Check, ShieldCheck } from "lucide-react"
 import { api } from "../api"
 import StatCard from "../components/StatCard"
+import InsightsCard from "../components/InsightsCard"
 import BarChart from "../components/BarChart"
 import LineChart from "../components/LineChart"
 import DoughnutChart from "../components/DoughnutChart"
@@ -106,6 +107,11 @@ const Dashboard = () => {
 
       {dashboardData ? (
         <>
+          {/* AI Insights */}
+          <div className="mb-8">
+             <InsightsCard siteId={selectedSite.id} />
+          </div>
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard

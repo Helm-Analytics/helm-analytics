@@ -62,6 +62,7 @@ func main() {
 	mux.Handle("/track/click", trackCors.Handler(http.HandlerFunc(sentinel.ClickHandler)))
 	mux.Handle("/track/error", trackCors.Handler(http.HandlerFunc(sentinel.ErrorHandler)))
 	mux.Handle("/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
+	mux.Handle("/trap", trackCors.Handler(http.HandlerFunc(sentinel.TrapHandler))) // F-501 Honey Pot
 
 	mux.Handle("/api/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
 	mux.Handle("/api/users", apiCors.Handler(http.HandlerFunc(sentinel.GetAllUsersHandler)))
@@ -77,6 +78,10 @@ func main() {
 	mux.Handle("/api/session/events", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetSessionEventsHandler)))
 	mux.Handle("/api/sessions", apiCors.Handler(sentinel.AuthMiddleware(sentinel.ListSessionsHandler)))
 	mux.Handle("/api/funnels/", apiCors.Handler(sentinel.AuthMiddleware(sentinel.FunnelsApiHandler)))
+	
+	// AI Features
+	mux.Handle("/api/ai/insights", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetInsightsHandler)))
+	mux.Handle("/api/ai/chat", apiCors.Handler(sentinel.AuthMiddleware(sentinel.ChatHandler)))
 
 	// Swagger documentation
 	mux.HandleFunc("/docs/", httpSwagger.WrapHandler)

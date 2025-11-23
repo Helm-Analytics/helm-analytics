@@ -8,6 +8,7 @@ services:
       - "6060:6060"
     environment:
       - DATABASE_URL=postgres://sentinel:password@db:5432/sentinel?sslmode=disable
+      - GEMINI_API_KEY=AIzaSyAp-cQCBdSyCS4o4Gn0rK4eoItOgyAlV80          
     depends_on:
       - db
       - clickhouse

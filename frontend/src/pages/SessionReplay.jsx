@@ -6,8 +6,7 @@ import { PlayCircle, Film, AlertCircle } from 'lucide-react';
 const SessionReplay = () => {
     const { selectedSite } = useOutletContext();
     const playerRef = useRef(null);
-    const [sessions, setSessions] = useState([]);
-    const [selectedSession, setSelectedSession] = useState(null);
+    const [events, setEvents] = useState([]);
     const [loadingEvents, setLoadingEvents] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
     const [error, setError] = useState(null);
@@ -29,8 +28,8 @@ const SessionReplay = () => {
         fetchSessions();
     }, [selectedSite]);
 
+    // Load rrweb-player assets
     useEffect(() => {
-        // Load rrweb-player assets
         const loadRrwebPlayer = () => {
             if (document.querySelector('#rrweb-player-css')) {
                 setPlayerLoaded(true);
@@ -56,69 +55,59 @@ const SessionReplay = () => {
         loadRrwebPlayer();
     }, []);
 
+    // Fetch events when session changes
     useEffect(() => {
-        const fetchAndPlaySession = async () => {
-            // Cleanup previous player
-            if (playerRef.current) {
-                playerRef.current.innerHTML = ''; 
-            }
-            
+        const fetchEvents = async () => {
             if (!selectedSite || !selectedSession) return;
             
-            if (playerLoaded && window.rrwebPlayer) {
-                setLoadingEvents(true);
-                setError(null);
-                try {
-                    const fetchedEvents = await api.getSessionEvents(selectedSite.id, selectedSession);
-                    
-                    // Ensure events is an array
-                    const events = Array.isArray(fetchedEvents) ? fetchedEvents : [];
-                    
-                    console.log("Session Replay: Fetched", events.length, "events");
+            setLoadingEvents(true);
+            setError(null);
+            setEvents([]); // Clear previous events
 
-                    if (events.length > 1) { 
-                        // Wait for ref to be available
-                        if (!playerRef.current) {
-                             console.warn("Session Replay: Player container ref is null. Retrying in 100ms...");
-                             setTimeout(fetchAndPlaySession, 100);
-                             return; 
-                        }
-
-                        // Clear previous content to avoid duplication
-                        playerRef.current.innerHTML = '';
-
-                        try {
-                            new window.rrwebPlayer({
-                                target: playerRef.current,
-                                props: {
-                                    events,
-                                    width: playerRef.current.clientWidth || 800,
-                                    height: 500,
-                                    autoPlay: true,
-                                    showController: true,
-                                },
-                            });
-                        } catch (playerError) {
-                            console.error("rrwebPlayer instantiation failed:", playerError);
-                            setError(`Player Error: ${playerError.message}`);
-                        }
-                    } else {
-                        setError(`Not enough events recorded (${events.length}) to replay this session.`);
-                    }
-                } catch (error) {
-                    console.error("Failed to fetch session events:", error);
-                    setError(`Fetch Error: ${error.message || "Unknown error"}`);
-                } finally {
-                    setLoadingEvents(false);
+            try {
+                const fetchedEvents = await api.getSessionEvents(selectedSite.id, selectedSession);
+                const eventList = Array.isArray(fetchedEvents) ? fetchedEvents : [];
+                console.log("Session Replay: Fetched", eventList.length, "events");
+                
+                if (eventList.length < 2) {
+                    setError(`Not enough events recorded (${eventList.length}) to replay this session.`);
+                } else {
+                    setEvents(eventList);
                 }
+            } catch (error) {
+                console.error("Failed to fetch session events:", error);
+                setError(`Fetch Error: ${error.message || "Unknown error"}`);
+            } finally {
+                setLoadingEvents(false);
             }
         };
 
-        // Debounce slightly to allow layout to settle
-        const timer = setTimeout(fetchAndPlaySession, 100);
-        return () => clearTimeout(timer);
-        
-    }, [selectedSite, selectedSession, playerLoaded]);
+        fetchEvents();
+    }, [selectedSite, selectedSession]);
+
+    // Initialize player when events and ref are ready
+    useEffect(() => {
+        if (!playerLoaded || !window.rrwebPlayer || events.length < 2 || !playerRef.current) return;
+
+        // Clear previous content
+        playerRef.current.innerHTML = '';
+
+        try {
+            new window.rrwebPlayer({
+                target: playerRef.current,
+                props: {
+                    events,
+                    width: playerRef.current.clientWidth || 800,
+                    height: 500,
+                    autoPlay: true,
+                    showController: true,
+                },
+            });
+        } catch (playerError) {
+            console.error("rrwebPlayer instantiation failed:", playerError);
+            setError(`Player Error: ${playerError.message}`);
+        }
+    }, [events, playerLoaded]);
 
     if (!selectedSite) {
         return (

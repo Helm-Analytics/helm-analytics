@@ -8,14 +8,28 @@ const FirewallPage = () => {
   const [rules, setRules] = useState([]);
   const [ruleType, setRuleType] = useState('ip');
   const [value, setValue] = useState('');
-  const [loading, setLoading] = useState(false); // Start false, fetch will set true
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [shieldMode, setShieldMode] = useState(false);
 
   useEffect(() => {
     if (selectedSite) {
+      setShieldMode(selectedSite.shieldMode || false);
       fetchRules();
     }
   }, [selectedSite]);
+
+  const toggleShieldMode = async () => {
+      try {
+          const newMode = !shieldMode;
+          setShieldMode(newMode); // Optimistic update
+          await api.updateSite(selectedSite.id, { ...selectedSite, shieldMode: newMode });
+      } catch (err) {
+          console.error("Failed to toggle Shield Mode:", err);
+          setShieldMode(!shieldMode); // Revert
+          setError("Failed to update Shield Mode settings.");
+      }
+  };
 
   const fetchRules = async () => {
     try {
@@ -39,7 +53,7 @@ const FirewallPage = () => {
       return;
     }
     try {
-      await api.addFirewallRule(selectedSite.id, { rule_type: ruleType, value });
+      await api.addFirewallRule(selectedSite.id, { rule_type: ruleType, value, reason: 'Manual Block' });
       setValue('');
       fetchRules(); // Refresh the list
     } catch (err) {
@@ -77,15 +91,48 @@ const FirewallPage = () => {
 
   return (
     <div className="space-y-6">
-      <div>
-          <h1 className="text-3xl font-bold text-slate-200 flex items-center gap-3">
-            <Shield className="w-8 h-8 text-indigo-500" />
-            Sentinel Firewall
-          </h1>
-          <p className="text-slate-400 mt-1 max-w-3xl">
-            Configure rules to block unwanted traffic from being recorded. 
-            These rules filter events based on IP, Country, or ASN (Data Center) before they hit your analytics database.
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+            <h1 className="text-3xl font-bold text-slate-200 flex items-center gap-3">
+                <Shield className="w-8 h-8 text-indigo-500" />
+                Sentinel Firewall
+            </h1>
+            <p className="text-slate-400 mt-1 max-w-2xl">
+                Configure blocking rules and active defense mechanisms.
+            </p>
+        </div>
+        
+        {/* Shield Mode Toggle */}
+        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${shieldMode ? 'bg-red-500/10 border-red-500/30' : 'bg-slate-800 border-slate-700'}`}>
+            <div className="flex flex-col">
+                <span className={`text-sm font-bold ${shieldMode ? 'text-red-400' : 'text-slate-300'}`}>
+                    Shield Mode
+                </span>
+                <span className="text-xs text-slate-500">
+                    {shieldMode ? "Active: Blocking low-trust IPs" : "Inactive"}
+                </span>
+            </div>
+            <button 
+                onClick={toggleShieldMode}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${shieldMode ? 'bg-red-500' : 'bg-slate-600'}`}
+            >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${shieldMode ? 'translate-x-6' : 'translate-x-1'}`} />
+            </button>
+        </div>
+      </div>
+
+      {/* Honey Pot Card */}
+      <div className="bg-gradient-to-br from-amber-900/20 to-slate-800 border border-amber-500/20 rounded-xl p-6 shadow-lg">
+          <h2 className="text-lg font-bold text-amber-400 mb-2 flex items-center gap-2">
+              <span className="text-xl">🍯</span> Honey Pot Module
+          </h2>
+          <p className="text-sm text-slate-400 mb-4">
+              Catch bots automatically by adding this invisible link to your website footer. 
+              Real humans won't see it, but scrapers will follow it and get banned immediately.
           </p>
+          <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 font-mono text-xs text-amber-200/80 break-all select-all">
+            {`<a href="https://api-sentinel.getmusterup.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin</a>`}
+          </div>
       </div>
 
       {/* Add Rule Card */}
@@ -150,6 +197,7 @@ const FirewallPage = () => {
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Type</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Value</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Reason</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Action</th>
                 </tr>
               </thead>
@@ -164,6 +212,9 @@ const FirewallPage = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-white">
                         {rule.value}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                        {rule.reason || <span className="text-slate-600 italic">Manual</span>}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button

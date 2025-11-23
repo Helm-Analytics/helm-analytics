@@ -8,9 +8,10 @@ import (
 
 // Site struct represents a website being tracked in the database.
 type Site struct {
-	ID     string `json:"id"`
-	Name   string `json:"name"`
-	Domain string `json:"domain,omitempty"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Domain     string `json:"domain,omitempty"`
+	ShieldMode bool   `json:"shieldMode"`
 }
 
 // SitesApiHandler now routes to different functions based on the request.
@@ -54,7 +55,7 @@ func SitesApiHandler(w http.ResponseWriter, r *http.Request) {
 func handleListSites(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userID").(int)
 
-	rows, err := db.Query("SELECT id, name, domain FROM sites WHERE user_id = $1 ORDER BY created_at DESC", userID)
+	rows, err := db.Query("SELECT id, name, domain, shield_mode FROM sites WHERE user_id = $1 ORDER BY created_at DESC", userID)
 	if err != nil {
 		http.Error(w, "Failed to fetch sites", http.StatusInternalServerError)
 		return
@@ -64,7 +65,8 @@ func handleListSites(w http.ResponseWriter, r *http.Request) {
 	sites := []Site{}
 	for rows.Next() {
 		var s Site
-		if err := rows.Scan(&s.ID, &s.Name, &s.Domain); err != nil {
+		// Handle nullables if necessary, but boolean default false is usually NOT NULL in my schema
+		if err := rows.Scan(&s.ID, &s.Name, &s.Domain, &s.ShieldMode); err != nil {
 			http.Error(w, "Failed to scan site", http.StatusInternalServerError)
 			return
 		}
@@ -91,7 +93,7 @@ func handleCreateSite(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var newSiteID string
-	err := db.QueryRow("INSERT INTO sites (user_id, name, domain) VALUES ($1, $2, $3) RETURNING id", userID, site.Name, site.Domain).Scan(&newSiteID)
+	err := db.QueryRow("INSERT INTO sites (user_id, name, domain, shield_mode) VALUES ($1, $2, $3, $4) RETURNING id", userID, site.Name, site.Domain, site.ShieldMode).Scan(&newSiteID)
 	if err != nil {
 		http.Error(w, "Failed to create site", http.StatusInternalServerError)
 		return
@@ -128,7 +130,7 @@ func handleUpdateSite(w http.ResponseWriter, r *http.Request, siteID string) {
 		return
 	}
 
-	_, err = db.Exec("UPDATE sites SET name = $1, domain = $2 WHERE id = $3 AND user_id = $4", site.Name, site.Domain, siteID, userID)
+	_, err = db.Exec("UPDATE sites SET name = $1, domain = $2, shield_mode = $3 WHERE id = $4 AND user_id = $5", site.Name, site.Domain, site.ShieldMode, siteID, userID)
 	if err != nil {
 		http.Error(w, "Failed to update site", http.StatusInternalServerError)
 		return

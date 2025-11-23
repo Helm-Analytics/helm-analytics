@@ -45,6 +45,12 @@ export const api = {
       method: "POST",
       data: { name },
     }),
+  updateSite: (id, data) => 
+    request({
+      url: `/api/sites/${id}`,
+      method: "PUT",
+      data: data,
+    }),
   deleteSite: (id) =>
     request({
       url: `/api/sites/${id}`,
@@ -105,4 +111,16 @@ export const api = {
   },
   getErrorStats: (siteId) => 
     request({ url: `/api/errors?siteId=${siteId}` }),
+
+  getInsights: (siteId) =>
+    request({
+      url: `/api/ai/insights?siteId=${siteId}`,
+      method: "POST",
+    }),
+  chatWithAI: (siteId, message) =>
+    request({
+      url: `/api/ai/chat?siteId=${siteId}`,
+      method: "POST",
+      data: { message },
+    }),
 };

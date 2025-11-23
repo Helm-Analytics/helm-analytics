@@ -3,6 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
 import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon } from "lucide-react"
 import { api } from "../api"
 import Logo from "./Logo"
+import ChatWidget from "./ChatWidget"
 
 const Layout = () => {
   const [sites, setSites] = useState([])
@@ -224,6 +225,8 @@ const Layout = () => {
            <Outlet context={{ sites, selectedSite }} />
         </div>
       </div>
+
+      <ChatWidget siteId={selectedSite?.id} />
     </div>
   )
 }

@@ -64,22 +64,29 @@ func createTables() {
         user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         name TEXT NOT NULL,
         domain TEXT,
+        shield_mode BOOLEAN DEFAULT FALSE,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );`
 	if _, err := db.Exec(createSitesTable); err != nil {
 		log.Fatalf("Could not create sites table: %v", err)
 	}
+	// Migration for shield_mode
+	db.Exec(`ALTER TABLE sites ADD COLUMN IF NOT EXISTS shield_mode BOOLEAN DEFAULT FALSE;`)
+
 	createFirewallRulesTable := `
     CREATE TABLE IF NOT EXISTS firewall_rules (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         site_id UUID NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
         rule_type TEXT NOT NULL, -- e.g., "ip", "country", "asn"
         value TEXT NOT NULL,
+        reason TEXT,
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );`
 	if _, err := db.Exec(createFirewallRulesTable); err != nil {
 		log.Fatalf("Could not create firewall_rules table: %v", err)
 	}
+	// Migration for reason
+	db.Exec(`ALTER TABLE firewall_rules ADD COLUMN IF NOT EXISTS reason TEXT;`)
 	createFunnelsTable := `
     CREATE TABLE IF NOT EXISTS funnels (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

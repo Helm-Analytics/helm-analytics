@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { Activity, MousePointer2 } from 'lucide-react';
-import h337 from 'heatmap.js'; // You'll need to install this: npm install heatmap.js
 
 const HeatmapPage = () => {
   const { selectedSite } = useOutletContext();
@@ -10,8 +9,7 @@ const HeatmapPage = () => {
   const [selectedPage, setSelectedPage] = useState('');
   const [heatmapData, setHeatmapData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const containerRef = useRef(null);
-  const heatmapInstance = useRef(null);
+  const canvasRef = useRef(null);
 
   useEffect(() => {
     if (selectedSite) {
@@ -50,34 +48,104 @@ const HeatmapPage = () => {
   };
 
   useEffect(() => {
-    // Initialize or update heatmap
-    if (containerRef.current && heatmapData.length > 0) {
-      // Clear previous instance if exists
-      if (containerRef.current.innerHTML !== "") {
-        containerRef.current.innerHTML = "";
-      }
-
-      heatmapInstance.current = h337.create({
-        container: containerRef.current,
-        radius: 25,
-        maxOpacity: 0.6,
-        minOpacity: 0,
-        blur: 0.85,
-      });
-
-      const maxVal = Math.max(...heatmapData.map(p => p.value), 1);
-      
-      heatmapInstance.current.setData({
-        max: maxVal,
-        min: 0,
-        data: heatmapData.map(p => ({
-            x: p.x,
-            y: p.y,
-            value: p.value
-        }))
-      });
+    if (canvasRef.current && heatmapData.length > 0) {
+      drawHeatmap();
     }
   }, [heatmapData]);
+
+  const drawHeatmap = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+
+    if (heatmapData.length === 0) return;
+
+    // 1. Draw the "shadow" (alpha) map
+    // We draw radial gradients with low opacity for each point.
+    // Overlapping points accumulate opacity.
+    
+    // Create a temporary canvas for the alpha map if needed, 
+    // but we can just draw directly to the main canvas first 
+    // using grayscale/alpha and then colorize.
+    
+    const radius = 25;
+    const maxVal = Math.max(...heatmapData.map(p => p.value), 1);
+
+    heatmapData.forEach(point => {
+        // Calculate intensity based on value relative to max
+        // However, standard heatmaps often just accumulate alpha 
+        // regardless of individual point "value" if value implies "count".
+        // If 'value' is just 1 (a click), we just draw.
+        // Let's assume point.value is the weight.
+        
+        const weight = point.value / maxVal;
+        
+        ctx.beginPath();
+        const alpha = Math.min(Math.max(weight, 0.1), 1); // Ensure some visibility
+        ctx.globalAlpha = 0.1 + (0.5 * alpha); // Base alpha per point
+        
+        const gradient = ctx.createRadialGradient(point.x, point.y, 0, point.x, point.y, radius);
+        gradient.addColorStop(0, 'rgba(0,0,0,1)');
+        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        
+        ctx.fillStyle = gradient;
+        ctx.arc(point.x, point.y, radius, 0, 2 * Math.PI);
+        ctx.fill();
+    });
+
+    // 2. Colorize
+    // Get the pixel data (alpha map)
+    // Note: We drew black with alpha. The alpha channel in ImageData 
+    // will reflect the accumulation.
+    
+    // Wait, if we draw 'rgba(0,0,0,X)', the RGB channels are 0.
+    // The Alpha channel is what we care about.
+    
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data; // Uint8ClampedArray
+
+    // Create a color gradient map (256 colors)
+    const gradientCanvas = document.createElement('canvas');
+    gradientCanvas.width = 1;
+    gradientCanvas.height = 256;
+    const gCtx = gradientCanvas.getContext('2d');
+    const gradient = gCtx.createLinearGradient(0, 0, 0, 256);
+    
+    // Define heatmap colors: Blue (cool) -> Green -> Yellow -> Red (hot)
+    gradient.addColorStop(0.4, 'blue');
+    gradient.addColorStop(0.6, 'cyan');
+    gradient.addColorStop(0.7, 'lime');
+    gradient.addColorStop(0.8, 'yellow');
+    gradient.addColorStop(1.0, 'red');
+    
+    gCtx.fillStyle = gradient;
+    gCtx.fillRect(0, 0, 1, 256);
+    
+    const gradientData = gCtx.getImageData(0, 0, 1, 256).data;
+
+    // Map alpha to color
+    for (let i = 0; i < data.length; i += 4) {
+        const alpha = data[i + 3]; // Alpha channel (0-255)
+        
+        if (alpha > 0) {
+            // Map alpha to gradient index (0-255)
+            // We use the alpha value as the index into our gradient map
+            const gradientIndex = alpha * 4;
+            
+            data[i] = gradientData[gradientIndex];     // R
+            data[i + 1] = gradientData[gradientIndex + 1]; // G
+            data[i + 2] = gradientData[gradientIndex + 2]; // B
+            // Alpha remains the same (or we can boost it for visibility)
+            data[i + 3] = alpha < 50 ? 0 : alpha * 1.5; // Thresholding to remove noise and boost visibility
+        }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+  };
 
   if (!selectedSite) return <div className="text-center p-8 text-slate-400">Select a site to view heatmaps.</div>;
 
@@ -115,21 +183,22 @@ const HeatmapPage = () => {
              </div>
          ) : heatmapData.length > 0 ? (
              <div 
-                ref={containerRef} 
-                className="relative w-full h-[800px] bg-slate-800 rounded-lg shadow-inner overflow-auto"
+                className="relative w-full bg-slate-800 rounded-lg shadow-inner overflow-auto"
                 style={{ 
-                    // Simulate a standard desktop viewport width if we don't have the real page
                     maxWidth: '1280px', 
+                    height: '800px',
                     margin: '0 auto' 
                 }}
              >
-                {/* 
-                   In a real app, you'd try to load the page in an iframe or display a screenshot here.
-                   For now, we just show the heatmap on a dark canvas.
-                */}
-                <div className="absolute top-4 left-4 text-xs text-slate-500 pointer-events-none">
+                <div className="absolute top-4 left-4 text-xs text-slate-500 pointer-events-none z-10">
                     Displaying {heatmapData.length} click points
                 </div>
+                <canvas 
+                    ref={canvasRef} 
+                    width={1280} 
+                    height={800} 
+                    className="block mx-auto"
+                />
              </div>
          ) : (
              <div className="text-center text-slate-500">

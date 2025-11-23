@@ -178,6 +178,17 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	trustScore := calculateTrustScore(ip, userAgent)
+
+	// Check Shield Mode
+	var shieldMode bool
+	err := db.QueryRow("SELECT shield_mode FROM sites WHERE id = $1", event.SiteID).Scan(&shieldMode)
+	if err == nil && shieldMode {
+		if trustScore < 80 {
+			http.Error(w, "Blocked by Shield Mode", http.StatusForbidden)
+			return
+		}
+	}
+
 	var asn string
 	if asnDb != nil && ip != nil {
 		record, err := asnDb.ASN(ip)
