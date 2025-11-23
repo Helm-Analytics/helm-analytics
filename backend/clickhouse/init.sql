@@ -26,3 +26,28 @@ CREATE TABLE IF NOT EXISTS sentinel.session_events (
     Payload String
 ) ENGINE = MergeTree()
 ORDER BY (SiteID, SessionID, Timestamp);
+
+CREATE TABLE IF NOT EXISTS sentinel.clicks (
+    Timestamp DateTime,
+    SiteID String,
+    ClientIP String,
+    URL String,
+    X UInt16,
+    Y UInt16,
+    Selector String,
+    Country String
+) ENGINE = MergeTree()
+ORDER BY (SiteID, Timestamp);
+
+CREATE TABLE IF NOT EXISTS sentinel.errors (
+    Timestamp DateTime,
+    SiteID String,
+    ClientIP String,
+    URL String,
+    Message String,
+    Source String,
+    LineNo UInt32,
+    ColNo UInt32,
+    ErrorObj String
+) ENGINE = MergeTree()
+ORDER BY (SiteID, Timestamp);

@@ -74,23 +74,30 @@ const SessionReplay = () => {
                     // Ensure events is an array
                     const events = Array.isArray(fetchedEvents) ? fetchedEvents : [];
                     
+                    console.log("Session Replay: Fetched", events.length, "events");
+
                     if (events.length > 1) { // rrweb needs at least 2 events to play usually
-                        new window.rrwebPlayer({
-                            target: playerRef.current,
-                            props: {
-                                events,
-                                width: playerRef.current.clientWidth || 800,
-                                height: 500,
-                                autoPlay: true,
-                                showController: true,
-                            },
-                        });
+                        try {
+                            new window.rrwebPlayer({
+                                target: playerRef.current,
+                                props: {
+                                    events,
+                                    width: playerRef.current.clientWidth || 800,
+                                    height: 500,
+                                    autoPlay: true,
+                                    showController: true,
+                                },
+                            });
+                        } catch (playerError) {
+                            console.error("rrwebPlayer instantiation failed:", playerError);
+                            setError(`Player Error: ${playerError.message}`);
+                        }
                     } else {
-                        setError("Not enough events recorded to replay this session.");
+                        setError(`Not enough events recorded (${events.length}) to replay this session.`);
                     }
                 } catch (error) {
                     console.error("Failed to fetch session events:", error);
-                    setError("Failed to load session events. Please try again.");
+                    setError(`Fetch Error: ${error.message || "Unknown error"}`);
                 } finally {
                     setLoadingEvents(false);
                 }

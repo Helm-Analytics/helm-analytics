@@ -223,6 +223,219 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }
 
+// --- CLICKS & ERRORS ---
+
+type Click struct {
+	SiteID   string `json:"siteId"`
+	URL      string `json:"url"`
+	X        int    `json:"x"`
+	Y        int    `json:"y"`
+	Selector string `json:"selector"`
+}
+
+type JSError struct {
+	SiteID   string `json:"siteId"`
+	URL      string `json:"url"`
+	Message  string `json:"message"`
+	Source   string `json:"source"`
+	LineNo   int    `json:"lineno"`
+	ColNo    int    `json:"colno"`
+	ErrorObj string `json:"error"`
+}
+
+func ClickHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var click Click
+	if err := json.NewDecoder(r.Body).Decode(&click); err != nil {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	ipStr := getClientIP(r)
+	ip := net.ParseIP(ipStr)
+	country := "Unknown"
+	if geoipDb != nil && ip != nil {
+		record, err := geoipDb.Country(ip)
+		if err == nil && record.Country.IsoCode != "" {
+			country = record.Country.IsoCode
+		}
+	}
+
+	ctx := context.Background()
+	err := chConn.AsyncInsert(ctx, "INSERT INTO sentinel.clicks VALUES (?, ?, ?, ?, ?, ?, ?, ?)", false,
+		time.Now().UTC(), click.SiteID, ipStr, click.URL, uint16(click.X), uint16(click.Y), click.Selector, country,
+	)
+	if err != nil {
+		log.Printf("Error inserting click: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func ErrorHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var jsErr JSError
+	if err := json.NewDecoder(r.Body).Decode(&jsErr); err != nil {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	ipStr := getClientIP(r)
+
+	ctx := context.Background()
+	err := chConn.AsyncInsert(ctx, "INSERT INTO sentinel.errors VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", false,
+		time.Now().UTC(), jsErr.SiteID, ipStr, jsErr.URL, jsErr.Message, jsErr.Source, uint32(jsErr.LineNo), uint32(jsErr.ColNo), jsErr.ErrorObj,
+	)
+	if err != nil {
+		log.Printf("Error inserting JS error: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+// --- DATA RETRIEVAL FOR NEW FEATURES ---
+
+func GetHeatmapDataHandler(w http.ResponseWriter, r *http.Request) {
+	siteID := r.URL.Query().Get("siteId")
+	urlPath := r.URL.Query().Get("url") // Optional: filter by specific page
+	
+	if siteID == "" {
+		http.Error(w, "siteId is required", http.StatusBadRequest)
+		return
+	}
+
+	ctx := context.Background()
+	var query string
+	var args []interface{}
+	
+	args = append(args, siteID)
+
+	if urlPath != "" {
+		// If URL is provided, return individual points for the canvas
+		// Limit to 2000 points to prevent browser crash, sample recent data
+		query = `
+			SELECT X, Y, count() as intensity 
+			FROM sentinel.clicks 
+			WHERE SiteID = ? AND URL LIKE ? AND Timestamp >= now() - INTERVAL 7 DAY
+			GROUP BY X, Y 
+			ORDER BY intensity DESC 
+			LIMIT 1000
+		`
+		args = append(args, "%"+urlPath+"%")
+	} else {
+		// If no URL, return list of pages with click counts
+		query = `
+			SELECT URL, count() as count 
+			FROM sentinel.clicks 
+			WHERE SiteID = ? AND Timestamp >= now() - INTERVAL 7 DAY
+			GROUP BY URL 
+			ORDER BY count DESC 
+			LIMIT 50
+		`
+	}
+
+	rows, err := chConn.Query(ctx, query, args...)
+	if err != nil {
+		log.Printf("Error querying heatmap data: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	// Dynamic result parsing based on query
+	var result interface{}
+	
+	if urlPath != "" {
+		type Point struct {
+			X         uint16 `json:"x"`
+			Y         uint16 `json:"y"`
+			Intensity uint64 `json:"value"`
+		}
+		var points []Point
+		for rows.Next() {
+			var p Point
+			if err := rows.Scan(&p.X, &p.Y, &p.Intensity); err != nil {
+				continue
+			}
+			points = append(points, p)
+		}
+		result = points
+	} else {
+		type Page struct {
+			URL   string `json:"url"`
+			Count uint64 `json:"count"`
+		}
+		var pages []Page
+		for rows.Next() {
+			var p Page
+			if err := rows.Scan(&p.URL, &p.Count); err != nil {
+				continue
+			}
+			pages = append(pages, p)
+		}
+		result = pages
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+}
+
+func GetErrorsStatsHandler(w http.ResponseWriter, r *http.Request) {
+	siteID := r.URL.Query().Get("siteId")
+	if siteID == "" {
+		http.Error(w, "siteId is required", http.StatusBadRequest)
+		return
+	}
+
+	ctx := context.Background()
+	// Return top errors by frequency
+	query := `
+		SELECT Message, Source, LineNo, count() as count, max(Timestamp) as last_seen
+		FROM sentinel.errors 
+		WHERE SiteID = ? AND Timestamp >= now() - INTERVAL 7 DAY
+		GROUP BY Message, Source, LineNo
+		ORDER BY count DESC
+		LIMIT 20
+	`
+	
+	rows, err := chConn.Query(ctx, query, siteID)
+	if err != nil {
+		log.Printf("Error querying error stats: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	type ErrorStat struct {
+		Message  string    `json:"message"`
+		Source   string    `json:"source"`
+		LineNo   uint32    `json:"lineNo"`
+		Count    uint64    `json:"count"`
+		LastSeen time.Time `json:"lastSeen"`
+	}
+
+	var stats []ErrorStat
+	for rows.Next() {
+		var s ErrorStat
+		if err := rows.Scan(&s.Message, &s.Source, &s.LineNo, &s.Count, &s.LastSeen); err != nil {
+			log.Printf("Scan error: %v", err)
+			continue
+		}
+		stats = append(stats, s)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(stats)
+}
+
 func isBlocked(siteID, ip, country, asn string) bool {
 	rows, err := db.Query("SELECT rule_type, value FROM firewall_rules WHERE site_id = $1", siteID)
 	if err != nil {

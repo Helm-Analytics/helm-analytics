@@ -6,6 +6,8 @@
     }
     const siteId = scriptTag.getAttribute('data-site-id');
     const apiEndpoint = 'https://api-sentinel.getmusterup.com/track';
+    const clickEndpoint = 'https://api-sentinel.getmusterup.com/track/click';
+    const errorEndpoint = 'https://api-sentinel.getmusterup.com/track/error';
     const sessionEndpoint = 'https://api-sentinel.getmusterup.com/session';
 
     // Inject rrweb
@@ -41,6 +43,52 @@
                 keepalive: true,
             }).catch(error => console.error('Sentinel tracking error:', error));
         }
+
+        // --- CLICK TRACKING ---
+        document.addEventListener('click', (e) => {
+            const data = {
+                siteId: siteId,
+                url: window.location.href,
+                x: e.clientX,
+                y: e.clientY,
+                selector: getSelector(e.target)
+            };
+            fetch(clickEndpoint, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' },
+                keepalive: true
+            }).catch(err => console.error('Sentinel click error:', err));
+        });
+
+        // Helper to generate a simple CSS selector
+        function getSelector(el) {
+            if (el.tagName.toLowerCase() === 'html') return 'html';
+            if (el.tagName.toLowerCase() === 'body') return 'body';
+            if (el.id) return '#' + el.id;
+            if (el.className && typeof el.className === 'string') return '.' + el.className.split(' ').join('.');
+            return el.tagName.toLowerCase();
+        }
+
+        // --- ERROR TRACKING ---
+        window.addEventListener('error', (e) => {
+             const data = {
+                siteId: siteId,
+                url: window.location.href,
+                message: e.message,
+                source: e.filename,
+                lineno: e.lineno,
+                colno: e.colno,
+                error: e.error ? e.error.toString() : ''
+            };
+            fetch(errorEndpoint, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: { 'Content-Type': 'application/json' },
+                keepalive: true
+            }).catch(err => console.error('Sentinel error tracking failed:', err));
+        });
+
 
         // Expose a global function for web-vitals to call
         window.trackWebVitals = (vital) => {
