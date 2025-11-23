@@ -76,7 +76,12 @@ const SessionReplay = () => {
                     
                     console.log("Session Replay: Fetched", events.length, "events");
 
-                    if (events.length > 1) { // rrweb needs at least 2 events to play usually
+                    if (events.length > 1) { 
+                        if (!playerRef.current) {
+                             console.warn("Session Replay: Player container ref is null. Retrying...");
+                             return; // Skip this render cycle, effect will re-run if dependencies change
+                        }
+
                         try {
                             new window.rrwebPlayer({
                                 target: playerRef.current,
