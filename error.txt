@@ -1,6 +1,14 @@
-80..4710272  master -> master
-PS C:\Users\USER\sentinel-mvp> cd .\backend\
-PS C:\Users\USER\sentinel-mvp\backend> go build
-# sentinel-backend/src
-src\analytics.go:221:6: no new variables on left side of :=
-PS C:\Users\USER\sentinel-mvp\backend> 
+index-CXiCMf5c.js:262 Uncaught ReferenceError: selectedSession is not defined
+    at LR (index-CXiCMf5c.js:262:43951)
+    at Bc (index-CXiCMf5c.js:48:34137)
+    at eu (index-CXiCMf5c.js:48:62250)
+    at Gg (index-CXiCMf5c.js:48:72752)
+    at xm (index-CXiCMf5c.js:48:106785)
+    at jv (index-CXiCMf5c.js:48:105850)
+    at Eu (index-CXiCMf5c.js:48:105682)
+    at gm (index-CXiCMf5c.js:48:102792)
+    at Dm (index-CXiCMf5c.js:48:114226)
+    at MessagePort.it (index-CXiCMf5c.js:25:1600)
+
+﻿
+

@@ -6,6 +6,8 @@ import { PlayCircle, Film, AlertCircle } from 'lucide-react';
 const SessionReplay = () => {
     const { selectedSite } = useOutletContext();
     const playerRef = useRef(null);
+    const [sessions, setSessions] = useState([]);
+    const [selectedSession, setSelectedSession] = useState(null);
     const [events, setEvents] = useState([]);
     const [loadingEvents, setLoadingEvents] = useState(false);
     const [playerLoaded, setPlayerLoaded] = useState(false);
