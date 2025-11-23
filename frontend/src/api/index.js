@@ -47,9 +47,8 @@ export const api = {
     }),
   deleteSite: (id) =>
     request({
-      url: "/api/sites/",
+      url: `/api/sites/${id}`,
       method: "DELETE",
-      data: { id },
     }),
   getDashboardStats: (siteId, days) =>
     request({
@@ -99,4 +98,11 @@ export const api = {
       url: `/api/firewall?siteId=${siteId}&ruleId=${ruleId}`,
       method: "DELETE",
     }),
+  getHeatmapData: (siteId, url) => {
+    let endpoint = `/api/heatmap?siteId=${siteId}`;
+    if (url) endpoint += `&url=${encodeURIComponent(url)}`;
+    return request({ url: endpoint });
+  },
+  getErrorStats: (siteId) => 
+    request({ url: `/api/errors?siteId=${siteId}` }),
 };

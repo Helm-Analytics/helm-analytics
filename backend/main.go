@@ -69,7 +69,10 @@ func main() {
 	// --- Protected API Routes ---
 	mux.Handle("/logout", apiCors.Handler(sentinel.AuthMiddleware(sentinel.LogoutHandler)))
 	mux.Handle("/api/sites/", apiCors.Handler(sentinel.AuthMiddleware(sentinel.SitesApiHandler)))
-	mux.Handle("/api/dashboard", apiCors.Handler(sentinel.AuthMiddleware(sentinel.DashboardApiHandler)))
+		// Analytics API (Protected)
+	mux.HandleFunc("/api/dashboard", sentinel.AuthMiddleware(sentinel.DashboardApiHandler))
+	mux.HandleFunc("/api/heatmap", sentinel.AuthMiddleware(sentinel.GetHeatmapDataHandler))
+	mux.HandleFunc("/api/errors", sentinel.AuthMiddleware(sentinel.GetErrorsStatsHandler))
 	mux.Handle("/api/firewall", apiCors.Handler(sentinel.AuthMiddleware(sentinel.FirewallApiHandler)))
 	mux.Handle("/api/session/events", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetSessionEventsHandler)))
 	mux.Handle("/api/sessions", apiCors.Handler(sentinel.AuthMiddleware(sentinel.ListSessionsHandler)))

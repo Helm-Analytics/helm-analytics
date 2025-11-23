@@ -5,6 +5,8 @@ import Signup from "./pages/SignUp"
 import SessionReplay from "./pages/SessionReplay"
 import FunnelsPage from "./pages/FunnelsPage"
 import FirewallPage from "./pages/FirewallPage"
+import HeatmapPage from "./pages/HeatmapPage"
+import ErrorsPage from "./pages/ErrorsPage"
 import Layout from "./components/Layout"
 
 function App() {
@@ -18,6 +20,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/session-replay" element={<SessionReplay />} />
+          <Route path="/heatmap" element={<HeatmapPage />} />
+          <Route path="/errors" element={<ErrorsPage />} />
           <Route path="/funnels" element={<FunnelsPage />} />
           <Route path="/firewall" element={<FirewallPage />} />
         </Route>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
-import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2 } from "lucide-react"
+import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon } from "lucide-react"
 import { api } from "../api"
 import Logo from "./Logo"
 
@@ -113,6 +113,8 @@ const Layout = () => {
   const navItems = [
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/session-replay", label: "Session Replay", icon: PlayCircle },
+    { path: "/heatmap", label: "Heatmaps", icon: MousePointer2 },
+    { path: "/errors", label: "Issues", icon: AlertOctagon },
     { path: "/funnels", label: "Funnels", icon: GitMerge },
     { path: "/firewall", label: "Firewall", icon: Shield },
   ]
