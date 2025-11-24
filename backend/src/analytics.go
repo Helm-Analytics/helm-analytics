@@ -524,14 +524,14 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 	var stats CoreStats
 
 	// Total Views - only count events that are not web-vital reports
-	queryTotalViews := "SELECT count() FROM events WHERE SiteID = ? AND LCP IS NULL AND CLS IS NULL AND FID IS NULL AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY"
+	queryTotalViews := "SELECT count() FROM events WHERE SiteID = ? AND LCP IS NULL AND CLS IS NULL AND FID IS NULL AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%'"
 	err := chConn.QueryRow(ctx, queryTotalViews, siteID, startDaysAgo, endDaysAgo).Scan(&stats.TotalViews)
 	if err != nil && err != sql.ErrNoRows {
 		return stats, err
 	}
 
 	// Unique Visitors
-	queryUniqueVisitors := "SELECT uniq(ClientIP) FROM events WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY"
+	queryUniqueVisitors := "SELECT uniq(ClientIP) FROM events WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%'"
 	err = chConn.QueryRow(ctx, queryUniqueVisitors, siteID, startDaysAgo, endDaysAgo).Scan(&stats.UniqueVisitors)
 	if err != nil && err != sql.ErrNoRows {
 		return stats, err
@@ -541,10 +541,9 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 	queryBounceRate := `
 		SELECT (countIf(pageviews = 1) / count()) * 100
 		FROM (
-			SELECT ClientIP, count() AS pageviews
-			FROM events
-			WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY
-			GROUP BY ClientIP
+			            SELECT ClientIP, count() AS pageviews
+			            FROM events
+			            WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%'			GROUP BY ClientIP
 		)`
 	err = chConn.QueryRow(ctx, queryBounceRate, siteID, startDaysAgo, endDaysAgo).Scan(&stats.BounceRate)
 	if err != nil {
@@ -560,7 +559,7 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 		FROM (
 			SELECT ClientIP, date_diff('second', min(Timestamp), max(Timestamp)) AS duration
 			FROM events
-			WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY
+			WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%'
 			GROUP BY ClientIP
 		)`
 	err = chConn.QueryRow(ctx, queryAvgVisitTime, siteID, startDaysAgo, endDaysAgo).Scan(&stats.AvgVisitTime)
@@ -572,7 +571,7 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 	}
 
 	// Traffic Quality Score
-	queryGoodTraffic := "SELECT count() FROM events WHERE SiteID = ? AND LCP IS NULL AND CLS IS NULL AND FID IS NULL AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND TrustScore > 50"
+	queryGoodTraffic := "SELECT count() FROM events WHERE SiteID = ? AND LCP IS NULL AND CLS IS NULL AND FID IS NULL AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND TrustScore > 50 AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%'"
 	var goodTrafficCount uint64
 	err = chConn.QueryRow(ctx, queryGoodTraffic, siteID, startDaysAgo, endDaysAgo).Scan(&goodTrafficCount)
 	if err != nil || stats.TotalViews == 0 {
@@ -582,15 +581,15 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 	}
 
 	// Web Vitals
-	chConn.QueryRow(ctx, "SELECT avg(LCP) FROM events WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY", siteID, startDaysAgo, endDaysAgo).Scan(&stats.AvgLCP)
+	chConn.QueryRow(ctx, "SELECT avg(LCP) FROM events WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%'", siteID, startDaysAgo, endDaysAgo).Scan(&stats.AvgLCP)
 	if math.IsNaN(stats.AvgLCP) {
 		stats.AvgLCP = 0
 	}
-	chConn.QueryRow(ctx, "SELECT avg(CLS) FROM events WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY", siteID, startDaysAgo, endDaysAgo).Scan(&stats.AvgCLS)
+	chConn.QueryRow(ctx, "SELECT avg(CLS) FROM events WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%'", siteID, startDaysAgo, endDaysAgo).Scan(&stats.AvgCLS)
 	if math.IsNaN(stats.AvgCLS) {
 		stats.AvgCLS = 0
 	}
-	chConn.QueryRow(ctx, "SELECT avg(FID) FROM events WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY", siteID, startDaysAgo, endDaysAgo).Scan(&stats.AvgFID)
+	chConn.QueryRow(ctx, "SELECT avg(FID) FROM events WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%'", siteID, startDaysAgo, endDaysAgo).Scan(&stats.AvgFID)
 	if math.IsNaN(stats.AvgFID) {
 		stats.AvgFID = 0
 	}
@@ -647,7 +646,7 @@ func calculateStats(siteID string, days int) (Stats, error) {
 }
 
 func queryTopStats(ctx context.Context, column, siteID string, days int) ([]CountStat, error) {
-	query := "SELECT " + column + ", count() AS c FROM events WHERE SiteID = ? AND Timestamp >= now() - INTERVAL ? DAY GROUP BY " + column + " ORDER BY c DESC LIMIT 10"
+	query := "SELECT " + column + ", count() AS c FROM events WHERE SiteID = ? AND Timestamp >= now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' GROUP BY " + column + " ORDER BY c DESC LIMIT 10"
 	rows, err := chConn.Query(ctx, query, siteID, days)
 	if err != nil {
 		return nil, err

@@ -1,32 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Sparkles, Lightbulb, AlertTriangle } from 'lucide-react';
-import { api } from '../api';
+import React from 'react';
+import { Sparkles, Lightbulb } from 'lucide-react';
+import { useDashboardStore } from '../store/useDashboardStore';
 
-const InsightsCard = ({ siteId }) => {
-  const [insights, setInsights] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const InsightsCard = () => {
+  const { aiInsights: insights, isLoadingAI: loading } = useDashboardStore();
 
-  useEffect(() => {
-    const fetchInsights = async () => {
-      setLoading(true);
-      try {
-        const data = await api.getInsights(siteId);
-        setInsights(data);
-      } catch (err) {
-        console.error("Failed to fetch AI insights:", err);
-        setError("Could not generate insights at this time.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (siteId) {
-      fetchInsights();
-    }
-  }, [siteId]);
-
-  if (loading) {
+  if (loading && !insights) {
     return (
       <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-6 shadow-lg animate-pulse h-64 flex flex-col justify-center items-center">
         <Sparkles className="w-8 h-8 text-indigo-400 mb-4 animate-spin-slow" />
@@ -35,8 +14,8 @@ const InsightsCard = ({ siteId }) => {
     );
   }
 
-  if (error || !insights) {
-    return null; // Don't show anything on error to keep dashboard clean, or show error state
+  if (!insights) {
+    return null; 
   }
 
   return (

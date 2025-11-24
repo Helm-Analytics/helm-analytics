@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useOutletContext } from "react-router-dom"
 import { Eye, Users, TrendingDown, Clock, Copy, Check, ShieldCheck } from "lucide-react"
-import { api } from "../api"
+import { useDashboardStore } from "../store/useDashboardStore"
 import StatCard from "../components/StatCard"
 import InsightsCard from "../components/InsightsCard"
 import BarChart from "../components/BarChart"
@@ -12,22 +12,14 @@ import DoughnutChart from "../components/DoughnutChart"
 
 const Dashboard = () => {
   const { selectedSite } = useOutletContext()
-  const [dashboardData, setDashboardData] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const { 
+    dashboardData, 
+    isLoadingStats, 
+    fetchDashboardStats, 
+    fetchAiInsights 
+  } = useDashboardStore()
+  
   const [copied, setCopied] = useState(false)
-
-  const fetchDashboardData = async (siteId) => {
-    setLoading(true)
-    try {
-      const data = await api.getDashboardStats(siteId, 30)
-      setDashboardData(data)
-    } catch (error) {
-      console.error("Failed to fetch dashboard data:", error)
-      setDashboardData(null)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const copyTrackingScript = async () => {
     if (!selectedSite) return
@@ -44,17 +36,22 @@ const Dashboard = () => {
   }
 
   useEffect(() => {
-    let intervalId
     if (selectedSite) {
-      fetchDashboardData(selectedSite.id)
-      intervalId = setInterval(() => {
-        fetchDashboardData(selectedSite.id)
-      }, 30000) // Poll every 30 seconds
-    }
+      // Initial fetch
+      fetchDashboardStats(selectedSite.id)
+      fetchAiInsights(selectedSite.id)
 
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId)
+      const statsInterval = setInterval(() => {
+        fetchDashboardStats(selectedSite.id)
+      }, 30000) // Poll stats every 30 seconds
+
+      const aiInterval = setInterval(() => {
+        fetchAiInsights(selectedSite.id)
+      }, 600000) // Poll AI every 10 minutes
+
+      return () => {
+        clearInterval(statsInterval)
+        clearInterval(aiInterval)
       }
     }
   }, [selectedSite])
@@ -109,7 +106,7 @@ const Dashboard = () => {
         <>
           {/* AI Insights */}
           <div className="mb-8">
-             <InsightsCard siteId={selectedSite.id} />
+             <InsightsCard />
           </div>
 
           {/* Stats Cards */}
@@ -201,7 +198,7 @@ const Dashboard = () => {
             />
           </div>
         </>
-      ) : loading ? (
+      ) : isLoadingStats ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
         </div>
