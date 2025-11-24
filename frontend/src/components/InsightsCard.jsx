@@ -1,5 +1,6 @@
 import React from 'react';
 import { Sparkles, Lightbulb } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { useDashboardStore } from '../store/useDashboardStore';
 
 const InsightsCard = () => {
@@ -35,7 +36,16 @@ const InsightsCard = () => {
             {insights.insights && insights.insights.map((insight, idx) => (
               <div key={idx} className="flex items-start gap-3 text-slate-300 text-sm">
                 <div className="mt-1 min-w-[6px] h-[6px] rounded-full bg-indigo-500" />
-                <p>{insight}</p>
+                <div className="flex-1">
+                  <ReactMarkdown 
+                    className="prose prose-invert max-w-none text-sm prose-p:my-0 prose-p:leading-relaxed prose-strong:text-indigo-300"
+                    components={{
+                      p: ({node, ...props}) => <p className="mb-0" {...props} />
+                    }}
+                  >
+                    {insight}
+                  </ReactMarkdown>
+                </div>
               </div>
             ))}
           </div>
@@ -46,9 +56,16 @@ const InsightsCard = () => {
                 <Lightbulb className="w-4 h-4" />
                 Recommendation
               </h4>
-              <p className="text-indigo-100 text-sm italic">
-                "{insights.recommendation}"
-              </p>
+              <div className="text-indigo-100 text-sm italic">
+                <ReactMarkdown 
+                   className="prose prose-invert max-w-none text-sm prose-p:my-0"
+                   components={{
+                      p: ({node, ...props}) => <p className="mb-0" {...props} />
+                   }}
+                >
+                  {insights.recommendation}
+                </ReactMarkdown>
+              </div>
             </div>
           )}
         </div>
