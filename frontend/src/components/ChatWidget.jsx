@@ -86,7 +86,7 @@ const ChatWindow = ({ siteId }) => {
                             </div>
                             <span className="font-semibold text-slate-200">Sentinel Assistant</span>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition-colors">
+                        <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition-colors" aria-label="Close chat">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
@@ -130,6 +130,7 @@ const ChatWindow = ({ siteId }) => {
                                 type="submit" 
                                 disabled={!input.trim() || isTyping}
                                 className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white p-2 rounded-md transition-colors"
+                                aria-label="Send message"
                             >
                                 <Send className="w-4 h-4" />
                             </button>
@@ -142,6 +143,7 @@ const ChatWindow = ({ siteId }) => {
             <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="pointer-events-auto bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center justify-center group"
+                aria-label={isOpen ? "Close chat" : "Open chat assistant"}
             >
                 {isOpen ? (
                     <X className="w-6 h-6" />

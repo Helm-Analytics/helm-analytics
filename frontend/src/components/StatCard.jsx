@@ -51,7 +51,7 @@ const StatCard = ({ title, value, icon: CardIcon, change, inverse = false, isQua
       <div className="bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700/50 hover:border-indigo-500/30 transition-all duration-300 flex flex-col justify-between h-full relative overflow-hidden">
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <div class={`p-2 rounded-lg ${isQualityScore ? 'bg-slate-700' : 'bg-indigo-600/20'}`}>
+            <div className={`p-2 rounded-lg ${isQualityScore ? 'bg-slate-700' : 'bg-indigo-600/20'}`}>
               <CardIcon className={`w-6 h-6 ${isQualityScore ? qualityColor : 'text-indigo-400'}`} />
             </div>
             <p className="text-slate-400 text-sm font-medium">{title}</p>

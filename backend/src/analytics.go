@@ -556,13 +556,48 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 
 	// Average Visit Duration
 	queryAvgVisitTime := `
-		SELECT avg(duration)
-		FROM (
-			SELECT ClientIP, date_diff('second', min(Timestamp), max(Timestamp)) AS duration
+		WITH
+		  site_client_events AS (
+			SELECT
+			  Timestamp,
+			  ClientIP,
+			  toUnixTimestamp(Timestamp) AS event_time_unix
 			FROM events
-			WHERE SiteID = ? AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%'
-			GROUP BY ClientIP, toDate(Timestamp)
-		)`
+			WHERE SiteID = ?
+			  AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY
+			  AND ClientIP NOT IN ('127.0.0.1', '::1')
+			  AND URL NOT LIKE '%localhost:8090%'
+			  AND Referrer NOT LIKE '%localhost:8090%'
+			  AND URL NOT LIKE '%Eng_Dub%'
+			  AND Referrer NOT LIKE '%Eng_Dub%'
+			ORDER BY
+			  ClientIP,
+			  Timestamp
+		  ),
+		  sessions AS (
+			SELECT
+			  ClientIP,
+			  Timestamp,
+			  -- Calculate time difference to the previous event for the same client
+			  -- If it's the first event for a client or the gap is > 30 minutes (1800 seconds), start a new session
+			  runningDifference(event_time_unix) AS time_diff_seconds,
+			  sumIf(time_diff_seconds > 1800, 1) OVER (PARTITION BY ClientIP ORDER BY Timestamp) AS session_id_per_client
+			FROM site_client_events
+		  ),
+		  session_durations AS (
+			SELECT
+			  ClientIP,
+			  session_id_per_client,
+			  max(event_time_unix) - min(event_time_unix) AS duration_seconds
+			FROM sessions
+			GROUP BY
+			  ClientIP,
+			  session_id_per_client
+		  )
+		SELECT
+		  avg(duration_seconds)
+		FROM session_durations
+		WHERE duration_seconds > 0;`
 	err = chConn.QueryRow(ctx, queryAvgVisitTime, siteID, startDaysAgo, endDaysAgo).Scan(&stats.AvgVisitTime)
 	if err != nil {
 		stats.AvgVisitTime = 0

@@ -153,6 +153,7 @@ const Layout = () => {
                     onClick={() => handleDeleteSite(site.id)}
                     className="p-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
                     title="Delete site"
+                    aria-label={`Delete site ${site.name}`}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -177,6 +178,7 @@ const Layout = () => {
             <button
               type="submit"
               className="p-2 bg-slate-700 hover:bg-indigo-600 text-white rounded-md transition-colors"
+              aria-label="Add new site"
             >
               <Plus className="w-4 h-4" />
             </button>
