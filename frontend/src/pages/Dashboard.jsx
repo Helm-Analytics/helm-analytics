@@ -112,7 +112,7 @@ const Dashboard = () => {
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <StatCard
-              title="Total Views"
+              title="Total Page Views"
               value={dashboardData.totalViews?.toLocaleString() || "0"}
               icon={Eye}
               change={dashboardData.totalViewsChange}

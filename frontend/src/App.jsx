@@ -1,33 +1,45 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
-import Dashboard from "./pages/Dashboard"
-import Login from "./pages/Login"
-import Signup from "./pages/SignUp"
-import SessionReplay from "./pages/SessionReplay"
-import FunnelsPage from "./pages/FunnelsPage"
-import FirewallPage from "./pages/FirewallPage"
-import HeatmapPage from "./pages/HeatmapPage"
-import ErrorsPage from "./pages/ErrorsPage"
+import { lazy, Suspense } from "react"
 import Layout from "./components/Layout"
+
+// Lazy load pages
+const Dashboard = lazy(() => import("./pages/Dashboard"))
+const Login = lazy(() => import("./pages/Login"))
+const Signup = lazy(() => import("./pages/SignUp"))
+const SessionReplay = lazy(() => import("./pages/SessionReplay"))
+const FunnelsPage = lazy(() => import("./pages/FunnelsPage"))
+const FirewallPage = lazy(() => import("./pages/FirewallPage"))
+const HeatmapPage = lazy(() => import("./pages/HeatmapPage"))
+const ErrorsPage = lazy(() => import("./pages/ErrorsPage"))
+
+// Loading component
+const PageLoader = () => (
+  <div className="flex items-center justify-center h-screen bg-slate-900">
+    <div className="w-12 h-12 border-4 border-indigo-500 rounded-full animate-spin border-t-transparent"></div>
+  </div>
+)
 
 function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        
-        {/* Protected Routes wrapped in Layout */}
-        <Route element={<Layout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/session-replay" element={<SessionReplay />} />
-          <Route path="/heatmap" element={<HeatmapPage />} />
-          <Route path="/errors" element={<ErrorsPage />} />
-          <Route path="/funnels" element={<FunnelsPage />} />
-          <Route path="/firewall" element={<FirewallPage />} />
-        </Route>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          
+          {/* Protected Routes wrapped in Layout */}
+          <Route element={<Layout />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/session-replay" element={<SessionReplay />} />
+            <Route path="/heatmap" element={<HeatmapPage />} />
+            <Route path="/errors" element={<ErrorsPage />} />
+            <Route path="/funnels" element={<FunnelsPage />} />
+            <Route path="/firewall" element={<FirewallPage />} />
+          </Route>
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </Suspense>
     </Router>
   )
 }
