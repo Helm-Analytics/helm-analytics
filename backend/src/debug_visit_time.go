@@ -25,36 +25,21 @@ func DebugAvgVisitTimeHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	
-	// Debug query to see sessions
+	// Simplified debug query - show heartbeat count per user
 	debugQuery := `
 		SELECT
 			ClientIP,
-			session_id,
-			max(duration) as duration,
-			count() as event_count,
+			count(*) as heartbeat_count,
+			count(*) * 15 as duration_seconds,
 			min(Timestamp) as first_event,
 			max(Timestamp) as last_event
-		FROM (
-			SELECT
-				ClientIP,
-				Timestamp,
-				sum(is_new_session) OVER (PARTITION BY ClientIP ORDER BY Timestamp) AS session_id,
-				max(Timestamp) OVER (PARTITION BY ClientIP, sum(is_new_session) OVER (PARTITION BY ClientIP ORDER BY Timestamp)) - 
-				min(Timestamp) OVER (PARTITION BY ClientIP, sum(is_new_session) OVER (PARTITION BY ClientIP ORDER BY Timestamp)) AS duration
-			FROM (
-				SELECT
-					ClientIP,
-					Timestamp,
-					if(neighbor(ClientIP, -1) != ClientIP OR dateDiff('second', neighbor(Timestamp, -1), Timestamp) > 1800, 1, 0) AS is_new_session
-				FROM events
-				WHERE SiteID = ?
-				  AND Timestamp >= now() - INTERVAL 7 DAY
-				  AND ClientIP NOT IN ('127.0.0.1', '::1')
-				ORDER BY ClientIP, Timestamp
-			)
-		)
-		GROUP BY ClientIP, session_id
-		ORDER BY first_event DESC
+		FROM events
+		WHERE SiteID = ?
+		  AND EventType = 'heartbeat'
+		  AND Timestamp >= now() - INTERVAL 7 DAY
+		  AND ClientIP NOT IN ('127.0.0.1', '::1')
+		GROUP BY ClientIP
+		ORDER BY last_event DESC
 		LIMIT 10
 	`
 	
@@ -68,9 +53,10 @@ func DebugAvgVisitTimeHandler(w http.ResponseWriter, r *http.Request) {
 	var sessions []DebugSession
 	for rows.Next() {
 		var s DebugSession
-		if err := rows.Scan(&s.ClientIP, &s.SessionID, &s.Duration, &s.EventCount, &s.FirstEvent, &s.LastEvent); err != nil {
+		if err := rows.Scan(&s.ClientIP, &s.EventCount, &s.Duration, &s.FirstEvent, &s.LastEvent); err != nil {
 			continue
 		}
+		s.SessionID = 1 // Not grouping by session, just by IP
 		sessions = append(sessions, s)
 	}
 
