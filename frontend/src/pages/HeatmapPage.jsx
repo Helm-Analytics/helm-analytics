@@ -48,12 +48,12 @@ const HeatmapPage = () => {
   };
 
   useEffect(() => {
-    if (canvasRef.current && heatmapData.length > 0) {
-      drawHeatmap();
+    if (!canvasRef.current || heatmapData.length === 0) {
+      console.log('Heatmap: No canvas or no data to draw');
+      return;
     }
-  }, [heatmapData]);
 
-  const drawHeatmap = () => {
+    console.log('Drawing heatmap with', heatmapData.length, 'points');
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     const width = canvas.width;
@@ -61,8 +61,7 @@ const HeatmapPage = () => {
 
     // Clear canvas
     ctx.clearRect(0, 0, width, height);
-
-    if (heatmapData.length === 0) return;
+    ctx.globalCompositeOperation = 'source-over';
 
     // 1. Draw the "shadow" (alpha) map
     // We draw radial gradients with low opacity for each point.
@@ -145,7 +144,7 @@ const HeatmapPage = () => {
     }
 
     ctx.putImageData(imageData, 0, 0);
-  };
+  }, [heatmapData, selectedPage]);
 
   const [iframeBlocked, setIframeBlocked] = useState(false);
 
@@ -213,8 +212,24 @@ const HeatmapPage = () => {
                     ) : (
                         <iframe 
                             src={selectedPage} 
-                            className="w-full h-full opacity-60 pointer-events-none"
-                            onLoad={() => console.log("Iframe loaded")}
+                            className="w-full opacity-60 pointer-events-none"
+                            style={{ 
+                                height: `${Math.max(2000, Math.max(...heatmapData.map(p => p.y)) + 500)}px`,
+                                border: 'none'
+                            }}
+                            onLoad={(e) => {
+                                try {
+                                    // Try to get actual page height
+                                    const iframe = e.target;
+                                    const height = iframe.contentWindow?.document?.body?.scrollHeight;
+                                    if (height && height > 0) {
+                                        iframe.style.height = `${height}px`;
+                                    }
+                                } catch (err) {
+                                    // Cross-origin - fallback to current calculation
+                                    console.log("Iframe height auto-detect blocked by CORS");
+                                }
+                            }}
                             onError={() => setIframeBlocked(true)}
                             title="Heatmap Context"
                             sandbox="allow-same-origin allow-scripts"

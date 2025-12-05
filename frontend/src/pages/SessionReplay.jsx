@@ -116,42 +116,44 @@ const SessionReplay = () => {
         playerRef.current.innerHTML = '';
 
         try {
-            // We need to properly unpack events if they are packed. 
-            // Since we imported 'unpack', let's use it on the first event to check if it works?
-            // Or just map all. 
-            // NOTE: rrweb.unpack is robust.
+            console.log('Initializing rrweb player with', events.length, 'events');
             
-            const replayerEvents = events.map(e => {
-                try {
-                     return unpack(e);
-                } catch (err) {
-                    return e; // Return original if unpack fails (already unpacked)
-                }
-            });
+            // Validate events have required fields
+            const validEvents = events.filter(e => e && typeof e === 'object' && e.type !== undefined);
+            
+            if (validEvents.length < 2) {
+                setError(`Invalid event data. Expected 2+, got ${validEvents.length} valid events.`);
+                return;
+            }
 
-            new window.rrwebPlayer({
+            // Create player instance and store ref
+            const playerInstance = new window.rrwebPlayer({
                 target: playerRef.current,
                 props: {
-                    events: replayerEvents,
+                    events: validEvents,
                     width: playerRef.current.clientWidth || 800,
                     height: 500,
-                    autoPlay: true,
+                    autoPlay: false, // Changed to false to prevent auto-destruction
                     showController: true,
-                    // Fix for blank screen due to CORS on stylesheets:
-                    // This forces the replayer to ignore external stylesheets that it can't load.
-                    // It might look "unstyled" but at least content will show.
-                    replayerOption: {
-                        unpackFn: unpack, // Pass unpack function to replayer
-                        mouseTail: false,
-                        loadTimeout: 5000, // Timeout for assets
-                        // Skip loading stylesheets that might block rendering
-                        stylesheetRules: [],
-                    },
+                    UNSAFE_replayCanvas: true, // Use canvas mode for better compatibility
                 },
             });
+
+            console.log('rrweb player initialized successfully');
+
+            // Cleanup function
+            return () => {
+                try {
+                    if (playerInstance && typeof playerInstance.pause === 'function') {
+                        playerInstance.pause();
+                    }
+                } catch (err) {
+                    console.warn('Player cleanup error:', err);
+                }
+            };
         } catch (playerError) {
             console.error("rrwebPlayer instantiation failed:", playerError);
-            setError(`Player Error: ${playerError.message}`);
+            setError(`Player Error: ${playerError.message || 'Failed to initialize player'}`);
         }
     }, [events, playerLoaded]);
 
