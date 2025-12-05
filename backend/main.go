@@ -59,6 +59,7 @@ func main() {
 	mux.Handle("/auth/login", apiCors.Handler(http.HandlerFunc(sentinel.LoginHandler)))
 	// Public tracking endpoints (no auth required)
 	mux.Handle("/track", trackCors.Handler(http.HandlerFunc(sentinel.TrackHandler)))
+	mux.Handle("/api/debug/latest", trackCors.Handler(http.HandlerFunc(sentinel.DebugLatestEventsHandler)))
 	mux.Handle("/track/click", trackCors.Handler(http.HandlerFunc(sentinel.ClickHandler)))
 	mux.Handle("/track/error", trackCors.Handler(http.HandlerFunc(sentinel.ErrorHandler)))
 	mux.Handle("/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
