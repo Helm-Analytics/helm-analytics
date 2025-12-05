@@ -11,10 +11,10 @@ export const useDashboardStore = create((set, get) => ({
   aiError: null,
 
   // Actions
-  fetchDashboardStats: async (siteId) => {
+  fetchDashboardStats: async (siteId, days = 30) => {
     set({ isLoadingStats: true, statsError: null })
     try {
-      const data = await api.getDashboardStats(siteId, 30)
+      const data = await api.getDashboardStats(siteId, days)
       // Update data only if we get a valid response. 
       // If the API returns empty but no error, we assume it's valid empty data? 
       // For now, we just set it.

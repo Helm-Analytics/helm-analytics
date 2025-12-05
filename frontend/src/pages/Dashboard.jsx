@@ -20,6 +20,7 @@ const Dashboard = () => {
   } = useDashboardStore()
   
   const [copied, setCopied] = useState(false)
+  const [dateRange, setDateRange] = useState("30")
 
   const copyTrackingScript = async () => {
     if (!selectedSite) return
@@ -38,11 +39,11 @@ const Dashboard = () => {
   useEffect(() => {
     if (selectedSite) {
       // Initial fetch
-      fetchDashboardStats(selectedSite.id)
+      fetchDashboardStats(selectedSite.id, dateRange)
       fetchAiInsights(selectedSite.id)
 
       const statsInterval = setInterval(() => {
-        fetchDashboardStats(selectedSite.id)
+        fetchDashboardStats(selectedSite.id, dateRange)
       }, 30000) // Poll stats every 30 seconds
 
       const aiInterval = setInterval(() => {
@@ -54,7 +55,7 @@ const Dashboard = () => {
         clearInterval(aiInterval)
       }
     }
-  }, [selectedSite])
+  }, [selectedSite, dateRange])
 
   if (!selectedSite) {
     return (
@@ -69,9 +70,24 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-200 mb-2">Dashboard for {selectedSite.name}</h1>
-        <p className="text-slate-400">Analytics and insights for your website</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-200 mb-2">Dashboard for {selectedSite.name}</h1>
+          <p className="text-slate-400">Analytics and insights for your website</p>
+        </div>
+        
+        <div>
+           <select 
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              className="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5"
+            >
+              <option value="1">Last 24 Hours</option>
+              <option value="7">Last 7 Days</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 3 Months</option>
+           </select>
+        </div>
       </div>
 
       <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-8 shadow-lg">
@@ -175,8 +191,8 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <LineChart
               title="Daily Visitors"
-              data={[]} // This needs to be populated if backend supports daily series
-              labels={[]}
+              data={dashboardData.dailyStats?.map(d => d.count) || []}
+              labels={dashboardData.dailyStats?.map(d => d.value) || []}
             />
             <BarChart
               title="Top Pages"

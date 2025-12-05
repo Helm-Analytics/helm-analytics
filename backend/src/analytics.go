@@ -598,6 +598,31 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 		stats.AvgVisitTime = 0
 	}
 
+	// Daily Visitors (for Line Chart)
+	queryDaily := `
+		SELECT 
+			formatDateTime(Timestamp, '%Y-%m-%d') as date, 
+			uniq(ClientIP) as count 
+		FROM events 
+		WHERE SiteID = ? 
+		  AND EventType = 'pageview'
+		  AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY 
+		  AND ClientIP NOT IN ('127.0.0.1', '::1') 
+		  AND URL NOT LIKE '%localhost:8090%' 
+		  AND Referrer NOT LIKE '%localhost:8090%' 
+		GROUP BY date 
+		ORDER BY date ASC`
+	
+	rows, err := chConn.Query(ctx, queryDaily, siteID, startDaysAgo, endDaysAgo)
+	if err == nil {
+		defer rows.Close()
+		for rows.Next() {
+			var d CountStat
+			rows.Scan(&d.Value, &d.Count)
+			stats.DailyStats = append(stats.DailyStats, d)
+		}
+	}
+
 	// Traffic Quality Score
 	queryGoodTraffic := "SELECT count() FROM events WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND TrustScore > 50 AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%'"
 	var goodTrafficCount uint64

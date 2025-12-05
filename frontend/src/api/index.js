@@ -56,7 +56,7 @@ export const api = {
       url: `/api/sites/${id}`,
       method: "DELETE",
     }),
-  getDashboardStats: (siteId, days) =>
+  getDashboardStats: (siteId, days = 30) =>
     request({
       url: `/api/dashboard?siteId=${siteId}&days=${days}`,
     }),
