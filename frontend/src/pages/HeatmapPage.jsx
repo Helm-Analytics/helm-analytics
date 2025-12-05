@@ -202,7 +202,10 @@ const HeatmapPage = () => {
                 </div>
                 
                 {/* Iframe Background */}
-                <div className="absolute top-0 left-0 w-full min-h-[2000px] z-0 bg-white">
+                <div 
+                    className="absolute top-0 left-0 w-full z-0 bg-white"
+                    style={{ minHeight: `${Math.max(2000, Math.max(...heatmapData.map(p => p.y)) + 500)}px` }}
+                >
                     {iframeBlocked ? (
                         <div className="flex items-center justify-center pt-20 h-full bg-slate-100 text-slate-500">
                             <p>Preview unavailable (Site allows same-origin only)</p>
@@ -217,12 +220,24 @@ const HeatmapPage = () => {
                             sandbox="allow-same-origin allow-scripts"
                         />
                     )}
+                    
+                    {/* Helper overlay for blocked iframes */}
+                    <div className="absolute top-4 right-4 z-30 opacity-70 hover:opacity-100 transition-opacity">
+                        <a 
+                            href={selectedPage} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 bg-slate-800 text-xs text-slate-300 px-3 py-1.5 rounded shadow border border-slate-600 hover:bg-slate-700"
+                        >
+                            Open Page <span aria-hidden="true">↗</span>
+                        </a>
+                    </div>
                 </div>
 
                 <canvas 
                     ref={canvasRef} 
                     width={1280} 
-                    height={2000} // Increased height for scroll
+                    height={Math.max(2000, Math.max(...heatmapData.map(p => p.y)) + 500)} // Dynamic height
                     className="absolute top-0 left-0 z-10"
                 />
              </div>

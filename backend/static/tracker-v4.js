@@ -155,8 +155,9 @@
              window.rrweb.record({
                 emit(event) {
                     events.push(event);
-                    // Optimization: If this is the very first batch (snapshot), send it sooner
-                    if (!sessionId && events.length > 50) {
+                    // Optimization: If this is the very first batch (snapshot), send it immediately
+                    // typically snapshot = Meta (4) + FullSnapshot (2), so length >= 2
+                    if (!sessionId && events.length > 1) {
                         flushEvents();
                     }
                 },
