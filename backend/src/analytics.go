@@ -569,33 +569,24 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 		stats.BounceRate = 0
 	}
 
-	// Average Visit Duration
-	// Average Visit Duration
-	// Average Visit Duration
+	// Average Visit Duration - Simplified approach
+	// Each heartbeat = 15 seconds, so we count heartbeats per session
 	queryAvgVisitTime := `
 		SELECT
-			avg(duration)
+			avg(visit_duration)
 		FROM (
 			SELECT
 				ClientIP,
-				sum(is_new_session) AS session_id,
-				max(Timestamp) - min(Timestamp) AS duration
-			FROM (
-				SELECT
-					ClientIP,
-					Timestamp,
-					if(neighbor(ClientIP, -1) != ClientIP OR dateDiff('second', neighbor(Timestamp, -1), Timestamp) > 1800, 1, 0) AS is_new_session
-				FROM events
-				WHERE SiteID = ?
-				  AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY
-				  AND ClientIP NOT IN ('127.0.0.1', '::1')
-				  AND URL NOT LIKE '%localhost:8090%'
-				  AND Referrer NOT LIKE '%localhost:8090%'
-				ORDER BY ClientIP, Timestamp
-			)
-			GROUP BY ClientIP, session_id
-			HAVING duration > 0
-		)`
+				count(*) * 15 AS visit_duration
+			FROM events
+			WHERE SiteID = ?
+			  AND EventType = 'heartbeat'
+			  AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY
+			  AND ClientIP NOT IN ('127.0.0.1', '::1')
+			GROUP BY ClientIP
+			HAVING count(*) > 0
+		)
+	`
 	err = chConn.QueryRow(ctx, queryAvgVisitTime, siteID, startDaysAgo, endDaysAgo).Scan(&stats.AvgVisitTime)
 	if err != nil {
 		stats.AvgVisitTime = 0
