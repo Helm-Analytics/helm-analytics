@@ -46,9 +46,11 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 		Events:    payload.Events,
 	}
 
-	// Insert into ClickHouse
+	// Insert into ClickHouse with explicit column names
 	ctx := context.Background()
-	err := chConn.AsyncInsert(ctx, "INSERT INTO session_events VALUES (?, ?, ?, ?)", false,
+	err := chConn.AsyncInsert(ctx, `INSERT INTO sentinel.session_events 
+		(Timestamp, SiteID, SessionID, Payload) 
+		VALUES (?, ?, ?, ?)`, false,
 		sessionData.Timestamp,
 		sessionData.SiteID,
 		sessionData.SessionID,
