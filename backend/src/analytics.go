@@ -81,6 +81,7 @@ type Stats struct {
 	TopBrowsers         []CountStat `json:"topBrowsers"`
 	TopOS               []CountStat `json:"topOS"`
 	TopCountries        []CountStat `json:"topCountries"`
+	DailyStats          []CountStat `json:"dailyStats"`
 
 	// Percentage changes
 	TotalViewsChange          float64 `json:"totalViewsChange"`
@@ -102,6 +103,7 @@ type CoreStats struct {
 	AvgLCP              float64
 	AvgCLS              float64
 	AvgFID              float64
+	DailyStats          []CountStat
 }
 
 type CountStat struct {
@@ -676,6 +678,7 @@ func calculateStats(siteID string, days int) (Stats, error) {
 	finalStats.AvgLCP = currentStats.AvgLCP
 	finalStats.AvgCLS = currentStats.AvgCLS
 	finalStats.AvgFID = currentStats.AvgFID
+	finalStats.DailyStats = currentStats.DailyStats
 
 	// Calculate percentage changes
 	finalStats.TotalViewsChange = calculateChange(float64(currentStats.TotalViews), float64(previousStats.TotalViews))
