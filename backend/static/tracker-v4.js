@@ -25,12 +25,13 @@
         let events = [];
         let lastUrl = location.href;
 
-        function track(payload = {}) {
+        function track(payload = {}, options = {}) {
             const data = {
                 siteId: siteId,
                 url: window.location.href,
                 referrer: document.referrer || '',
                 screenWidth: window.screen.width,
+                eventType: 'pageview', // Default to pageview if not overridden
                 ...payload
             };
 
@@ -40,7 +41,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                keepalive: true,
+                keepalive: options.keepalive !== undefined ? options.keepalive : true,
             }).catch(error => console.error('Sentinel tracking error:', error));
         }
 
@@ -49,8 +50,8 @@
             const data = {
                 siteId: siteId,
                 url: window.location.href,
-                x: e.clientX,
-                y: e.clientY,
+                x: e.pageX,
+                y: e.pageY,
                 selector: getSelector(e.target)
             };
             fetch(clickEndpoint, {
@@ -89,13 +90,31 @@
             }).catch(err => console.error('Sentinel error tracking failed:', err));
         });
 
+        window.addEventListener('unhandledrejection', (e) => {
+            const data = {
+               siteId: siteId,
+               url: window.location.href,
+               message: e.reason ? (e.reason.message || e.reason.toString()) : 'Unhandled Promise Rejection',
+               source: 'Promise',
+               lineno: 0,
+               colno: 0,
+               error: e.reason ? JSON.stringify(e.reason) : ''
+           };
+           fetch(errorEndpoint, {
+               method: 'POST',
+               body: JSON.stringify(data),
+               headers: { 'Content-Type': 'application/json' },
+               keepalive: true
+           }).catch(err => console.error('Sentinel error tracking failed:', err));
+       });
+
 
         // Expose a global function for web-vitals to call
         window.trackWebVitals = (vital) => {
             // vital is like { name: 'LCP', value: 123.45 }
             // We need to flatten it to { LCP: 123.45 }
             if (vital && vital.name && vital.value !== undefined) {
-                track({ [vital.name]: vital.value });
+                track({ [vital.name]: vital.value, eventType: 'web-vital' });
             }
         };
         
@@ -149,7 +168,7 @@
 
         let sessionId = null;
 
-        function flushEvents() {
+        function flushEvents(isUnload = false) {
              if (events.length > 0) {
                 const body = JSON.stringify({ siteId: siteId, events: events, sessionId: sessionId });
                 events = []; // Clear buffer
@@ -157,7 +176,7 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: body,
-                    keepalive: true
+                    keepalive: isUnload // Only use keepalive on unload to avoid 64KB limit during session
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -173,10 +192,20 @@
         setInterval(flushEvents, 5 * 1000);
         
         // Flush on exit
+        const flushOnUnload = () => flushEvents(true);
+        window.addEventListener('pagehide', flushOnUnload);
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
-                flushEvents();
+                flushEvents(true);
             }
         });
+
+        // --- Heartbeat Tracking ---
+        // Send a heartbeat every 15 seconds to track time-on-page accurately
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+               track({ eventType: 'heartbeat' });
+            }
+        }, 15000);
     }
 })();

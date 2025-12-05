@@ -133,6 +133,21 @@ const FunnelsPage = () => {
                 </div>
             )}
 
+            {/* Help / Info Box */}
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-6 flex gap-4">
+                <div className="p-2 bg-blue-500/20 rounded-lg h-fit">
+                    <Settings className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                    <h3 className="text-blue-200 font-semibold mb-1">How Funnels Work</h3>
+                    <p className="text-slate-400 text-sm leading-relaxed">
+                        Funnels track users who move through a specific sequence of pages. 
+                        Define the steps by entering the <strong>URL path</strong> (e.g., <code className="bg-slate-800 px-1 py-0.5 rounded text-slate-300">/signup</code>). 
+                        Sentinel will calculate the drop-off rate between each step.
+                    </p>
+                </div>
+            </div>
+
             {/* Funnels List */}
             <div className="grid grid-cols-1 gap-6">
                 {funnels.length > 0 ? (

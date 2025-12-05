@@ -147,6 +147,13 @@ const HeatmapPage = () => {
     ctx.putImageData(imageData, 0, 0);
   };
 
+  const [iframeBlocked, setIframeBlocked] = useState(false);
+
+  useEffect(() => {
+    // Reset iframe blocking state when page changes
+    setIframeBlocked(false);
+  }, [selectedPage]);
+
   if (!selectedSite) return <div className="text-center p-8 text-slate-400">Select a site to view heatmaps.</div>;
 
   return (
@@ -183,21 +190,40 @@ const HeatmapPage = () => {
              </div>
          ) : heatmapData.length > 0 ? (
              <div 
-                className="relative w-full bg-slate-800 rounded-lg shadow-inner overflow-auto"
+                className="relative w-full bg-slate-800 rounded-lg shadow-inner overflow-auto border border-slate-700"
                 style={{ 
                     maxWidth: '1280px', 
                     height: '800px',
                     margin: '0 auto' 
                 }}
              >
-                <div className="absolute top-4 left-4 text-xs text-slate-500 pointer-events-none z-10">
+                <div className="absolute top-4 left-4 text-xs text-slate-500 pointer-events-none z-20 bg-slate-900/80 px-2 py-1 rounded">
                     Displaying {heatmapData.length} click points
                 </div>
+                
+                {/* Iframe Background */}
+                <div className="absolute top-0 left-0 w-full min-h-[2000px] z-0 bg-white">
+                    {iframeBlocked ? (
+                        <div className="flex items-center justify-center pt-20 h-full bg-slate-100 text-slate-500">
+                            <p>Preview unavailable (Site allows same-origin only)</p>
+                        </div>
+                    ) : (
+                        <iframe 
+                            src={selectedPage} 
+                            className="w-full h-full opacity-60 pointer-events-none"
+                            onLoad={() => console.log("Iframe loaded")}
+                            onError={() => setIframeBlocked(true)}
+                            title="Heatmap Context"
+                            sandbox="allow-same-origin allow-scripts"
+                        />
+                    )}
+                </div>
+
                 <canvas 
                     ref={canvasRef} 
                     width={1280} 
-                    height={800} 
-                    className="block mx-auto"
+                    height={2000} // Increased height for scroll
+                    className="absolute top-0 left-0 z-10"
                 />
              </div>
          ) : (
