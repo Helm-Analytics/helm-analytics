@@ -230,10 +230,12 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := context.Background()
-	err := chConn.AsyncInsert(ctx, "INSERT INTO sentinel.events VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", false,
+	err := chConn.AsyncInsert(ctx, `INSERT INTO sentinel.events 
+		(Timestamp, SiteID, ClientIP, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, LCP, CLS, FID, EventType) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, false,
 		eventData.Timestamp, eventData.SiteID, eventData.ClientIP, eventData.URL, eventData.Referrer,
-		eventData.ScreenWidth, eventData.Browser, eventData.OS, eventData.Country, eventData.EventType, eventData.TrustScore,
-		eventData.LCP, eventData.CLS, eventData.FID,
+		eventData.ScreenWidth, eventData.Browser, eventData.OS, eventData.Country, eventData.TrustScore,
+		eventData.LCP, eventData.CLS, eventData.FID, eventData.EventType,
 	)
 	if err != nil {
 		log.Printf("Error inserting event into ClickHouse: %v", err)
