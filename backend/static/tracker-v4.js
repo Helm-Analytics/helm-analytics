@@ -150,6 +150,8 @@
         });
 
         // --- RRWeb Session Recording ---
+        let sessionId = null;
+
         // Check if rrweb is actually available
         if (window.rrweb) {
              window.rrweb.record({
@@ -166,8 +168,6 @@
         } else {
             console.error("Sentinel: rrweb failed to load");
         }
-
-        let sessionId = null;
 
         function flushEvents(isUnload = false) {
              if (events.length > 0) {
