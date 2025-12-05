@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
 import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon } from "lucide-react"
 import { api } from "../api"
-import Logo from "./Logo"
+import LogoImg from "../assets/Logo.png"
 import ChatWidget from "./ChatWidget"
 
 const Layout = () => {
@@ -130,7 +130,7 @@ const Layout = () => {
     >
       {/* Sidebar */}
       <div className="w-80 bg-slate-800 border-r border-slate-700 flex-shrink-0 flex flex-col p-6 h-screen sticky top-0 overflow-y-auto">
-        <Logo className="mb-8" />
+        <img src={LogoImg} alt="Sentinel" className="mb-8 w-32" />
 
         {/* Site Switcher */}
         <div className="mb-8">

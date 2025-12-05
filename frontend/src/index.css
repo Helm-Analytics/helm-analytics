@@ -4,40 +4,40 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Updated color tokens for Sentinel dark theme */
+  /* Updated color tokens for Sentinel dark theme - Cosmic Indigo */
   --background: #0d1117;
   --foreground: #e5e7eb;
   --card: #161b22;
   --card-foreground: #e5e7eb;
   --popover: #161b22;
   --popover-foreground: #e5e7eb;
-  --primary: #3b82f6;
+  --primary: #6366f1; /* Indigo-500 */
   --primary-foreground: #ffffff;
   --secondary: #30363d;
   --secondary-foreground: #9ca3af;
   --muted: #30363d;
   --muted-foreground: #9ca3af;
-  --accent: #3b82f6;
+  --accent: #6366f1; /* Indigo-500 */
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #30363d;
   --input: #0d1117;
-  --ring: #3b82f6;
-  --chart-1: #3b82f6;
-  --chart-2: #1c7ed6;
-  --chart-3: #0b7285;
+  --ring: #6366f1; /* Indigo-500 */
+  --chart-1: #6366f1;
+  --chart-2: #818cf8; /* Indigo-400 */
+  --chart-3: #4f46e5; /* Indigo-600 */
   --chart-4: #6f42c1;
   --chart-5: #e64980;
   --radius: 0.75rem;
   --sidebar: #161b22;
   --sidebar-foreground: #e5e7eb;
-  --sidebar-primary: #3b82f6;
+  --sidebar-primary: #6366f1;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #30363d;
   --sidebar-accent-foreground: #e5e7eb;
   --sidebar-border: #30363d;
-  --sidebar-ring: #3b82f6;
+  --sidebar-ring: #6366f1;
 }
 
 .dark {
@@ -48,32 +48,32 @@
   --card-foreground: #e5e7eb;
   --popover: #161b22;
   --popover-foreground: #e5e7eb;
-  --primary: #3b82f6;
+  --primary: #6366f1;
   --primary-foreground: #ffffff;
   --secondary: #30363d;
   --secondary-foreground: #9ca3af;
   --muted: #30363d;
   --muted-foreground: #9ca3af;
-  --accent: #3b82f6;
+  --accent: #6366f1;
   --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #ffffff;
   --border: #30363d;
   --input: #0d1117;
-  --ring: #3b82f6;
-  --chart-1: #3b82f6;
-  --chart-2: #1c7ed6;
-  --chart-3: #0b7285;
+  --ring: #6366f1;
+  --chart-1: #6366f1;
+  --chart-2: #818cf8;
+  --chart-3: #4f46e5;
   --chart-4: #6f42c1;
   --chart-5: #e64980;
   --sidebar: #161b22;
   --sidebar-foreground: #e5e7eb;
-  --sidebar-primary: #3b82f6;
+  --sidebar-primary: #6366f1;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #30363d;
   --sidebar-accent-foreground: #e5e7eb;
   --sidebar-border: #30363d;
-  --sidebar-ring: #3b82f6;
+  --sidebar-ring: #6366f1;
 }
 
 @theme inline {
@@ -125,31 +125,31 @@
     @apply bg-background text-foreground;
   }
 
-  /* Added diagonal pattern background for Sentinel aesthetic */
+  /* Added diagonal pattern background for Sentinel aesthetic - Indigo */
   .sentinel-bg {
     background-image: linear-gradient(
         45deg,
         transparent 35%,
-        rgba(59, 130, 246, 0.03) 35%,
-        rgba(59, 130, 246, 0.03) 65%,
+        rgba(99, 102, 241, 0.03) 35%,
+        rgba(99, 102, 241, 0.03) 65%,
         transparent 65%
       ),
       linear-gradient(
         -45deg,
         transparent 35%,
-        rgba(59, 130, 246, 0.03) 35%,
-        rgba(59, 130, 246, 0.03) 65%,
+        rgba(99, 102, 241, 0.03) 35%,
+        rgba(99, 102, 241, 0.03) 65%,
         transparent 65%
       );
     background-size: 20px 20px;
   }
 
-  /* Added glow effects for buttons and interactive elements */
-  .glow-blue {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  /* Added glow effects for buttons and interactive elements - Indigo */
+  .glow-blue, .glow-indigo {
+    box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
   }
 
-  .glow-blue-hover:hover {
-    box-shadow: 0 0 25px rgba(59, 130, 246, 0.4);
+  .glow-blue-hover:hover, .glow-indigo-hover:hover {
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.4);
   }
 }

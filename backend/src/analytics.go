@@ -569,6 +569,19 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 	queryAvgVisitTime := `
 		WITH
 		  site_client_events AS (
+			SELECT
+			  ClientIP,
+			  Timestamp,
+			  toUnixTimestamp(Timestamp) AS event_time_unix
+			FROM events
+			WHERE SiteID = ?
+			  AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY
+			  AND ClientIP NOT IN ('127.0.0.1', '::1')
+			  AND URL NOT LIKE '%localhost:8090%'
+			  AND Referrer NOT LIKE '%localhost:8090%'
+			  AND URL NOT LIKE '%Eng_Dub%'
+			  AND Referrer NOT LIKE '%Eng_Dub%'
+			ORDER BY
 			  ClientIP,
 			  Timestamp
 		  ),
