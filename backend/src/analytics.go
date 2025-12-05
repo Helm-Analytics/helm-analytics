@@ -569,6 +569,7 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 
 	// Average Visit Duration
 	// Average Visit Duration
+	// Average Visit Duration
 	queryAvgVisitTime := `
 		SELECT
 			avg(duration)
@@ -581,13 +582,14 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 				SELECT
 					ClientIP,
 					Timestamp,
-					if(dateDiff('second', lagInFrame(Timestamp) OVER (PARTITION BY ClientIP ORDER BY Timestamp), Timestamp) > 1800, 1, 0) AS is_new_session
+					if(neighbor(ClientIP, -1) != ClientIP OR dateDiff('second', neighbor(Timestamp, -1), Timestamp) > 1800, 1, 0) AS is_new_session
 				FROM events
 				WHERE SiteID = ?
 				  AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY
 				  AND ClientIP NOT IN ('127.0.0.1', '::1')
 				  AND URL NOT LIKE '%localhost:8090%'
 				  AND Referrer NOT LIKE '%localhost:8090%'
+				ORDER BY ClientIP, Timestamp
 			)
 			GROUP BY ClientIP, session_id
 			HAVING duration > 0
