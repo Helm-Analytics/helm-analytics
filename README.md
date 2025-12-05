@@ -3,9 +3,9 @@
 **Take the Helm of Your Data**  
 Privacy-first, open-source website intelligence. Get actionable insights without selling your users' data.
 
-![GitHub Repo stars](https://img.shields.io/github/stars/Sentinel-Analytics/sentinel-mvp?style=social)
-![GitHub issues](https://img.shields.io/github/issues/Sentinel-Analytics/sentinel-mvp)
-![GitHub license](https://img.shields.io/github/license/Sentinel-Analytics/sentinel-mvp)
+[![GitHub Repo stars](https://img.shields.io/github/stars/Sentinel-Analytics/sentinel-mvp?style=social)](https://github.com/Sentinel-Analytics/sentinel-mvp)
+[![GitHub issues](https://img.shields.io/github/issues/Sentinel-Analytics/sentinel-mvp)](https://github.com/Sentinel-Analytics/sentinel-mvp/issues)
+[![GitHub license](https://img.shields.io/github/license/Sentinel-Analytics/sentinel-mvp)](https://github.com/Sentinel-Analytics/sentinel-mvp/blob/master/LICENSE)
 
 ---
 
