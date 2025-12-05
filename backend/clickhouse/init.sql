@@ -41,7 +41,7 @@ SELECT
     SiteID,
     count() as TotalViews,
     uniqState(ClientIP) as UniqueVisitors,
-    avgState(15) as AvgDuration -- Placeholder for duration approx
+    avgState(toUInt64(15)) as AvgDuration -- Placeholder for duration approx
 FROM sentinel.events
 GROUP BY SiteID, Date;
 

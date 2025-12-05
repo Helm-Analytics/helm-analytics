@@ -130,7 +130,7 @@ const Layout = () => {
     >
       {/* Sidebar */}
       <div className="w-80 bg-slate-800 border-r border-slate-700 flex-shrink-0 flex flex-col p-6 h-screen sticky top-0 overflow-y-auto">
-        <img src={LogoImg} alt="Sentinel" className="mb-8 w-32" />
+        <img src={LogoImg} alt="Helm" className="mb-8 w-32" />
 
         {/* Site Switcher */}
         <div className="mb-8">

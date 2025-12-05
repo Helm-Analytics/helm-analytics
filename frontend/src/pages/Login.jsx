@@ -35,7 +35,7 @@ const Login = () => {
     >
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img src={LogoImg} alt="Sentinel Logo" className="w-32 mx-auto mb-4" />
+          <img src={LogoImg} alt="Helm Logo" className="w-32 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-slate-200">Welcome back</h2>
           <p className="text-slate-400 mt-2">Sign in to your account</p>
         </div>

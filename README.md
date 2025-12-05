@@ -1,4 +1,4 @@
-# Sentinel-Analytics
+# Helm-Analytics
 
 **A privacy-first, open-source web analytics platform.**  
 Get the insights you need without compromising user privacy.
@@ -24,7 +24,7 @@ Get the insights you need without compromising user privacy.
 
 ## 🚀 Quick Start (One-Click Deployment)
 
-Get your own **Sentinel-Analytics** instance running in under 5 minutes.
+Get your own **Helm-Analytics** instance running in under 5 minutes.
 
 ### Prerequisites
 - A server (VPS or home server) with **docker** and **docker-compose** installed.  
@@ -61,7 +61,7 @@ docker compose up --build -d
 
 ## 🔮 What's Next? The Road to v2
 
-This MVP is just the beginning. Our vision for Sentinel-Analytics is to be a complete website intelligence platform. Coming in v2:
+This MVP is just the beginning. Our vision for Helm-Analytics is to be a complete website intelligence platform. Coming in v2:
 
 - 🛡️ **Traffic Quality Score & Bot Detection** – Go beyond simple numbers and detect real human traffic.  
 - 🔥 **Real-Time Firewall** – Block malicious traffic from specific countries, data centers (ASNs), and known bots.  
@@ -71,7 +71,7 @@ This MVP is just the beginning. Our vision for Sentinel-Analytics is to be a com
 
 ## 🤝 Community & Feedback
 
-Sentinel-Analytics is built for the community, by the community. Your feedback is invaluable in shaping the future of this project.
+Helm-Analytics is built for the community, by the community. Your feedback is invaluable in shaping the future of this project.
 
 - 🐛 **Report a Bug:** Open an issue on GitHub.  
 - 💡 **Request a Feature:** Start a discussion in the feature requests section.  
@@ -81,7 +81,7 @@ Sentinel-Analytics is built for the community, by the community. Your feedback i
 
 ## ❤️ Support the Project
 
-If you find Sentinel-Analytics useful and want to support its continued development:
+If you find Helm-Analytics useful and want to support its continued development:
 
 - ⭐ **Star the project** on GitHub — the easiest and most impactful way to show support!  
 - ☕ **Buy me a coffee** — small donations fuel development and are greatly appreciated.  
