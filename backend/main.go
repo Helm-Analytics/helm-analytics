@@ -86,7 +86,7 @@ func main() {
 	// Swagger documentation
 	mux.HandleFunc("/docs/", httpSwagger.WrapHandler)
 
-	log.Println("Sentinel Go server starting on :6060")
+	log.Println("SENTINEL BACKEND: Analytics Fixes Applied (v2.1) - Starting server on :6060")
 	if err := http.ListenAndServe(":6060", mux); err != nil {
 		log.Fatalf("Could not start server: %s\n", err)
 	}

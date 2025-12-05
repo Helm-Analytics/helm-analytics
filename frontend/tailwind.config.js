@@ -12,7 +12,10 @@ export default {
       },
       colors: {
         indigo: {
-          600: '#4f46e5',
+          400: '#818cf8',
+          500: '#6366f1',
+          600: 'var(--primary)', // Use CSS variable for consistent theming
+          700: '#4338ca',
         },
         slate: {
           100: '#f1f5f9',
