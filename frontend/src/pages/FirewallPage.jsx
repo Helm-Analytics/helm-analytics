@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
-import { Shield, Plus, Trash2, AlertTriangle, Globe, Hash, Server } from 'lucide-react';
+import { Shield, Plus, Trash2, AlertTriangle, Globe, Hash, Server, Copy, Check } from 'lucide-react';
 import PremiumSelect from '../components/PremiumSelect';
 
 const FirewallPage = () => {
@@ -12,6 +12,13 @@ const FirewallPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [shieldMode, setShieldMode] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   useEffect(() => {
     if (selectedSite) {
@@ -257,8 +264,17 @@ const FirewallPage = () => {
                   Catch automated crawlers by adding this invisible gateway to your site's header or footer. 
                   Bots that interact with this link will be identified and mitigated instantly.
               </p>
-              <div className="bg-black/20 border border-white/5 rounded-xl p-4 font-mono text-[10px] text-accent/80 break-all select-all mb-4">
-                {`<a href="https://api-sentinel.getmusterup.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
+              <div className="relative group mb-4">
+                  <div className="bg-black/20 border border-white/5 rounded-xl p-4 font-mono text-[10px] text-accent/80 break-all select-all">
+                    {`<a href="https://api-sentinel.getmusterup.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
+                  </div>
+                  <button 
+                        onClick={() => copyToClipboard(`<a href="https://api-sentinel.getmusterup.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`)}
+                        className="absolute top-2 right-2 p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all border border-white/5 backdrop-blur-sm opacity-0 group-hover:opacity-100"
+                        title="Copy Snippet"
+                    >
+                        {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-white" />}
+                  </button>
               </div>
               <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase font-bold tracking-widest">
                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
