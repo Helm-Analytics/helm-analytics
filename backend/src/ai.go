@@ -226,8 +226,8 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 // AnalyzeError uses Gemini to synthesize a debugging guide for a specific error.
 func AnalyzeError(ctx context.Context, errMsg, source string) (string, error) {
 	prompt := fmt.Sprintf(`As Helm Intelligence, analyze this frontend error and provide a concise, expert debugging guide:
-Error: %%s
-Source: %%s
+Error: %s
+Source: %s
 
 Please provide your response in HTML format (using only <b>, <i>, <ul>, <li> tags) with these sections:
 1. **Root Cause**: What likely triggered this?

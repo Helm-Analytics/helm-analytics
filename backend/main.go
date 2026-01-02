@@ -66,7 +66,7 @@ func main() {
 	mux.Handle("/track/click", trackCors.Handler(http.HandlerFunc(sentinel.ClickHandler)))
 	mux.Handle("/track/error", trackCors.Handler(http.HandlerFunc(sentinel.ErrorHandler)))
 	mux.Handle("/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
-	mux.Handle("/trap", trackCors.Handler(http.HandlerFunc(sentinel.TrapHandler))) // F-501 Honey Pot
+	mux.Handle("/track/trap", trackCors.Handler(http.HandlerFunc(sentinel.SpiderTrapHandler))) // Advanced Bot Trap
 
 	mux.Handle("/api/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
 	mux.Handle("/api/users", apiCors.Handler(http.HandlerFunc(sentinel.GetAllUsersHandler)))

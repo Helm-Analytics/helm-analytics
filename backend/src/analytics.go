@@ -469,7 +469,7 @@ func GetErrorsStatsHandler(w http.ResponseWriter, r *http.Request) {
 	for rows.Next() {
 		var s ErrorStat
 		if err := rows.Scan(&s.Message, &s.Source, &s.LineNo, &s.Count, &s.UserImpact, &s.LastSeen, &s.Severity, &s.Mitigation, &s.ErrorObj, &s.ClientIP); err != nil {
-			log.Printf("Scan error: %%v", err)
+			log.Printf("Scan error: %v", err)
 			continue
 		}
 		stats = append(stats, s)
@@ -514,6 +514,33 @@ func isBlocked(siteID, ip, country, asn string) bool {
 		}
 	}
 	return false
+}
+
+func SpiderTrapHandler(w http.ResponseWriter, r *http.Request) {
+	siteID := r.URL.Query().Get("siteId")
+	if siteID == "" {
+		http.Error(w, "siteId is required", http.StatusBadRequest)
+		return
+	}
+
+	ipStr := getClientIP(r)
+	userAgent := r.UserAgent()
+
+	// Log this as a high-confidence bot event
+	log.Printf("SPIDER TRAP HIT: IP=%s, UA=%s", ipStr, userAgent)
+	ctx := context.Background()
+	err := chConn.AsyncInsert(ctx, `INSERT INTO sentinel.events 
+		(Timestamp, SiteID, ClientIP, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, EventType, PageTitle) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, false,
+		time.Now().UTC(), siteID, ipStr, "/track/spider-trap", "Spider Trap",
+		0, "Bot", "Robot", "XX", 0, "bot-trap", "Spider Trap Detected",
+	)
+	if err != nil {
+		log.Printf("Error logging spider trap: %v", err)
+	}
+
+	// Always return 403 to spiders
+	http.Error(w, "Forbidden", http.StatusForbidden)
 }
 
 func DashboardApiHandler(w http.ResponseWriter, r *http.Request) {

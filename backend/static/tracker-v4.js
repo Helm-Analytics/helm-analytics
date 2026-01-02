@@ -204,6 +204,16 @@
             }
         });
 
+        // --- Spider Trap (Honey Pot) ---
+        (function() {
+            const trap = document.createElement('a');
+            trap.href = `https://api-sentinel.getmusterup.com/track/trap?siteId=${siteId}`;
+            trap.style.display = 'none';
+            trap.setAttribute('aria-hidden', 'true');
+            trap.innerText = 'Health Check';
+            document.body.appendChild(trap);
+        })();
+
         // --- Heartbeat Tracking ---
         // Send a heartbeat every 15 seconds to track time-on-page accurately
         setInterval(() => {
