@@ -1,5 +1,5 @@
 import React from 'react';
-import { Book, Terminal, Code, Shield, Activity, Zap, ChevronRight, Copy, Check } from 'lucide-react';
+import { Book, Terminal, Code, Shield, Activity, Zap, ChevronRight, Copy, Check, BarChart3, Globe, Clock, MousePointerClick } from 'lucide-react';
 
 const DocsPage = () => {
     const [copied, setCopied] = React.useState(null);
@@ -10,26 +10,40 @@ const DocsPage = () => {
         setTimeout(() => setCopied(null), 2000);
     };
 
-    const features = [
+    const metrics = [
         {
-            title: "Live Session Recording",
-            icon: Activity,
-            description: "Watch anonymized replays of user journeys. Understand exactly how visitors navigate your site, where they click, and what causes frustration.",
+            title: "Total Views",
+            desc: "The total number of page loads. Includes reloads and internal navigation."
         },
         {
-            title: "Interactive Heatmaps",
-            icon: Zap,
-            description: "Visualize engagement hotspots. See where users are clicking and scrolling to optimize your layout for better conversion.",
+            title: "Unique Visits",
+            desc: "Individual sessions identified by a privacy-preserving hash. A user visiting 5 pages counts as 1 visit."
         },
         {
-            title: "Conversion Funnels",
-            icon: ChevronRight,
-            description: "Define multi-step paths (e.g., /pricing -> /signup -> /dashboard) and identify exactly where users drop off.",
+            title: "Bounce Rate",
+            desc: "The percentage of visitors who leave after viewing only one page. Lower is generally better."
         },
         {
-            title: "Nautical Firewall",
-            icon: Shield,
-            description: "Active protection against bots and scrapers. Block traffic by IP, Country, or Data Center (ASN) with a single click.",
+            title: "Avg. Duration",
+            desc: "The average time spent on your site per session. We use a 15s heartbeat for high accuracy."
+        }
+    ];
+
+    const webVitals = [
+        {
+            title: "LCP (Largest Contentful Paint)",
+            stat: "Loading Speed",
+            desc: "How long it takes for the main content to load. < 2.5s is good."
+        },
+        {
+            title: "CLS (Cumulative Layout Shift)",
+            stat: "Visual Stability",
+            desc: "Measures unexpected layout shifts. < 0.1 is good."
+        },
+        {
+            title: "FID (First Input Delay)",
+            stat: "Interactivity",
+            desc: "Delay before the browser responds to a click. < 100ms is good."
         }
     ];
 
@@ -70,7 +84,7 @@ def helm_track():
     ];
 
     return (
-        <div className="max-w-5xl mx-auto space-y-16 animate-in fade-in duration-700 pb-12">
+        <div className="max-w-5xl mx-auto space-y-16 animate-in fade-in duration-700 pb-20">
             {/* Hero Section */}
             <div className="text-center space-y-6 pt-8">
                 <div className="inline-flex items-center justify-center p-4 bg-accent/10 rounded-2xl mb-2">
@@ -78,7 +92,7 @@ def helm_track():
                 </div>
                 <h1 className="text-5xl font-heading font-extrabold text-foreground tracking-tight">Helm Knowledge Base</h1>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-                    Welcome to the complete guide for <strong>Helm Analytics</strong>. Learn how to integrate our lightweight tracker, secure your application, and leverage AI insights to grow your user base.
+                    Everything you need to master <strong>Helm Analytics</strong>. From integration to advanced security and AI-driven insights.
                 </p>
             </div>
 
@@ -109,106 +123,193 @@ def helm_track():
                 </div>
             </div>
 
-            {/* Feature Grid */}
-            <div className="space-y-8">
-                 <h2 className="text-3xl font-heading font-extrabold text-foreground text-center">Core Capabilities</h2>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {features.map((feature, idx) => (
-                        <div key={idx} className="premium-card hover:border-accent/30 transition-colors">
-                            <div className="flex items-start gap-4">
-                                <div className="p-3 bg-secondary rounded-2xl">
-                                    <feature.icon className="w-6 h-6 text-accent" />
-                                </div>
-                                <div className="space-y-2">
-                                    <h3 className="text-lg font-bold text-foreground">{feature.title}</h3>
-                                    <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
-                                </div>
-                            </div>
+            {/* Dashboard Metrics */}
+            <div className="space-y-6">
+                <h2 className="text-3xl font-heading font-extrabold text-foreground">Understanding Metrics</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {metrics.map((m, i) => (
+                        <div key={i} className="premium-card p-6 space-y-3">
+                            <h3 className="font-bold text-foreground text-sm uppercase tracking-wide">{m.title}</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{m.desc}</p>
                         </div>
                     ))}
-                 </div>
+                </div>
             </div>
 
-            {/* Advanced Guides */}
+            {/* Feature Deep Dive Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Spider Trap */}
+                {/* AI Intelligence */}
                 <div className="premium-card space-y-6">
                     <div className="flex items-center gap-3">
-                        <div className="p-2 bg-rose-500/10 rounded-lg">
-                            <Shield className="w-5 h-5 text-rose-500" />
+                        <div className="p-2 bg-amber-500/10 rounded-lg">
+                            <Zap className="w-5 h-5 text-amber-500" />
                         </div>
-                        <h2 className="text-xl font-heading font-extrabold text-foreground">Advanced Bot Defense</h2>
+                        <h2 className="text-xl font-heading font-extrabold text-foreground">Helm Intelligence AI</h2>
                     </div>
                     <p className="text-muted-foreground text-sm leading-relaxed">
-                        Deploy a 'Spider Trap' to catch advanced scrapers. Add this hidden link anywhere in your HTML. Genuine users won't see it, but bots will follow it and get flagged immediately.
+                        Our AI engine analyzes your traffic patterns every 10 minutes to identify anomalies, growth opportunities, and technical issues.
                     </p>
-                    <div className="relative group mt-auto">
-                        <div className="bg-slate-900 rounded-xl p-5 font-mono text-xs text-slate-300 border border-white/5 overflow-x-auto">
-                            <pre>{spiderTrapCode}</pre>
-                        </div>
-                        <button 
-                            onClick={() => copyToClipboard(spiderTrapCode, 'trap')}
-                            className="absolute top-4 right-4 p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors border border-white/10"
-                        >
-                            {copied === 'trap' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-400" />}
-                        </button>
-                    </div>
+                    <ul className="space-y-3">
+                        <li className="flex items-start gap-3 text-sm text-muted-foreground">
+                            <CheckCircle2 className="w-4 h-4 text-accent mt-0.5" />
+                            <span><strong>Anomaly Detection:</strong> Sudden spikes or drops in traffic.</span>
+                        </li>
+                        <li className="flex items-start gap-3 text-sm text-muted-foreground">
+                            <CheckCircle2 className="w-4 h-4 text-accent mt-0.5" />
+                            <span><strong>Conversion Insights:</strong> Why users are dropping off.</span>
+                        </li>
+                        <li className="flex items-start gap-3 text-sm text-muted-foreground">
+                            <CheckCircle2 className="w-4 h-4 text-accent mt-0.5" />
+                            <span><strong>Smart Caching:</strong> Reports are cached for 15 mins to save resources. Use the refresh button for instant updates.</span>
+                        </li>
+                    </ul>
                 </div>
 
-                {/* Middleware */}
+                {/* Web Vitals */}
                 <div className="premium-card space-y-6">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-accent/10 rounded-lg">
-                            <Terminal className="w-5 h-5 text-accent" />
+                     <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-500/10 rounded-lg">
+                            <Clock className="w-5 h-5 text-blue-500" />
                         </div>
-                        <h2 className="text-xl font-heading font-extrabold text-foreground">Server-Side Tracking</h2>
+                        <h2 className="text-xl font-heading font-extrabold text-foreground">Core Web Vitals</h2>
                     </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                        For maximum reliability, you can track events directly from your server. This bypasses ad-blockers and ensures 100% data fidelity.
-                    </p>
-                    
                     <div className="space-y-4">
-                        {integrations.map((int, idx) => (
-                             <details key={idx} className="group/details">
-                                <summary className="flex items-center justify-between p-3 bg-secondary rounded-lg cursor-pointer hover:bg-secondary/70 transition-colors">
-                                    <span className="font-bold text-sm flex items-center gap-2">
-                                        <Code className="w-4 h-4 text-muted-foreground" />
-                                        {int.name}
-                                    </span>
-                                    <ChevronRight className="w-4 h-4 text-muted-foreground group-open/details:rotate-90 transition-transform" />
-                                </summary>
-                                <div className="mt-3 relative">
-                                    <div className="bg-slate-900 rounded-xl p-4 font-mono text-[10px] text-slate-300 border border-white/5 overflow-x-auto">
-                                        <pre>{int.code}</pre>
-                                    </div>
-                                    <button 
-                                        onClick={() => copyToClipboard(int.code, `int-${idx}`)}
-                                        className="absolute top-2 right-2 p-1.5 bg-white/5 hover:bg-white/10 rounded-md transition-colors border border-white/10"
-                                    >
-                                        {copied === `int-${idx}` ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-slate-400" />}
-                                    </button>
+                        {webVitals.map((v, i) => (
+                            <div key={i} className="flex items-center justify-between p-3 bg-secondary/50 rounded-lg border border-border/50">
+                                <div>
+                                    <div className="font-bold text-foreground text-sm">{v.title}</div>
+                                    <div className="text-xs text-muted-foreground">{v.desc}</div>
                                 </div>
-                             </details>
+                                <div className="text-xs font-bold text-accent px-2 py-1 bg-accent/10 rounded uppercase tracking-wider whitespace-nowrap">
+                                    {v.stat}
+                                </div>
+                            </div>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* Footer FAQ-style mini tips */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="p-6 rounded-2xl bg-secondary/20 border border-border/50">
-                    <Activity className="w-6 h-6 text-accent mb-4" />
-                    <h4 className="font-bold text-foreground mb-2">Real-time Heartbeat</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">The tracker sends a heartbeat every 15 seconds to ensure 'Time on Page' metrics are 100% accurate even if the user closes the tab.</p>
+             {/* Security Section */}
+             <div className="premium-card bg-slate-900 border-none space-y-8 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-rose-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                
+                <div className="relative z-10 flex flex-col md:flex-row gap-8">
+                     <div className="flex-1 space-y-6">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-rose-500/20 rounded-lg">
+                                <Shield className="w-5 h-5 text-rose-500" />
+                            </div>
+                            <h2 className="text-xl font-heading font-extrabold text-white">Advanced Security Suite</h2>
+                        </div>
+                        <p className="text-slate-400 text-sm leading-relaxed">
+                            Helm includes enterprise-grade protection features out of the box.
+                        </p>
+                        <div className="space-y-4">
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                                <h4 className="text-white font-bold mb-1">Shield Mode</h4>
+                                <p className="text-xs text-slate-400">Automatically blocks traffic from known data centers (AWS, GCP, Azure) and bad bot user-agents.</p>
+                            </div>
+                            <div className="p-4 bg-white/5 rounded-xl border border-white/5">
+                                <h4 className="text-white font-bold mb-1">Spider Trap 🕸️</h4>
+                                <p className="text-xs text-slate-400">A hidden link that only bots see. If accessed, the visitor's IP is permanently banned.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 flex flex-col">
+                        <div className="p-4 bg-black/40 rounded-t-xl border border-white/10 flex items-center justify-between">
+                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Spider Trap Implementation</span>
+                            <div className="flex gap-1.5">
+                                <div className="w-2.5 h-2.5 rounded-full bg-rose-500/20"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-amber-500/20"></div>
+                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/20"></div>
+                            </div>
+                        </div>
+                        <div className="flex-1 bg-black/60 p-6 font-mono text-xs text-rose-300 border-x border-b border-white/10 rounded-b-xl overflow-x-auto relative">
+                             <pre>{spiderTrapCode}</pre>
+                             <button 
+                                onClick={() => copyToClipboard(spiderTrapCode, 'trap')}
+                                className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                            >
+                                {copied === 'trap' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-white" />}
+                            </button>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-4 italic">
+                            Place this link anywhere in your HTML body. It is hidden with CSS so real users won't click it.
+                        </p>
+                    </div>
                 </div>
-                <div className="p-6 rounded-2xl bg-secondary/20 border border-border/50">
-                    <Shield className="w-6 h-6 text-accent mb-4" />
-                    <h4 className="font-bold text-foreground mb-2">Privacy First</h4>
-                    <p className="text-xs text-muted-foreground leading-relaxed">Helm is cookieless. We use privacy-compliant session hashes that expire naturally, ensuring GDPR and CCPA compliance by default.</p>
+            </div>
+
+            {/* Server Side Integration */}
+            <div className="space-y-6">
+                 <h2 className="text-2xl font-heading font-extrabold text-foreground">Server-Side Tracking</h2>
+                 <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
+                    Client-side JS can be blocked by ad-blockers. For mission-critical analytics, use our server-side middleware to track every single request directly from your backend.
+                 </p>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {integrations.map((int, idx) => (
+                        <div key={idx} className="premium-card p-0 overflow-hidden">
+                             <div className="bg-secondary/30 p-4 border-b border-border/50 flex items-center justify-between">
+                                <span className="font-bold text-sm flex items-center gap-2">
+                                    <Terminal className="w-4 h-4 text-accent" />
+                                    {int.name}
+                                </span>
+                                <button 
+                                    onClick={() => copyToClipboard(int.code, `int-${idx}`)}
+                                    className="p-1.5 hover:bg-secondary rounded transition-colors"
+                                >
+                                    {copied === `int-${idx}` ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground" />}
+                                </button>
+                             </div>
+                             <div className="p-4 bg-slate-950 overflow-x-auto">
+                                <pre className="text-[11px] font-mono text-slate-300">{int.code}</pre>
+                             </div>
+                        </div>
+                    ))}
+                 </div>
+            </div>
+
+             {/* Footer FAQ-style mini tips */}
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-8 border-t border-border/50">
+                <div className="flex gap-4">
+                    <Activity className="w-8 h-8 text-accent shrink-0" />
+                    <div>
+                         <h4 className="font-bold text-foreground mb-1">Real-time Heartbeat</h4>
+                         <p className="text-xs text-muted-foreground leading-relaxed">The tracker sends a heartbeat every 15 seconds to ensure 'Time on Page' metrics are 100% accurate even if the user closes the tab.</p>
+                    </div>
+                </div>
+                <div className="flex gap-4">
+                    <Shield className="w-8 h-8 text-accent shrink-0" />
+                    <div>
+                         <h4 className="font-bold text-foreground mb-1">Privacy First</h4>
+                         <p className="text-xs text-muted-foreground leading-relaxed">Helm is cookieless. We use privacy-compliant session hashes that expire naturally, ensuring GDPR and CCPA compliance by default.</p>
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
+
+// Missing Imports
+function CheckCircle2(props) {
+    return (
+      <svg
+        {...props}
+        xmlns="http://www.w3.org/2000/svg"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d="m9 12 2 2 4-4" />
+      </svg>
+    )
+}
 
 export default DocsPage;
