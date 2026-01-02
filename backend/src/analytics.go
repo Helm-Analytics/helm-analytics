@@ -319,6 +319,7 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
+	log.Printf("DEBUG: Received JS Error: %s from %s", jsErr.Message, jsErr.URL)
 
 	ipStr := getClientIP(r)
 

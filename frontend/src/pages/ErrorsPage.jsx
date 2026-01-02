@@ -33,14 +33,22 @@ const ErrorsPage = () => {
     
     const err = errors[idx];
     if (isExpanding && !err.mitigation) {
+        console.log("🤖 Triggering AI Analysis for:", err.message);
         try {
             const response = await api.analyzeError(err.message, err.source);
+            console.log("✅ AI Response Received:", response);
+
             const updatedErrors = [...errors];
             updatedErrors[idx].mitigation = response.mitigation;
             setErrors(updatedErrors);
         } catch (e) {
-            console.error("AI Analysis failed", e);
+            console.error("❌ AI Analysis Failed:", e);
+            const updatedErrors = [...errors];
+            updatedErrors[idx].mitigation = `<div class="text-rose-500 font-bold">Analysis Failed: ${e.message || "Unknown Error"}. Check console for details.</div>`;
+            setErrors(updatedErrors);
         }
+    } else if (isExpanding) {
+        console.log("ℹ️ Using cached mitigation for:", err.message);
     }
   };
 

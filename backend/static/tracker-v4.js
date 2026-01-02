@@ -82,6 +82,7 @@
 
         // --- ERROR TRACKING ---
         window.addEventListener('error', (e) => {
+             console.log("Sentinel: 🚨 Caught Runtime Error:", e.message);
              const data = {
                 siteId: siteId,
                 url: window.location.href,
@@ -100,6 +101,7 @@
         });
 
         window.addEventListener('unhandledrejection', (e) => {
+            console.log("Sentinel: 🚨 Caught Promise Rejection:", e.reason);
             const data = {
                siteId: siteId,
                url: window.location.href,
