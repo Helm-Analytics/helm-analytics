@@ -127,7 +127,15 @@ func ListSessionsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := context.Background()
-	query := "SELECT DISTINCT SessionID FROM session_events WHERE SiteID = ? ORDER BY SessionID ASC"
+	query := `
+		SELECT 
+			SessionID, 
+			min(Timestamp) as start_time 
+		FROM session_events 
+		WHERE SiteID = ? 
+		GROUP BY SessionID 
+		ORDER BY start_time DESC 
+		LIMIT 50`
 	rows, err := chConn.Query(ctx, query, siteID)
 	if err != nil {
 		log.Printf("Error querying session IDs from ClickHouse: %v", err)
@@ -139,7 +147,8 @@ func ListSessionsHandler(w http.ResponseWriter, r *http.Request) {
 	var sessionIDs []string
 	for rows.Next() {
 		var sessionID string
-		if err := rows.Scan(&sessionID); err != nil {
+		var startTime time.Time
+		if err := rows.Scan(&sessionID, &startTime); err != nil {
 			log.Printf("Error scanning session ID: %v", err)
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return

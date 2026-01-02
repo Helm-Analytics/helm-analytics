@@ -122,7 +122,7 @@ const Layout = () => {
   return (
     <div className="min-h-screen flex text-foreground font-sans helm-bg">
       {/* Sidebar - Integrated Modern Style */}
-      <aside className="w-72 bg-white dark:bg-[#0b0f1a] border-r border-border/60 flex-shrink-0 flex flex-col h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+      <aside className="w-64 bg-white dark:bg-[#0b0f1a] border-r border-border/60 flex-shrink-0 flex flex-col h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div className="p-6">
           <Logo className="mb-10 scale-105 origin-left" />
 

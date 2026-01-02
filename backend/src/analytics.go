@@ -24,7 +24,7 @@ type Event struct {
 	Referrer    string   `json:"referrer"`
 	ScreenWidth int      `json:"screenWidth"`
 	EventType   string   `json:"eventType"`
-	SessionID   string   `json:"sessionId"`
+	PageTitle   string   `json:"pageTitle"`
 	LCP         *float64 `json:"LCP,omitempty"`
 	CLS         *float64 `json:"CLS,omitempty"`
 	FID         *float64 `json:"FID,omitempty"`
@@ -41,7 +41,7 @@ type EventData struct {
 	OS          string
 	Country     string
 	EventType   string
-	SessionID   string
+	PageTitle   string
 	TrustScore  uint8
 	LCP         sql.NullFloat64
 	CLS         sql.NullFloat64
@@ -212,12 +212,12 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 		ClientIP:    ipStr,
 		URL:         event.URL,
 		Referrer:    event.Referrer,
+		PageTitle:   event.PageTitle,
 		ScreenWidth: uint16(event.ScreenWidth),
 		Browser:     browser,
 		OS:          osFamily,
 		Country:     country,
 		EventType:   event.EventType,
-		SessionID:   event.SessionID,
 		TrustScore:  trustScore,
 		LCP:         nullFloat64(event.LCP),
 		CLS:         nullFloat64(event.CLS),
@@ -234,11 +234,11 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	err := chConn.AsyncInsert(ctx, `INSERT INTO sentinel.events 
-		(Timestamp, SiteID, ClientIP, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, LCP, CLS, FID, EventType, SessionID) 
+		(Timestamp, SiteID, ClientIP, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, LCP, CLS, FID, EventType, PageTitle) 
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, false,
 		eventData.Timestamp, eventData.SiteID, eventData.ClientIP, eventData.URL, eventData.Referrer,
 		eventData.ScreenWidth, eventData.Browser, eventData.OS, eventData.Country, eventData.TrustScore,
-		eventData.LCP, eventData.CLS, eventData.FID, eventData.EventType, eventData.SessionID,
+		eventData.LCP, eventData.CLS, eventData.FID, eventData.EventType, eventData.PageTitle,
 	)
 	if err != nil {
 		log.Printf("Error inserting event into ClickHouse: %v", err)
@@ -559,10 +559,10 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 	queryBounceRate := `
 		SELECT (countIf(pageviews = 1) / count()) * 100
 		FROM (
-			            SELECT SessionID, count() AS pageviews
+			            SELECT ClientIP, count() AS pageviews
 			            FROM events
 			            WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%'
-			            GROUP BY SessionID
+			            GROUP BY ClientIP
 		)`
 	err = chConn.QueryRow(ctx, queryBounceRate, siteID, startDaysAgo, endDaysAgo).Scan(&stats.BounceRate)
 	if err != nil {
@@ -579,14 +579,14 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 			avg(visit_duration)
 		FROM (
 			SELECT
-				SessionID,
+				ClientIP,
 				count(*) * 15 AS visit_duration
-			FROM events
+			FROM sentinel.events
 			WHERE SiteID = ?
 			  AND EventType = 'heartbeat'
 			  AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY
 			  AND ClientIP NOT IN ('127.0.0.1', '::1')
-			GROUP BY SessionID
+			GROUP BY ClientIP
 			HAVING count(*) > 0
 		)
 	`

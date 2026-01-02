@@ -39,7 +39,7 @@
                 referrer: document.referrer || '',
                 screenWidth: window.screen.width,
                 eventType: 'pageview', // Default to pageview if not overridden
-                sessionId: sessionId,
+                pageTitle: document.title,
                 ...payload
             };
 
@@ -158,18 +158,13 @@
         });
 
         // --- RRWeb Session Recording ---
-        // Note: sessionId here is for rrweb session recording, which might be different from the analytics sessionId
-        // but for simplicity and consistency, let's use the same one if possible.
-        let rrSessionId = null;
-
-        // Check if rrweb is actually available
+        // Note: we use the same sessionId from sessionStorage to keep replays continuous across refreshes
         if (window.rrweb) {
              window.rrweb.record({
                 emit(event) {
                     events.push(event);
                     // Optimization: If this is the very first batch (snapshot), send it immediately
-                    // typically snapshot = Meta (4) + FullSnapshot (2), so length >= 2
-                    if (!sessionId && events.length > 1) {
+                    if (events.length > 2) {
                         flushEvents();
                     }
                 },
@@ -181,19 +176,17 @@
 
         function flushEvents(isUnload = false) {
              if (events.length > 0) {
-                const body = JSON.stringify({ siteId: siteId, events: events, sessionId: rrSessionId });
+                const body = JSON.stringify({ 
+                    siteId: siteId, 
+                    events: events, 
+                    sessionId: sessionId 
+                });
                 events = []; // Clear buffer
                 fetch(sessionEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: body,
-                    keepalive: isUnload // Only use keepalive on unload to avoid 64KB limit during session
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.sessionId) {
-                        rrSessionId = data.sessionId;
-                    }
+                    keepalive: isUnload
                 })
                 .catch(err => console.error('Sentinel session recording error:', err));
             }

@@ -77,6 +77,7 @@ func runMigrations(ctx context.Context) {
 		ORDER BY (SiteID, Timestamp)
 		TTL Timestamp + INTERVAL 30 DAY`,
 		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS TrustScore UInt8",
+		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS PageTitle String DEFAULT ''",
 		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS EventType String DEFAULT 'pageview'",
 		"ALTER TABLE sentinel.events MODIFY TTL Timestamp + INTERVAL 30 DAY",
 

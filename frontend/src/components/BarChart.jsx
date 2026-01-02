@@ -4,21 +4,6 @@ import { Bar } from "react-chartjs-2"
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const BarChart = ({ title, data, labels }) => {
-  const chartData = {
-    labels,
-    datasets: [
-      {
-        label: title,
-        data,
-        backgroundColor: "rgba(79, 70, 229, 0.8)",
-        borderColor: "rgba(79, 70, 229, 1)",
-        borderWidth: 1,
-        borderRadius: 8,
-        borderSkipped: false,
-      },
-    ],
-  }
-
   const options = {
     responsive: true,
     maintainAspectRatio: false,
@@ -27,10 +12,10 @@ const BarChart = ({ title, data, labels }) => {
         display: false,
       },
       tooltip: {
-        backgroundColor: "rgba(15, 23, 42, 0.95)",
-        titleColor: "#e2e8f0",
-        bodyColor: "#e2e8f0",
-        borderColor: "rgba(79, 70, 229, 0.5)",
+        backgroundColor: "rgba(15, 23, 42, 0.9)",
+        titleColor: "#ffffff",
+        bodyColor: "#ffffff",
+        borderColor: "rgba(14, 165, 233, 0.5)",
         borderWidth: 1,
         cornerRadius: 8,
         displayColors: false,
@@ -39,37 +24,50 @@ const BarChart = ({ title, data, labels }) => {
     scales: {
       x: {
         grid: {
-          color: "rgba(148, 163, 184, 0.1)",
+          display: false,
           drawBorder: false,
         },
         ticks: {
           color: "#94a3b8",
           font: {
-            size: 12,
+            size: 11,
           },
         },
       },
       y: {
+        beginAtZero: true,
         grid: {
-          color: "rgba(148, 163, 184, 0.1)",
+          color: "rgba(148, 163, 184, 0.08)",
           drawBorder: false,
         },
         ticks: {
           color: "#94a3b8",
           font: {
-            size: 12,
+            size: 11,
           },
         },
       },
     },
   }
 
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: title,
+        data,
+        backgroundColor: "#0ea5e9",
+        hoverBackgroundColor: "#0284c7",
+        borderRadius: 6,
+        borderSkipped: false,
+        barThickness: 20,
+      },
+    ],
+  }
+
   return (
-    <div className="bg-slate-800 rounded-xl p-6 shadow-lg border border-slate-700/50 hover:border-indigo-500/30 transition-all duration-300">
-      <h3 className="text-slate-200 text-lg font-semibold mb-4">{title}</h3>
-      <div className="h-64">
-        <Bar data={chartData} options={options} />
-      </div>
+    <div className="h-64">
+      <Bar data={chartData} options={options} />
     </div>
   )
 }
