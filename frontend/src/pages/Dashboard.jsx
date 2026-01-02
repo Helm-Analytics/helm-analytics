@@ -156,8 +156,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* AI Intelligence Insights */}
-          <InsightsCard />
 
           {/* Sub Grid for Top Content & Geography */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -188,6 +186,9 @@ const Dashboard = () => {
 
         {/* Right Column: Setup & Technology */}
         <div className="lg:col-span-4 space-y-8">
+          {/* AI Intelligence Insights */}
+          <InsightsCard />
+
           {/* Setup Guide - Sidebar Placement */}
           <div className="premium-card bg-[#0F172A] border-none shadow-2xl relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10">

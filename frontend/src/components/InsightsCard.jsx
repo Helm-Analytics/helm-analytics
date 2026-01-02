@@ -21,7 +21,7 @@ const InsightsCard = () => {
   }
 
   return (
-    <div className="premium-card bg-slate-900 border-none rounded-2xl p-8 shadow-xl shadow-slate-200 relative overflow-hidden group h-full transition-all hover:scale-[1.01]">
+    <div className="premium-card bg-slate-900 border-none rounded-2xl p-8 shadow-xl shadow-slate-200 relative overflow-hidden group transition-all hover:scale-[1.01]">
       {/* Decorative Orbs */}
       <div className="absolute -top-24 -right-24 w-64 h-64 bg-accent/20 rounded-full blur-3xl group-hover:bg-accent/30 transition-all duration-700"></div>
       <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/10 rounded-full blur-3xl"></div>

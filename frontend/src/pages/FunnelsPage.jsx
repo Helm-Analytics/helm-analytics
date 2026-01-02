@@ -204,37 +204,65 @@ const FunnelsPage = () => {
                             </div>
                             
                             <div className="p-8">
-                                <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative">
-                                    {/* Connection Line */}
-                                    <div className="hidden lg:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-accent/30 via-border to-border -z-0"></div>
+                                {(() => {
+                                    const hasData = funnel.stepCounts && funnel.stepCounts.some(c => c > 0);
+                                    
+                                    return (
+                                        <>
+                                            <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative">
+                                                {/* Connection Line */}
+                                                <div className="hidden lg:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-accent/30 via-border to-border -z-0"></div>
 
-                                    {funnel.steps.map((step, idx) => (
-                                        <div key={idx} className="relative z-10 flex flex-col items-center w-full lg:w-auto group/step">
-                                            <div className="w-12 h-12 rounded-2xl bg-white dark:bg-primary border-2 border-accent flex items-center justify-center text-accent font-extrabold shadow-xl mb-4 group-hover/step:translate-y-[-4px] transition-all duration-300">
-                                                {idx + 1}
-                                            </div>
-                                            <div className="bg-secondary/50 dark:bg-black/30 border border-border/60 rounded-xl px-4 py-2 text-xs text-foreground font-mono font-bold shadow-sm flex items-center gap-2 max-w-[180px] break-all">
-                                                <ExternalLink className="w-3 h-3 text-accent" />
-                                                {step}
+                                                {funnel.steps.map((step, idx) => {
+                                                    const count = funnel.stepCounts ? funnel.stepCounts[idx] : 0;
+                                                    const prevCount = idx > 0 && funnel.stepCounts ? funnel.stepCounts[idx - 1] : 0;
+                                                    const conversion = prevCount > 0 ? ((count / prevCount) * 100).toFixed(1) : (idx === 0 ? "100" : "0.0");
+                                                    
+                                                    return (
+                                                        <div key={idx} className="relative z-10 flex flex-col items-center w-full lg:w-auto group/step">
+                                                            <div className={`w-12 h-12 rounded-2xl border-2 flex items-center justify-center font-extrabold shadow-xl mb-4 transition-all duration-300 ${hasData ? 'bg-primary text-primary-foreground border-accent scale-110' : 'bg-white dark:bg-primary border-accent text-accent group-hover/step:translate-y-[-4px]'}`}>
+                                                                {idx + 1}
+                                                            </div>
+                                                            <div className="bg-secondary/50 dark:bg-black/30 border border-border/60 rounded-xl px-4 py-2 text-xs text-foreground font-mono font-bold shadow-sm flex items-center gap-2 max-w-[180px] break-all mb-3">
+                                                                <ExternalLink className="w-3 h-3 text-accent" />
+                                                                {step}
+                                                            </div>
+                                                            
+                                                            {hasData && (
+                                                                <div className="text-center animate-in fade-in slide-in-from-bottom-2">
+                                                                    <div className="text-lg font-heading font-extrabold text-foreground">{count?.toLocaleString()}</div>
+                                                                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Visitors</div>
+                                                                    {idx > 0 && (
+                                                                        <div className={`mt-1 text-xs font-bold ${parseFloat(conversion) > 50 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                                            {conversion}% Conv.
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            )}
+                                                            
+                                                            {/* Mobile Arrow */}
+                                                            {idx < funnel.steps.length - 1 && (
+                                                                <ArrowDown className="lg:hidden w-6 h-6 text-muted-foreground/30 my-4" />
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })}
                                             </div>
                                             
-                                            {/* Mobile Arrow */}
-                                            {idx < funnel.steps.length - 1 && (
-                                                <ArrowDown className="lg:hidden w-6 h-6 text-muted-foreground/30 my-4" />
+                                            {!hasData && (
+                                                <div className="mt-12 bg-secondary/20 rounded-2xl p-8 text-center border border-border/40 border-dashed">
+                                                    <div className="w-10 h-10 bg-white dark:bg-card rounded-full flex items-center justify-center mx-auto mb-4 border border-border/50 text-muted-foreground/40">
+                                                      <Settings className="w-5 h-5 animate-spin-slow" />
+                                                    </div>
+                                                    <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest mb-1">Awaiting Traffic Flow</p>
+                                                    <p className="text-muted-foreground/50 text-[10px] max-w-md mx-auto">
+                                                        Intelligence engine is processing visits. Real-time conversion percentages will calibrate as users interact with these touchpoints.
+                                                    </p>
+                                                </div>
                                             )}
-                                        </div>
-                                    ))}
-                                </div>
-                                
-                                <div className="mt-12 bg-secondary/20 rounded-2xl p-8 text-center border border-border/40 border-dashed">
-                                    <div className="w-10 h-10 bg-white dark:bg-card rounded-full flex items-center justify-center mx-auto mb-4 border border-border/50 text-muted-foreground/40">
-                                      <Settings className="w-5 h-5 animate-spin-slow" />
-                                    </div>
-                                    <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest mb-1">Awaiting Traffic Flow</p>
-                                    <p className="text-muted-foreground/50 text-[10px] max-w-md mx-auto">
-                                        Intelligence engine is processing visits. Real-time conversion percentages will calibrate as users interact with these touchpoints.
-                                    </p>
-                                </div>
+                                        </>
+                                    );
+                                })()}
                             </div>
                         </div>
                     ))
