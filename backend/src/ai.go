@@ -275,3 +275,98 @@ func AnalyzeErrorHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"mitigation": mitigation})
 }
+
+type FirewallSuggestion struct {
+	IP         string `json:"ip"`
+	Reason     string `json:"reason"`
+	Confidence string `json:"confidence"` // High, Medium, Low
+	Country    string `json:"country"`
+}
+
+func GetFirewallSuggestionsHandler(w http.ResponseWriter, r *http.Request) {
+	siteID := r.URL.Query().Get("siteId")
+	if siteID == "" {
+		http.Error(w, "siteId is required", http.StatusBadRequest)
+		return
+	}
+
+	// 1. Get existing IP blocks to avoid duplicates
+	rows, err := db.Query("SELECT value FROM firewall_rules WHERE site_id = $1 AND rule_type = 'ip'", siteID)
+	if err != nil {
+		log.Printf("Error fetching firewall rules: %v", err)
+		http.Error(w, "Database error", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	blockedIPs := make(map[string]bool)
+	for rows.Next() {
+		var ip string
+		if err := rows.Scan(&ip); err == nil {
+			blockedIPs[ip] = true
+		}
+	}
+
+	// 2. Query ClickHouse for suspicious traffic (Low Trust, High Volume)
+	// We look for IPs with TrustScore < 60 in last 24h
+	ctx := context.Background()
+	query := `
+		SELECT ClientIP, any(Country) as country, avg(TrustScore) as avg_trust, count() as requests
+		FROM sentinel.events
+		WHERE SiteID = ? AND Timestamp >= now() - INTERVAL 24 HOUR AND TrustScore < 80
+		GROUP BY ClientIP
+		HAVING requests > 5
+		ORDER BY avg_trust ASC, requests DESC
+		LIMIT 10
+	`
+	
+	chRows, err := chConn.Query(ctx, query, siteID)
+	if err != nil {
+		log.Printf("Error querying suggestions: %v", err)
+		http.Error(w, "Analytics error", http.StatusInternalServerError)
+		return
+	}
+	defer chRows.Close()
+
+	var suggestions []FirewallSuggestion
+
+	for chRows.Next() {
+		var ip, country string
+		var avgTrust float64
+		var requests uint64
+		if err := chRows.Scan(&ip, &country, &avgTrust, &requests); err != nil {
+			continue
+		}
+
+		if blockedIPs[ip] {
+			continue
+		}
+
+		reason := "Suspicious Behavior"
+		confidence := "Low"
+
+		if avgTrust < 20 {
+			reason = "Known Botnet / Data Center"
+			confidence = "High"
+		} else if avgTrust < 50 {
+			reason = "Likely Automated Traffic"
+			confidence = "Medium"
+		} else {
+			reason = fmt.Sprintf("Abnormal Request Volume (%d reqs)", requests)
+		}
+
+		suggestions = append(suggestions, FirewallSuggestion{
+			IP:         ip,
+			Reason:     reason,
+			Confidence: confidence,
+			Country:    country,
+		})
+
+		if len(suggestions) >= 5 {
+			break
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(suggestions)
+}

@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
 
 type FirewallRule struct {
@@ -203,6 +205,37 @@ func handleDeleteFirewallRule(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
+var (
+	rateLimitMap = make(map[string]int)
+	rateLimitMux sync.Mutex
+)
+
+func init() {
+	// Reset rate limits every minute
+	go func() {
+		for range time.Tick(1 * time.Minute) {
+			rateLimitMux.Lock()
+			rateLimitMap = make(map[string]int)
+			rateLimitMux.Unlock()
+		}
+	}()
+}
+
+func isMaliciousPayload(input string) bool {
+	input = strings.ToLower(input)
+	patterns := []string{
+		"<script", "javascript:", "onerror=", "onload=", // XSS
+		"union select", "or 1=1", "drop table",          // SQLi
+		"/etc/passwd", "..",                             // Path Traversal
+	}
+	for _, p := range patterns {
+		if strings.Contains(input, p) {
+			return true
+		}
+	}
+	return false
+}
+
 // CheckAccessHandler checks if a request should be allowed or blocked.
 // It is public (no AuthMiddleware needed) but requires siteID.
 func CheckAccessHandler(w http.ResponseWriter, r *http.Request) {
@@ -227,8 +260,28 @@ func CheckAccessHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing siteId or ip", http.StatusBadRequest)
 		return
 	}
+	
+	// 0. Check Rate Limit (Brute Force Protection)
+	rateLimitMux.Lock()
+	rateLimitMap[req.IP]++
+	reqCount := rateLimitMap[req.IP]
+	rateLimitMux.Unlock()
 
-	// 1. Check IP Rules
+	// Threshold: 60 checks per minute (1 per second)
+	if reqCount > 60 { 
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"action": "block", "reason": "rate_limit_exceeded"})
+		return
+	}
+
+	// 1. WAF Checks (XSS, SQLi, Path Traversal)
+	if isMaliciousPayload(req.URL) || isMaliciousPayload(req.UserAgent) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"action": "block", "reason": "waf_payload_detected"})
+		return
+	}
+
+	// 2. Check IP Rules
 	var blocked bool
 	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM firewall_rules WHERE site_id=$1 AND rule_type='ip' AND value=$2)", req.SiteID, req.IP).Scan(&blocked)
 	if err == nil && blocked {
@@ -237,7 +290,7 @@ func CheckAccessHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2. Check Country Rules
+	// 3. Check Country Rules
 	ip := net.ParseIP(req.IP)
 	country := "XX"
 	if geoipDb != nil && ip != nil {
