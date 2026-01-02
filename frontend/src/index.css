@@ -5,38 +5,38 @@
 
 :root {
   /* Helm Analytics - Premium Light Theme */
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #ffffff;
+  --foreground: #020617;
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #020617;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #0f172a; /* Midnight Navy */
+  --popover-foreground: #020617;
+  --primary: #0F172A; /* Midnight Navy */
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
+  --secondary: #f8fafc;
   --secondary-foreground: #475569;
-  --muted: #f1f5f9;
+  --muted: #f8fafc;
   --muted-foreground: #64748b;
   --accent: #0ea5e9; /* Ocean Teal */
   --accent-foreground: #ffffff;
   --destructive: #f43f5e;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
+  --border: #f1f5f9;
   --input: #ffffff;
   --ring: #0ea5e9;
-  --chart-1: #0f172a;
-  --chart-2: #0ea5e9;
-  --chart-3: #6366f1;
-  --chart-4: #8b5cf6;
-  --chart-5: #ec4899;
-  --radius: 0.75rem;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #0f172a;
-  --sidebar-primary: #0f172a;
+  --chart-1: #0ea5e9;
+  --chart-2: #6366f1;
+  --chart-3: #8b5cf6;
+  --chart-4: #f43f5e;
+  --chart-5: #f59e0b;
+  --radius: 1rem;
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #0F172A;
+  --sidebar-primary: #0F172A;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f1f5f9;
-  --sidebar-accent-foreground: #0f172a;
-  --sidebar-border: #e2e8f0;
+  --sidebar-accent: #ffffff;
+  --sidebar-accent-foreground: #0ea5e9;
+  --sidebar-border: #f1f5f9;
   --sidebar-ring: #0ea5e9;
 }
 

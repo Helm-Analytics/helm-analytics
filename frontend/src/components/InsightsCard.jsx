@@ -21,28 +21,28 @@ const InsightsCard = () => {
   }
 
   return (
-    <div className="premium-card bg-[#0F172A] border-accent/20 rounded-2xl p-8 shadow-2xl relative overflow-hidden group">
-      <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+    <div className="premium-card bg-white border-accent/20 rounded-2xl p-8 shadow-xl shadow-accent/5 relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
         <Sparkles className="w-40 h-40 text-accent" />
       </div>
       
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-8">
-            <h3 className="text-xl font-heading font-extrabold text-white flex items-center gap-3">
+            <h3 className="text-xl font-heading font-extrabold text-foreground flex items-center gap-3">
               <Sparkles className="w-6 h-6 text-accent" />
               Helm Intelligence
             </h3>
-            <span className="text-[10px] bg-accent/20 text-accent px-2 py-1 rounded-md font-bold uppercase tracking-widest border border-accent/30">Gemini Powered</span>
+            <span className="text-[10px] bg-accent/10 text-accent px-2 py-1 rounded-md font-bold uppercase tracking-widest border border-accent/20">Gemini Powered</span>
         </div>
 
         <div className="space-y-6">
           <div className="space-y-4">
             {insights.insights && insights.insights.map((insight, idx) => (
-              <div key={idx} className="flex items-start gap-4 text-slate-300 text-[13px] leading-relaxed">
-                <div className="mt-1.5 min-w-[8px] h-[8px] rounded-full bg-accent shadow-[0_0_8px_rgba(14,165,233,0.5)] flex-shrink-0" />
+              <div key={idx} className="flex items-start gap-4 text-muted-foreground text-[13px] leading-relaxed">
+                <div className="mt-1.5 min-w-[8px] h-[8px] rounded-full bg-accent shadow-[0_0_8px_rgba(14,165,233,0.3)] flex-shrink-0" />
                 <div className="flex-1">
                   <ReactMarkdown 
-                    className="prose prose-invert max-w-none text-[13px] prose-p:my-0 prose-p:leading-relaxed prose-strong:text-accent font-medium"
+                    className="prose prose-slate max-w-none text-[13px] prose-p:my-0 prose-p:leading-relaxed prose-strong:text-accent font-medium"
                     components={{
                       p: ({node, ...props}) => <p className="mb-0" {...props} />
                     }}
@@ -60,9 +60,9 @@ const InsightsCard = () => {
                 <Lightbulb className="w-4 h-4" />
                 Command Recommendation
               </h4>
-              <div className="text-slate-200 text-[13px] italic leading-relaxed font-medium">
+              <div className="text-foreground text-[13px] italic leading-relaxed font-medium">
                 <ReactMarkdown 
-                   className="prose prose-invert max-w-none text-[13px] prose-p:my-0"
+                   className="prose prose-slate max-w-none text-[13px] prose-p:my-0"
                    components={{
                       p: ({node, ...props}) => <p className="mb-0" {...props} />
                    }}
