@@ -123,4 +123,10 @@ export const api = {
       method: "POST",
       data: { message },
     }),
+  analyzeError: (message, source) =>
+    request({
+      url: "/api/ai/analyze-error",
+      method: "POST",
+      data: { message, source },
+    }),
 };

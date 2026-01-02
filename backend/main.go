@@ -86,6 +86,7 @@ func main() {
 	// AI Features
 	mux.Handle("/api/ai/insights", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetInsightsHandler)))
 	mux.Handle("/api/ai/chat", apiCors.Handler(sentinel.AuthMiddleware(sentinel.ChatHandler)))
+	mux.Handle("/api/ai/analyze-error", apiCors.Handler(sentinel.AuthMiddleware(sentinel.AnalyzeErrorHandler)))
 
 	// Swagger documentation
 	mux.HandleFunc("/docs/", httpSwagger.WrapHandler)

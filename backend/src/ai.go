@@ -241,3 +241,29 @@ Please provide your response in HTML format (using only <b>, <i>, <ul>, <li> tag
 
 	return reply, nil
 }
+// AnalyzeErrorHandler handles requests for on-demand error resolution strategies.
+func AnalyzeErrorHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		Message string `json:"message"`
+		Source  string `json:"source"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
+
+	mitigation, err := AnalyzeError(r.Context(), req.Message, req.Source)
+	if err != nil {
+		log.Printf("Error analyzing issue: %v", err)
+		http.Error(w, "Helm Intelligence unavailable", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"mitigation": mitigation})
+}
