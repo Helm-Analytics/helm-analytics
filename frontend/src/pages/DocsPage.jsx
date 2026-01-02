@@ -266,32 +266,96 @@ def helm_track():
             <div className="space-y-6">
                  <h2 className="text-2xl font-heading font-extrabold text-foreground">Server-Side Tracking</h2>
                  <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed mb-6">
-                    For mission-critical analytics, track events directly from your backend.
-                    <br />
-                    <span className="text-accent font-bold text-xs uppercase tracking-wide bg-accent/10 px-2 py-1 rounded-full mt-2 inline-block">
-                        Coming Soon: Official NPM & PyPI Packages
-                    </span>
+                    For mission-critical analytics, track events and block threats directly from your backend using our official SDKs.
                  </p>
+                 
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {integrations.map((int, idx) => (
-                        <div key={idx} className="premium-card p-0 overflow-hidden">
-                             <div className="bg-secondary/30 p-4 border-b border-border/50 flex items-center justify-between">
-                                <span className="font-bold text-sm flex items-center gap-2">
-                                    <Terminal className="w-4 h-4 text-accent" />
-                                    {int.name}
-                                </span>
-                                <button 
-                                    onClick={() => copyToClipboard(int.code, `int-${idx}`)}
-                                    className="p-1.5 hover:bg-secondary rounded transition-colors"
-                                >
-                                    {copied === `int-${idx}` ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground" />}
-                                </button>
-                             </div>
-                             <div className="p-4 bg-slate-950 overflow-x-auto">
-                                <pre className="text-[11px] font-mono text-slate-300">{int.code}</pre>
-                             </div>
-                        </div>
-                    ))}
+                    {/* Node.js SDK */}
+                    <div className="premium-card p-0 overflow-hidden">
+                         <div className="bg-secondary/30 p-4 border-b border-border/50 flex items-center justify-between">
+                            <span className="font-bold text-sm flex items-center gap-2">
+                                <Terminal className="w-4 h-4 text-accent" />
+                                Node.js (Express)
+                            </span>
+                            <div className="text-[10px] bg-accent/10 px-2 py-0.5 rounded text-accent border border-accent/20">v1.1.0</div>
+                         </div>
+                         <div className="p-4 bg-slate-950 overflow-x-auto space-y-4">
+                            <div className="space-y-2">
+                                <div className="text-xs text-slate-400">Installation</div>
+                                <code className="block bg-white/5 p-2 rounded text-xs font-mono text-emerald-400">npm install helm-analytics</code>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="text-xs text-slate-400">Middleware Usage</div>
+                                <pre className="text-[11px] font-mono text-slate-300 whitespace-pre-wrap">{`const helm = require('helm-analytics');
+
+// Initialize with your Site ID
+const analytics = new helm.HelmAnalytics({
+    siteId: 'YOUR_SITE_ID',
+    apiUrl: 'https://api.analytics.yourdomain.com'
+});
+
+// Enable Tracking & Shield Mode (Blocking)
+app.use(analytics.middleware({ shield: true }));`}</pre>
+                            </div>
+                         </div>
+                    </div>
+
+                    {/* Python SDK */}
+                    <div className="premium-card p-0 overflow-hidden">
+                         <div className="bg-secondary/30 p-4 border-b border-border/50 flex items-center justify-between">
+                            <span className="font-bold text-sm flex items-center gap-2">
+                                <Terminal className="w-4 h-4 text-accent" />
+                                Python (Flask/FastAPI)
+                            </span>
+                            <div className="text-[10px] bg-accent/10 px-2 py-0.5 rounded text-accent border border-accent/20">v1.1.0</div>
+                         </div>
+                         <div className="p-4 bg-slate-950 overflow-x-auto space-y-4">
+                            <div className="space-y-2">
+                                <div className="text-xs text-slate-400">Installation</div>
+                                <code className="block bg-white/5 p-2 rounded text-xs font-mono text-emerald-400">pip install helm_analytics</code>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="text-xs text-slate-400">Flask Example</div>
+                                <pre className="text-[11px] font-mono text-slate-300 whitespace-pre-wrap">{`from helm_analytics import HelmAnalytics
+
+helm = HelmAnalytics(
+    site_id="YOUR_SITE_ID", 
+    api_url="https://api.analytics.yourdomain.com"
+)
+
+# Enable Shield Mode (Blocking)
+app.before_request(helm.flask_middleware(shield=True))`}</pre>
+                            </div>
+                         </div>
+                    </div>
+
+                     {/* Go SDK */}
+                     <div className="premium-card p-0 overflow-hidden md:col-span-2">
+                         <div className="bg-secondary/30 p-4 border-b border-border/50 flex items-center justify-between">
+                            <span className="font-bold text-sm flex items-center gap-2">
+                                <Terminal className="w-4 h-4 text-accent" />
+                                Go (Golang)
+                            </span>
+                            <div className="text-[10px] bg-accent/10 px-2 py-0.5 rounded text-accent border border-accent/20">v1.0.0</div>
+                         </div>
+                         <div className="p-4 bg-slate-950 overflow-x-auto space-y-4">
+                            <div className="space-y-2">
+                                <div className="text-xs text-slate-400">Installation</div>
+                                <code className="block bg-white/5 p-2 rounded text-xs font-mono text-emerald-400">go get github.com/Sentinel-Analytics/sentinel-mvp/sdk/go/helm-analytics</code>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <pre className="text-[11px] font-mono text-slate-300 whitespace-pre-wrap">{`// Initialize
+analytics := helm.New(helm.Config{
+    SiteID: "YOUR_SITE_ID",
+    APIURL: "https://api...",
+})`}</pre>
+<pre className="text-[11px] font-mono text-slate-300 whitespace-pre-wrap">{`// Mount Middleware with Shield=true
+http.ListenAndServe(":80", 
+    analytics.Middleware(mux, true)
+)`}</pre>
+                            </div>
+                         </div>
+                    </div>
                  </div>
             </div>
 

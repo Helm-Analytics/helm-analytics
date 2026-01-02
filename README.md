@@ -45,15 +45,15 @@ graph TD
     User[Visitor] -->|JS Tracker| LB[Load Balancer / Nginx]
     Server[Backend Server] -->|Middleware| LB
     
-    LB -->|/track| API[Helm Backend (Go)]
+    LB -->|/track| API["Helm Backend (Go)"]
     
-    API -->|Hot Data| CH[(ClickHouse)]
-    API -->|User Data| PG[(PostgreSQL)]
+    API -->|Hot Data| CH[("ClickHouse")]
+    API -->|User Data| PG[("PostgreSQL")]
     
     CH -->|Analytics Queries| API
     PG -->|Auth & Settings| API
     
-    API -->|JSON| Dashboard[Frontend (React/Vite)]
+    API -->|JSON| Dashboard["Frontend (React/Vite)"]
 ```
 
 *   **Backend**: Written in **Go (Golang)** for sub-millisecond API response times.
