@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
-import { AlertTriangle, AlertOctagon, Terminal, Clock } from 'lucide-react';
+import { AlertTriangle, AlertOctagon, Terminal, Clock, ChevronDown, ChevronRight, Play, Sparkles } from 'lucide-react';
 
 const ErrorsPage = () => {
   const { selectedSite } = useOutletContext();
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     if (selectedSite) {
