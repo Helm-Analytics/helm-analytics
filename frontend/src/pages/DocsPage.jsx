@@ -96,29 +96,50 @@ def helm_track():
                 </p>
             </div>
 
-            {/* Quick Start Card */}
-            <div className="premium-card bg-[#0F172A] border-none shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                    <Zap className="w-32 h-32 text-accent rotate-12" />
-                </div>
-                <div className="relative z-10 space-y-6">
-                    <h2 className="text-2xl font-heading font-extrabold text-white flex items-center gap-3">
-                        <Zap className="w-6 h-6 text-accent" />
-                        Quick Integration
-                    </h2>
-                    <p className="text-slate-400 text-sm leading-relaxed max-w-2xl">
-                        To start tracking monitoring your website immediately, simply copy and paste the following snippet into the <code className="bg-white/10 px-1.5 py-0.5 rounded text-white font-mono text-xs">&lt;head&gt;</code> of your website HTML.
-                    </p>
-                    <div className="relative group">
-                        <div className="bg-black/50 rounded-xl p-6 font-mono text-xs text-emerald-400 border border-white/10 overflow-x-auto shadow-inner">
-                            <pre>{quickStartCode}</pre>
+            {/* Get Started Guide */}
+            <div className="space-y-12">
+                <h2 className="text-3xl font-heading font-extrabold text-foreground text-center">Get Started in 60 Seconds</h2>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+                    {/* Connecting Line (Desktop) */}
+                    <div className="hidden md:block absolute top-[15%] left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-accent/0 via-accent/30 to-accent/0 border-t border-dashed border-accent/50 z-0"></div>
+
+                    {/* Step 1 */}
+                    <div className="premium-card relative bg-[#0F172A] z-10 shadow-2xl hover:scale-105 transition-transform duration-300">
+                        <div className="absolute -top-4 -left-4 w-10 h-10 bg-accent rounded-xl flex items-center justify-center font-black text-white shadow-lg shadow-accent/20 rotate-3 border border-white/20 ring-4 ring-background">1</div>
+                        <h3 className="text-xl font-bold text-white mb-3 mt-4">Add Site</h3>
+                        <p className="text-sm text-slate-400 leading-relaxed">
+                            Click the <span className="bg-accent/20 text-accent px-1.5 rounded font-bold">+</span> button in the sidebar. Enter your website's domain name to generate your unique tracking ID.
+                        </p>
+                    </div>
+
+                    {/* Step 2 */}
+                    <div className="premium-card relative bg-[#0F172A] z-10 shadow-2xl hover:scale-105 transition-transform duration-300">
+                        <div className="absolute -top-4 -left-4 w-10 h-10 bg-accent rounded-xl flex items-center justify-center font-black text-white shadow-lg shadow-accent/20 rotate-3 border border-white/20 ring-4 ring-background">2</div>
+                        <h3 className="text-xl font-bold text-white mb-3 mt-4">Install Script</h3>
+                        <p className="text-sm text-slate-400 mb-4 leading-relaxed">
+                            Copy this snippet into the <code className="bg-white/10 px-1 rounded text-accent">&lt;head&gt;</code> of your website.
+                        </p>
+                        <div className="relative group">
+                            <div className="bg-black/50 rounded-lg p-3 font-mono text-[10px] text-emerald-400 border border-white/10 overflow-x-auto">
+                                <pre>{quickStartCode}</pre>
+                            </div>
+                            <button 
+                                onClick={() => copyToClipboard(quickStartCode, 'quickstart')}
+                                className="absolute top-2 right-2 p-1.5 bg-white/10 hover:bg-white/20 rounded-md transition-colors border border-white/5"
+                            >
+                                {copied === 'quickstart' ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-white" />}
+                            </button>
                         </div>
-                        <button 
-                            onClick={() => copyToClipboard(quickStartCode, 'quickstart')}
-                            className="absolute top-4 right-4 p-2.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors border border-white/5 backdrop-blur-sm"
-                        >
-                            {copied === 'quickstart' ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-white" />}
-                        </button>
+                    </div>
+
+                    {/* Step 3 */}
+                    <div className="premium-card relative bg-[#0F172A] z-10 shadow-2xl hover:scale-105 transition-transform duration-300">
+                        <div className="absolute -top-4 -left-4 w-10 h-10 bg-accent rounded-xl flex items-center justify-center font-black text-white shadow-lg shadow-accent/20 rotate-3 border border-white/20 ring-4 ring-background">3</div>
+                         <h3 className="text-xl font-bold text-white mb-3 mt-4">Deploy & Live</h3>
+                        <p className="text-sm text-slate-400 leading-relaxed">
+                            Deploy your changes to production. Visit your site to trigger the first event. Your dashboard will light up with real-time data instantly.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -244,8 +265,12 @@ def helm_track():
             {/* Server Side Integration */}
             <div className="space-y-6">
                  <h2 className="text-2xl font-heading font-extrabold text-foreground">Server-Side Tracking</h2>
-                 <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed">
-                    Client-side JS can be blocked by ad-blockers. For mission-critical analytics, use our server-side middleware to track every single request directly from your backend.
+                 <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed mb-6">
+                    For mission-critical analytics, track events directly from your backend.
+                    <br />
+                    <span className="text-accent font-bold text-xs uppercase tracking-wide bg-accent/10 px-2 py-1 rounded-full mt-2 inline-block">
+                        Coming Soon: Official NPM & PyPI Packages
+                    </span>
                  </p>
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {integrations.map((int, idx) => (

@@ -202,13 +202,21 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 
 	prompt := fmt.Sprintf(`
 		You are Sentinel, a helpful and professional web analytics assistant. 
-		You have access to the following website traffic data for the last 30 days (JSON):
+
+		PRODUCT KNOWLEDGE BASE & SETUP GUIDE:
+		1. Getting Started: To track a site, click '+' in the sidebar, add domain, copy the generated script, and paste it into the <head> of the website. Deploy to go live.
+		2. Metrics: 'Unique Visits' are sessions (cookieless hash). 'Views' are page loads. 'Bounce Rate' is single-page visits %. 'Duration' is time on site (heartbeat every 15s).
+		3. Security: 'Shield Mode' blocks bad bots/data centers. 'Spider Trap' is a hidden link (/track/trap) that bans bots found clicking it.
+		4. AI Intelligence: Analyze trends every 10 mins. Cached for 15 mins.
+		5. Middleware: Server-side tracking (Python/Node) coming soon to bypass ad-blockers.
+
+		You see the live traffic data below (JSON):
 		%s
 
 		User Question: "%s"
 
-		Answer the user's question clearly and concisely based ONLY on the data provided. 
-		If the answer cannot be found in the data, state that you don't have that information.
+		Answer the user's question clearly and concisely based on the traffic data OR the knowledge base above. 
+		If the question is unrelated to website analytics, performance, or security (e.g. cooking recipes), politely decline.
 		Do not use JSON in your response, just natural language.
 	`, string(statsJson), chatReq.Message)
 
