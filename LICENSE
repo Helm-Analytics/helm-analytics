@@ -1,21 +1,33 @@
-MIT License
+ELASTIC LICENSE 2.0
 
-Copyright (c) 2025 Sentinel-Analytics
+I. Preamble
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This license allows you to use, copy, distribute, and modify the software, provided that you do not provide the software to third parties as a managed service, and do not circumvent any license key functionality.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+II. Definitions
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+"Software" means the software that is distributed with this license.
+
+"Managed Service" means a service that permits a third party to access the Software, where the third party's use of the Software is the primary purpose of the service, and the service is offered in exchange for a fee or other consideration.
+
+III. Grant of Rights
+
+Subject to the limitations in this license, you may:
+1. use the Software;
+2. copy the Software;
+3. modify the Software; and
+4. distribute the Software and your modifications.
+
+IV. Limitations
+
+1. You may not provide the Software to third parties as a Managed Service.
+2. You may not circumvent, remove, or modify any license key functionality in the Software, or distribute the Software with such functionality removed or modified.
+3. You may not alter or remove any copyright or other proprietary notices in the Software.
+
+V. Notices
+
+Any copies of the Software that you distribute must include a copy of this license.
+
+VI. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
