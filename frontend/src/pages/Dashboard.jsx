@@ -154,10 +154,7 @@ const Dashboard = () => {
       {/* Main Content Grid */}
       {/* Top Intelligence Row */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch mb-8">
-        <div className="lg:col-span-8">
-          <InsightsCard />
-        </div>
-        <div className="lg:col-span-4">
+        <div className="lg:col-span-12">
           {/* Tracking Script Setup Card */}
           <div className="premium-card bg-slate-900 border-none shadow-xl shadow-slate-200 overflow-hidden relative group h-full">
             <div className="absolute -top-24 -right-24 w-64 h-64 bg-accent/20 rounded-full blur-3xl group-hover:bg-accent/30 transition-all duration-700"></div>
@@ -235,7 +232,7 @@ const Dashboard = () => {
                 Visitor Traffic
               </h3>
             </div>
-            <div className="p-8 h-[350px]">
+            <div className="p-8 h-[280px]">
               <LineChart
                 data={dashboardData?.dailyStats?.map(d => d.count) || []}
                 labels={dashboardData?.dailyStats?.map(d => d.value) || []}

@@ -426,7 +426,15 @@ func GetErrorsStatsHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	// Return top errors by frequency
 	query := `
-		SELECT Message, Source, LineNo, count() as count, max(Timestamp) as last_seen
+		SELECT 
+			Message, 
+			Source, 
+			LineNo, 
+			count() as count, 
+			uniq(ClientIP) as user_impact,
+			max(Timestamp) as last_seen,
+			any(Severity) as severity,
+			any(Mitigation) as mitigation
 		FROM sentinel.errors 
 		WHERE SiteID = ? AND Timestamp >= now() - INTERVAL 7 DAY
 		GROUP BY Message, Source, LineNo
@@ -443,17 +451,20 @@ func GetErrorsStatsHandler(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	type ErrorStat struct {
-		Message  string    `json:"message"`
-		Source   string    `json:"source"`
-		LineNo   uint32    `json:"lineNo"`
-		Count    uint64    `json:"count"`
-		LastSeen time.Time `json:"lastSeen"`
+		Message    string    `json:"message"`
+		Source     string    `json:"source"`
+		LineNo     uint32    `json:"lineNo"`
+		Count      uint64    `json:"count"`
+		UserImpact uint64    `json:"userImpact"`
+		LastSeen   time.Time `json:"lastSeen"`
+		Severity   string    `json:"severity"`
+		Mitigation string    `json:"mitigation"`
 	}
 
 	var stats []ErrorStat
 	for rows.Next() {
 		var s ErrorStat
-		if err := rows.Scan(&s.Message, &s.Source, &s.LineNo, &s.Count, &s.LastSeen); err != nil {
+		if err := rows.Scan(&s.Message, &s.Source, &s.LineNo, &s.Count, &s.UserImpact, &s.LastSeen, &s.Severity, &s.Mitigation); err != nil {
 			log.Printf("Scan error: %v", err)
 			continue
 		}

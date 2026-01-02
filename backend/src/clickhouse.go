@@ -121,6 +121,8 @@ func runMigrations(ctx context.Context) {
 		) ENGINE = MergeTree()
 		ORDER BY (SiteID, Timestamp)
 		TTL Timestamp + INTERVAL 7 DAY`,
+		"ALTER TABLE sentinel.errors ADD COLUMN IF NOT EXISTS Severity String DEFAULT 'Error'",
+		"ALTER TABLE sentinel.errors ADD COLUMN IF NOT EXISTS Mitigation String DEFAULT ''",
 		"ALTER TABLE sentinel.errors MODIFY TTL Timestamp + INTERVAL 7 DAY",
 	}
 
