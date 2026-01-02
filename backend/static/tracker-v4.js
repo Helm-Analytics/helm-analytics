@@ -35,6 +35,7 @@
         function track(payload = {}, options = {}) {
             const data = {
                 siteId: siteId,
+                sessionId: sessionId,
                 url: window.location.href,
                 referrer: document.referrer || '',
                 screenWidth: window.screen.width,

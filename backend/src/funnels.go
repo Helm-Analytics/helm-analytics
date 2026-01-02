@@ -116,7 +116,7 @@ func calculateFunnelStats(siteID string, steps []string) ([]uint64, error) {
 			WHERE SiteID = ? 
 			  AND Timestamp >= now() - INTERVAL 90 DAY 
 			  AND ClientIP NOT IN ('127.0.0.1', '::1')
-			GROUP BY ClientIP
+			GROUP BY if(SessionID != '', SessionID, ClientIP)
 		) 
 		GROUP BY level`, strings.Join(conditions, ", "))
 

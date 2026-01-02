@@ -20,6 +20,7 @@ import (
 
 type Event struct {
 	SiteID      string   `json:"siteId"`
+	SessionID   string   `json:"sessionId"`
 	URL         string   `json:"url"`
 	Referrer    string   `json:"referrer"`
 	ScreenWidth int      `json:"screenWidth"`
@@ -33,6 +34,7 @@ type Event struct {
 type EventData struct {
 	Timestamp   time.Time
 	SiteID      string
+	SessionID   string
 	ClientIP    string
 	URL         string
 	Referrer    string
@@ -209,6 +211,7 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 	eventData := EventData{
 		Timestamp:   time.Now().UTC(),
 		SiteID:      event.SiteID,
+		SessionID:   event.SessionID,
 		ClientIP:    ipStr,
 		URL:         event.URL,
 		Referrer:    event.Referrer,
@@ -234,9 +237,9 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	err := chConn.AsyncInsert(ctx, `INSERT INTO sentinel.events 
-		(Timestamp, SiteID, ClientIP, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, LCP, CLS, FID, EventType, PageTitle) 
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, false,
-		eventData.Timestamp, eventData.SiteID, eventData.ClientIP, eventData.URL, eventData.Referrer,
+		(Timestamp, SiteID, ClientIP, SessionID, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, LCP, CLS, FID, EventType, PageTitle) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, false,
+		eventData.Timestamp, eventData.SiteID, eventData.ClientIP, eventData.SessionID, eventData.URL, eventData.Referrer,
 		eventData.ScreenWidth, eventData.Browser, eventData.OS, eventData.Country, eventData.TrustScore,
 		eventData.LCP, eventData.CLS, eventData.FID, eventData.EventType, eventData.PageTitle,
 	)
