@@ -204,7 +204,7 @@ const Tutorial = ({ onComplete }) => {
                         </button>
                         <button 
                             onClick={handleNext}
-                            className="px-4 py-2 bg-primary text-white text-xs font-bold rounded-lg shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all"
+                            className="px-4 py-2 bg-primary text-primary-foreground dark:bg-indigo-500 dark:text-white dark:hover:bg-indigo-400 text-xs font-bold rounded-lg shadow-lg shadow-primary/20 dark:shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all"
                         >
                             {step === steps.length - 1 ? "Finish" : "Next"}
                         </button>

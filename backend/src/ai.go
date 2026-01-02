@@ -272,6 +272,20 @@ func AnalyzeErrorHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Persist the AI Insights to ClickHouse (Update all matching errors for this site)
+	siteID := r.URL.Query().Get("siteId")
+	if siteID != "" {
+		go func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancel()
+			// ClickHouse mutations are heavy, so we limit this to specific site & message
+			query := "ALTER TABLE sentinel.errors UPDATE Mitigation = ? WHERE Message = ? AND SiteID = ?"
+			if err := chConn.Exec(ctx, query, mitigation, req.Message, siteID); err != nil {
+				log.Printf("Error persisting mitigation to DB: %v", err)
+			}
+		}()
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"mitigation": mitigation})
 }

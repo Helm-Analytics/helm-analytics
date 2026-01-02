@@ -440,15 +440,14 @@ func GetErrorsStatsHandler(w http.ResponseWriter, r *http.Request) {
 			max(Timestamp) as last_seen,
 			any(Severity) as severity,
 			any(Mitigation) as mitigation,
-			any(ErrorObj) as error_obj,
-			any(ClientIP) as client_ip
+			any(ErrorObj) as error_obj
 		FROM sentinel.errors 
 		WHERE SiteID = ? AND Timestamp >= now() - INTERVAL 7 DAY
 		GROUP BY Message, Source, LineNo
 		ORDER BY count DESC
 		LIMIT 20
 	`
-	
+
 	rows, err := chConn.Query(ctx, query, siteID)
 	if err != nil {
 		log.Printf("Error querying error stats: %v", err)
@@ -467,13 +466,12 @@ func GetErrorsStatsHandler(w http.ResponseWriter, r *http.Request) {
 		Severity   string    `json:"severity"`
 		Mitigation string    `json:"mitigation"`
 		ErrorObj   string    `json:"errorObj"`
-		ClientIP   string    `json:"clientIp"`
 	}
 
 	var stats []ErrorStat
 	for rows.Next() {
 		var s ErrorStat
-		if err := rows.Scan(&s.Message, &s.Source, &s.LineNo, &s.Count, &s.UserImpact, &s.LastSeen, &s.Severity, &s.Mitigation, &s.ErrorObj, &s.ClientIP); err != nil {
+		if err := rows.Scan(&s.Message, &s.Source, &s.LineNo, &s.Count, &s.UserImpact, &s.LastSeen, &s.Severity, &s.Mitigation, &s.ErrorObj); err != nil {
 			log.Printf("Scan error: %v", err)
 			continue
 		}

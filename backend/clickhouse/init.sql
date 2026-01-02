@@ -87,7 +87,9 @@ CREATE TABLE IF NOT EXISTS sentinel.errors (
     Source String,
     LineNo UInt32,
     ColNo UInt32,
-    ErrorObj String
+    ErrorObj String,
+    Severity String,
+    Mitigation String
 ) ENGINE = MergeTree()
 ORDER BY (SiteID, Timestamp)
 TTL Timestamp + INTERVAL 7 DAY;
