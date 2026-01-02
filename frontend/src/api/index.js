@@ -104,6 +104,7 @@ export const api = {
       url: `/api/firewall?siteId=${siteId}&ruleId=${ruleId}`,
       method: "DELETE",
     }),
+  getFirewallSuggestions: (siteId) => request(`/api/firewall/suggestions?siteId=${siteId}`),
   getHeatmapData: (siteId, url) => {
     let endpoint = `/api/heatmap?siteId=${siteId}`;
     if (url) endpoint += `&url=${encodeURIComponent(url)}`;

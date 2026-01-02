@@ -12,6 +12,7 @@ const FirewallPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [shieldMode, setShieldMode] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = (text) => {
@@ -24,8 +25,32 @@ const FirewallPage = () => {
     if (selectedSite) {
       setShieldMode(selectedSite.shieldMode || false);
       fetchRules();
+      fetchSuggestions();
     }
   }, [selectedSite]);
+
+  const fetchSuggestions = async () => {
+      try {
+          const data = await api.getFirewallSuggestions(selectedSite.id);
+          setSuggestions(data || []);
+      } catch (err) {
+          console.error("Failed to fetch AI suggestions:", err);
+      }
+  };
+
+  const handleAcceptSuggestion = async (suggestion) => {
+      try {
+          await api.addFirewallRule(selectedSite.id, {
+              rule_type: 'ip',
+              value: suggestion.ip,
+              reason: `AI Block: ${suggestion.reason}`
+          });
+          setSuggestions(prev => prev.filter(s => s.ip !== suggestion.ip));
+          fetchRules();
+      } catch (err) {
+          setError("Failed to apply AI block.");
+      }
+  };
 
   const toggleShieldMode = async () => {
       try {
@@ -252,6 +277,62 @@ const FirewallPage = () => {
 
         {/* Info Column */}
         <div className="space-y-8">
+
+           {/* AI Suggestions */}
+           <div className="premium-card bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-indigo-500/20">
+              <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-indigo-500/20 rounded-xl">
+                      <span className="text-xl">🤖</span>
+                  </div>
+                  <div>
+                      <h2 className="text-lg font-heading font-extrabold text-foreground">Helm Intelligence</h2>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Automated Threat Detection</p>
+                  </div>
+              </div>
+              
+              {suggestions.length > 0 ? (
+                  <div className="space-y-3">
+                      {suggestions.map((suggestion, idx) => (
+                          <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-3">
+                              <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                      <div className="flex items-center gap-2">
+                                          <span className="font-mono text-xs font-bold text-foreground">{suggestion.ip}</span>
+                                          <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${suggestion.confidence === 'High' ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                                              {suggestion.confidence} Conf.
+                                          </span>
+                                      </div>
+                                      <p className="text-[10px] text-muted-foreground mt-1">{suggestion.reason} • {suggestion.country}</p>
+                                  </div>
+                              </div>
+                              <div className="flex gap-2">
+                                  <button 
+                                      onClick={() => handleAcceptSuggestion(suggestion)}
+                                      className="flex-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-wide py-2 rounded-lg transition-colors border border-rose-500/20"
+                                  >
+                                      Block IP
+                                  </button>
+                                  <button 
+                                      onClick={() => setSuggestions(prev => prev.filter(s => s.ip !== suggestion.ip))}
+                                      className="flex-1 bg-white/5 hover:bg-white/10 text-muted-foreground text-[10px] font-bold uppercase tracking-wide py-2 rounded-lg transition-colors"
+                                  >
+                                      Ignore
+                                  </button>
+                              </div>
+                          </div>
+                      ))}
+                  </div>
+              ) : (
+                  <div className="text-center py-6">
+                      <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <Check className="w-5 h-5 text-emerald-500" />
+                      </div>
+                      <p className="text-sm font-bold text-foreground">All Clear</p>
+                      <p className="text-xs text-muted-foreground">No suspicious activity detected in the last 24h.</p>
+                  </div>
+              )}
+          </div>
+
           {/* Honey Pot Sidebar */}
           <div className="premium-card bg-primary text-primary-foreground border-transparent overflow-hidden">
               <div className="flex items-center gap-3 mb-4">

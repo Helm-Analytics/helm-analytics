@@ -227,12 +227,17 @@ def helm_track():
                         </p>
                         <div className="space-y-4">
                             <div className="p-4 bg-white/5 rounded-xl border border-white/5">
-                                <h4 className="text-white font-bold mb-1">Shield Mode</h4>
-                                <p className="text-xs text-slate-400">Automatically blocks traffic from known data centers (AWS, GCP, Azure) and bad bot user-agents.</p>
+                                <h4 className="text-white font-bold mb-1">Shield Mode (WAF)</h4>
+                                <p className="text-xs text-slate-400 w-full mb-2">
+                                    Full spectrum protection against <strong className="text-slate-200">XSS, Brute Force, and SQL Injection</strong>.
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                    Automatically blocks traffic from known data centers (AWS/GCP), anonymous proxies, and malicious botnets.
+                                </p>
                             </div>
                             <div className="p-4 bg-white/5 rounded-xl border border-white/5">
                                 <h4 className="text-white font-bold mb-1">Spider Trap 🕸️</h4>
-                                <p className="text-xs text-slate-400">A hidden link that only bots see. If accessed, the visitor's IP is permanently banned.</p>
+                                <p className="text-xs text-slate-400">A hidden link that only bots see. If accessed, the visitor's IP is permanently banned from your entire network.</p>
                             </div>
                         </div>
                     </div>

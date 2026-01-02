@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
-import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon, ChevronRight, Globe, Book, Sparkles } from "lucide-react"
+import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon, ChevronRight, Globe, Book, Sparkles, Sun, Moon } from "lucide-react"
 import { api } from "../api"
 import Logo from "./Logo"
 import ChatWidget from "./ChatWidget"
@@ -15,6 +15,22 @@ const Layout = () => {
   
   const location = useLocation()
   const navigate = useNavigate()
+
+  // Dark Mode Logic
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("helm_theme") === "dark" || 
+    (!localStorage.getItem("helm_theme") && window.matchMedia("(prefers-color-scheme: dark)").matches)
+  )
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add("dark")
+      localStorage.setItem("helm_theme", "dark")
+    } else {
+      document.documentElement.classList.remove("dark")
+      localStorage.setItem("helm_theme", "light")
+    }
+  }, [darkMode])
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -206,6 +222,16 @@ const Layout = () => {
                    <Sparkles className="w-3.5 h-3.5 text-accent/70 group-hover:text-accent" />
                  </div>
                  <span className="font-bold text-[9px] uppercase tracking-wider">Tutorial</span>
+               </button>
+
+                <button
+                 onClick={() => setDarkMode(!darkMode)}
+                 className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-foreground transition-colors group"
+               >
+                 <div className="p-1.5 bg-white dark:bg-black/20 rounded-md shadow-sm border border-border/50 group-hover:border-accent/20 group-hover:bg-accent/5">
+                   {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+                 </div>
+                 <span className="font-bold text-[9px] uppercase tracking-wider">{darkMode ? "Light Mode" : "Dark Mode"}</span>
                </button>
 
                <button
