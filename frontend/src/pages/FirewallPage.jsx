@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { Shield, Plus, Trash2, AlertTriangle, Globe, Hash, Server } from 'lucide-react';
+import PremiumSelect from '../components/PremiumSelect';
 
 const FirewallPage = () => {
   const { selectedSite } = useOutletContext();
@@ -138,15 +139,17 @@ const FirewallPage = () => {
             </h2>
             <form onSubmit={handleAddRule} className="grid grid-cols-1 md:grid-cols-12 gap-4">
               <div className="md:col-span-3">
-                 <select
+              <div className="md:col-span-3">
+                 <PremiumSelect
                     value={ruleType}
-                    onChange={(e) => setRuleType(e.target.value)}
-                    className="w-full bg-secondary border border-border/50 text-foreground py-2.5 px-3 rounded-xl font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-accent cursor-pointer transition-all"
-                >
-                    <option value="ip">IP Address</option>
-                    <option value="country">Country</option>
-                    <option value="asn">ASN / Data Center</option>
-                </select>
+                    onChange={setRuleType}
+                    options={[
+                        { value: 'ip', label: 'IP Address', icon: Hash },
+                        { value: 'country', label: 'Country', icon: Globe },
+                        { value: 'asn', label: 'ASN / Data Center', icon: Server }
+                    ]}
+                 />
+              </div>
               </div>
              
               <div className="md:col-span-6">

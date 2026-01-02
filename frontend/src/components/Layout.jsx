@@ -123,6 +123,7 @@ const Layout = () => {
     { path: "/heatmap", label: "Heatmaps", icon: MousePointer2 },
     { path: "/funnels", label: "Funnels", icon: GitMerge },
     { path: "/firewall", label: "Security", icon: Shield },
+    { path: "/errors", label: "Issues", icon: AlertOctagon },
     { path: "/docs", label: "Help & Docs", icon: Book },
   ]
 

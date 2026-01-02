@@ -40,8 +40,8 @@ const InsightsCard = () => {
             </div>
         </div>
 
-        <div className="space-y-6 flex-1">
-          <div className="space-y-5">
+        <div className="space-y-6 flex-1 overflow-hidden flex flex-col">
+          <div className="space-y-5 overflow-y-auto pr-2 custom-scrollbar max-h-[300px]">
             {insights.insights && insights.insights.map((insight, idx) => (
               <div key={idx} className="flex items-start gap-4 text-slate-300 text-[13.5px] leading-relaxed group/item">
                 <div className="mt-2 min-w-[6px] h-[6px] rounded-full bg-accent shadow-[0_0_10px_rgba(14,165,233,0.5)] flex-shrink-0 transition-transform group-hover/item:scale-125" />

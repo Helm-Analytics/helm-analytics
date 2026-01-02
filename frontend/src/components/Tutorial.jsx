@@ -45,7 +45,7 @@ const Tutorial = ({ onComplete }) => {
     ];
 
     const nextStep = () => {
-        if (step < steps.Length - 1) {
+        if (step < steps.length - 1) {
             setStep(prev => prev + 1);
         } else {
             handleComplete();
