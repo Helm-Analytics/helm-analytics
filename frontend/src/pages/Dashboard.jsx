@@ -207,17 +207,44 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* Web Vitals Section */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-heading font-extrabold text-foreground flex items-center px-1 border-b border-border/50 pb-4">
+              <Clock className="w-5 h-5 mr-3 text-accent" />
+              Web Vitals
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <StatCard
+                title="LCP (Loading)"
+                value={`${dashboardData?.avgLcp?.toFixed(0) || 0}ms`}
+                icon={Clock}
+                change={dashboardData?.avgLcpChange}
+                inverse={true}
+              />
+              <StatCard
+                title="CLS (Stability)"
+                value={`${dashboardData?.avgCls?.toFixed(3) || 0}`}
+                icon={TrendingDown}
+                change={dashboardData?.avgClsChange}
+                inverse={true}
+              />
+              <StatCard
+                title="FID (Interaction)"
+                value={`${dashboardData?.avgFid?.toFixed(0) || 0}ms`}
+                icon={Users}
+                change={dashboardData?.avgFidChange}
+                inverse={true}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Right Column: Setup & Technology */}
         <div className="lg:col-span-4 space-y-8">
           {/* AI Intelligence Insights */}
-          <div id="tut-insights-card">
-              <InsightsCard />
-          </div>
-
           {/* Setup Guide - Sidebar Placement */}
-          <div className="premium-card bg-[#0F172A] border-none shadow-2xl relative overflow-hidden group">
+          <div id="tut-setup-guide" className="premium-card bg-[#0F172A] border-none shadow-2xl relative overflow-hidden group mb-8">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <ShieldCheck className="w-12 h-12 text-accent rotate-12" />
             </div>
@@ -249,39 +276,12 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Technology Blocks */}
-
-
-          {/* Web Vitals Section */}
-          <div className="space-y-4 pt-4">
-            <h3 className="text-lg font-heading font-extrabold text-foreground flex items-center px-1">
-              <Clock className="w-5 h-5 mr-3 text-accent" />
-              Web Vitals
-            </h3>
-            <div className="grid grid-cols-1 gap-4">
-              <StatCard
-                title="LCP (Loading)"
-                value={`${dashboardData?.avgLcp?.toFixed(0) || 0}ms`}
-                icon={Clock}
-                change={dashboardData?.avgLcpChange}
-                inverse={true}
-              />
-              <StatCard
-                title="CLS (Stability)"
-                value={`${dashboardData?.avgCls?.toFixed(3) || 0}`}
-                icon={TrendingDown}
-                change={dashboardData?.avgClsChange}
-                inverse={true}
-              />
-              <StatCard
-                title="FID (Interaction)"
-                value={`${dashboardData?.avgFid?.toFixed(0) || 0}ms`}
-                icon={Users}
-                change={dashboardData?.avgFidChange}
-                inverse={true}
-              />
-            </div>
+          {/* AI Intelligence Insights */}
+          <div id="tut-insights-card">
+              <InsightsCard />
           </div>
+
+
         </div>
       </div>
     </div>

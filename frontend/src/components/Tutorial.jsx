@@ -83,8 +83,16 @@ const Tutorial = ({ onComplete }) => {
     useEffect(() => {
         // If route matches, look for element
         if (location.pathname === currentStep.path) {
-            // Slight delay to allow render
-            const timer = setTimeout(updatePosition, 300);
+            // Scroll element into view immediately if it exists
+            if (currentStep.targetId) {
+                const el = document.getElementById(currentStep.targetId);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            // Slight delay to allow render and smooth scroll to finish
+            const timer = setTimeout(updatePosition, 600);
             const interval = setInterval(updatePosition, 1000); // Poll for resize/layout shifts
             
             // Add resize listener
