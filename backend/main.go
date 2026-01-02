@@ -67,6 +67,7 @@ func main() {
 	mux.Handle("/track/error", trackCors.Handler(http.HandlerFunc(sentinel.ErrorHandler)))
 	mux.Handle("/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
 	mux.Handle("/track/trap", trackCors.Handler(http.HandlerFunc(sentinel.SpiderTrapHandler))) // Advanced Bot Trap
+	mux.Handle("/api/shield/decision", trackCors.Handler(http.HandlerFunc(sentinel.CheckAccessHandler))) // Shield Decision Endpoint
 
 	mux.Handle("/api/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
 	mux.Handle("/api/users", apiCors.Handler(http.HandlerFunc(sentinel.GetAllUsersHandler)))

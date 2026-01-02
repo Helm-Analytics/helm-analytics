@@ -202,3 +202,59 @@ func handleDeleteFirewallRule(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// CheckAccessHandler checks if a request should be allowed or blocked.
+// It is public (no AuthMiddleware needed) but requires siteID.
+func CheckAccessHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		SiteID    string `json:"siteId"`
+		IP        string `json:"ip"`
+		UserAgent string `json:"userAgent"`
+		URL       string `json:"url"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if req.SiteID == "" || req.IP == "" {
+		http.Error(w, "Missing siteId or ip", http.StatusBadRequest)
+		return
+	}
+
+	// 1. Check IP Rules
+	var blocked bool
+	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM firewall_rules WHERE site_id=$1 AND rule_type='ip' AND value=$2)", req.SiteID, req.IP).Scan(&blocked)
+	if err == nil && blocked {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"action": "block", "reason": "ip_ban"})
+		return
+	}
+
+	// 2. Check Country Rules
+	ip := net.ParseIP(req.IP)
+	country := "XX"
+	if geoipDb != nil && ip != nil {
+		if record, err := geoipDb.Country(ip); err == nil {
+			country = record.Country.IsoCode
+		}
+	}
+
+	if country != "XX" {
+		err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM firewall_rules WHERE site_id=$1 AND rule_type='country' AND value=$2)", req.SiteID, country).Scan(&blocked)
+		if err == nil && blocked {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{"action": "block", "reason": "country_ban"})
+			return
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"action": "allow"})
+}

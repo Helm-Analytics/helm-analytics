@@ -168,6 +168,8 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 	ipStr := getClientIP(r)
 	ip := net.ParseIP(ipStr)
 
+	log.Printf("[Track] Received %s event for Site %s from %s (URL: %s)", event.EventType, event.SiteID, ipStr, event.URL)
+
 	country := "Unknown"
 	if geoipDb != nil && ip != nil {
 		record, err := geoipDb.Country(ip)
