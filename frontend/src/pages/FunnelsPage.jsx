@@ -25,7 +25,16 @@ const FunnelsPage = () => {
 
     const handleCreateFunnel = async (e) => {
         e.preventDefault();
-        if (!newFunnelName.trim() || newFunnelSteps.some(s => !s.trim())) return;
+        
+        if (!newFunnelName.trim()) {
+            alert("Please provide a name for your funnel.");
+            return;
+        }
+        
+        if (newFunnelSteps.some(s => !s.trim())) {
+            alert("All funnel steps must have a URL path.");
+            return;
+        }
         
         try {
             await api.createFunnel({

@@ -1,10 +1,18 @@
 import React from 'react';
-import { Sparkles, Lightbulb, Zap } from 'lucide-react';
+import { useOutletContext } from 'react-router-dom';
+import { Sparkles, Lightbulb, Zap, RefreshCcw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useDashboardStore } from '../store/useDashboardStore';
 
 const InsightsCard = () => {
-  const { aiInsights: insights, isLoadingAI: loading } = useDashboardStore();
+  const { selectedSite } = useOutletContext();
+  const { aiInsights: insights, isLoadingAI: loading, fetchAiInsights } = useDashboardStore();
+  
+  const handleRefresh = () => {
+    if (selectedSite?.id) {
+        fetchAiInsights(selectedSite.id, true);
+    }
+  };
 
   if (loading && !insights) {
     return (
@@ -34,9 +42,19 @@ const InsightsCard = () => {
               </div>
               Helm Intelligence
             </h3>
-            <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-              <Zap className="w-3 h-3 text-accent fill-accent" />
-              <span className="text-[10px] text-white font-bold uppercase tracking-widest">AI Engine</span>
+            <div className="flex items-center gap-3">
+                <button 
+                    onClick={handleRefresh}
+                    disabled={loading}
+                    className="p-1.5 md:p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed group/btn"
+                    title="Refresh Analysis"
+                >
+                    <RefreshCcw className={`w-3.5 h-3.5 md:w-4 md:h-4 ${loading ? 'animate-spin' : 'group-hover/btn:rotate-180 transition-transform duration-500'}`} />
+                </button>
+                <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+                    <Zap className="w-3 h-3 text-accent fill-accent" />
+                    <span className="text-[10px] text-white font-bold uppercase tracking-widest">AI Engine</span>
+                </div>
             </div>
         </div>
 

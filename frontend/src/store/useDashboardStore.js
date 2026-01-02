@@ -26,18 +26,43 @@ export const useDashboardStore = create((set, get) => ({
     }
   },
 
-  fetchAiInsights: async (siteId) => {
-    // If we are already loading, maybe skip? Or just let it override.
+  fetchAiInsights: async (siteId, forceRefresh = false) => {
+    // Check cache first (unless forced)
+    const cacheKey = `helm_ai_cache_${siteId}`
+    if (!forceRefresh) {
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) {
+            try {
+                const { timestamp, data } = JSON.parse(cached)
+                const age = Date.now() - timestamp
+                const CACHE_DURATION = 15 * 60 * 1000 // 15 minutes
+                
+                if (age < CACHE_DURATION) {
+                    set({ aiInsights: data, isLoadingAI: false })
+                    return
+                }
+            } catch (e) {
+                console.warn("Invalid cache format", e)
+                localStorage.removeItem(cacheKey)
+            }
+        }
+    }
+
     if (get().isLoadingAI) return
 
     set({ isLoadingAI: true, aiError: null })
     try {
-      const data = await api.getInsights(siteId)
-      set({ aiInsights: data, isLoadingAI: false })
+        const data = await api.getInsights(siteId)
+        set({ aiInsights: data, isLoadingAI: false })
+        
+        // Save to cache
+        localStorage.setItem(cacheKey, JSON.stringify({
+            timestamp: Date.now(),
+            data: data
+        }))
     } catch (error) {
-      console.error("Failed to fetch AI insights:", error)
-      // Do NOT clear aiInsights here
-      set({ isLoadingAI: false, aiError: error.message || "Failed to fetch insights" })
+        console.error("Failed to fetch AI insights:", error)
+        set({ isLoadingAI: false, aiError: error.message || "Failed to fetch insights" })
     }
   },
   

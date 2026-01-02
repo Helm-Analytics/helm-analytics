@@ -205,7 +205,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 
 		PRODUCT KNOWLEDGE BASE & SETUP GUIDE:
 		1. Getting Started: To track a site, click '+' in the sidebar, add domain, copy the generated script, and paste it into the <head> of the website. Deploy to go live.
-		2. Metrics: 'Unique Visits' are sessions (cookieless hash). 'Views' are page loads. 'Bounce Rate' is single-page visits %. 'Duration' is time on site (heartbeat every 15s).
+		2. Metrics: 'Unique Visits' are sessions (cookieless hash). 'Views' are page loads. 'Bounce Rate' is percentage of single-page visits. 'Duration' is time on site (heartbeat every 15s).
 		3. Security: 'Shield Mode' blocks bad bots/data centers. 'Spider Trap' is a hidden link (/track/trap) that bans bots found clicking it.
 		4. AI Intelligence: Analyze trends every 10 mins. Cached for 15 mins.
 		5. Middleware: Server-side tracking (Python/Node) coming soon to bypass ad-blockers.
