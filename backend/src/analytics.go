@@ -548,8 +548,8 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 		return stats, err
 	}
 
-	// Unique Visitors (Visits) - Count unique SessionIDs
-	queryUniqueVisitors := "SELECT uniq(SessionID) FROM events WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%'"
+	// Unique Visitors (Visits) - Count unique ClientIPs
+	queryUniqueVisitors := "SELECT uniq(ClientIP) FROM events WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%'"
 	err = chConn.QueryRow(ctx, queryUniqueVisitors, siteID, startDaysAgo, endDaysAgo).Scan(&stats.UniqueVisitors)
 	if err != nil && err != sql.ErrNoRows {
 		return stats, err
@@ -602,7 +602,7 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 	queryDaily := `
 		SELECT 
 			formatDateTime(Timestamp, '%Y-%m-%d') as date, 
-			uniq(SessionID) as count 
+			uniq(ClientIP) as count 
 		FROM events 
 		WHERE SiteID = ? 
 		  AND EventType = 'pageview'

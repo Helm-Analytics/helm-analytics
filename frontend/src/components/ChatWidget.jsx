@@ -3,42 +3,10 @@ import { MessageSquare, X, Send, Bot } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom'; // To get siteId if generic
 import { api } from '../api';
 
-const ChatWidget = () => {
-    // We need to access selectedSite. Since this might be in Layout, we might need to pass it down
-    // or use context. If Layout uses Outlet, the context is usually passed TO the Outlet.
-    // Ideally, Layout should know about selectedSite.
-    // For now, I'll assume this component is used where selectedSite is available or 
-    // I will try to read it from local storage/global state if possible. 
-    // Actually, `useOutletContext` works inside Outlet components. 
-    // If this is in Layout, it can't use useOutletContext to get data from itself.
-    // I will modify Layout to pass selectedSite to this widget.
-    
-    // Props will be passed from Layout
-    
+const ChatWidget = ({ siteId }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { role: 'assistant', text: 'Hi! I\'m Sentinel AI. Ask me anything about your traffic.' }
-    ]);
-    const [input, setInput] = useState('');
-    const [isTyping, setIsTyping] = useState(false);
-    const messagesEndRef = useRef(null);
-
-    // This component will receive siteId as a prop in the real implementation
-    // But for now let's expose a setter or use a hook if we modify Layout.
-    
-    // Actually, let's make it accept siteId as prop.
-    // If siteId is missing, it should probably be hidden or ask to select a site.
-    
-    return (siteId) => {
-        // ... hook logic
-    }
-};
-
-// Re-defining properly
-const ChatWindow = ({ siteId }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        { role: 'assistant', text: 'Hi! I\'m Sentinel AI. Ask me anything about your traffic.' }
+        { role: 'assistant', text: "Welcome aboard! I'm the Helm Intelligence Assistant. Ask me anything about your site's performance or security." }
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
@@ -65,7 +33,7 @@ const ChatWindow = ({ siteId }) => {
             const response = await api.chatWithAI(siteId, userMsg);
             setMessages(prev => [...prev, { role: 'assistant', text: response.reply }]);
         } catch (error) {
-            setMessages(prev => [...prev, { role: 'assistant', text: "Sorry, I\'m having trouble connecting to my brain right now." }]);
+            setMessages(prev => [...prev, { role: 'assistant', text: "Apologies, captain. I'm having trouble connecting to the intelligence core." }]);
         } finally {
             setIsTyping(false);
         }
@@ -77,28 +45,31 @@ const ChatWindow = ({ siteId }) => {
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none">
             {/* Chat Window */}
             {isOpen && (
-                <div className="bg-slate-800 border border-slate-700 rounded-lg shadow-2xl w-80 sm:w-96 mb-4 overflow-hidden pointer-events-auto flex flex-col transition-all duration-200 ease-in-out h-[500px]">
+                <div className="bg-white dark:bg-[#0F172A] border border-border/60 rounded-2xl shadow-2xl w-80 sm:w-96 mb-4 overflow-hidden pointer-events-auto flex flex-col animate-in slide-in-from-bottom-5 duration-300 h-[500px]">
                     {/* Header */}
-                    <div className="bg-slate-900 p-4 border-b border-slate-700 flex justify-between items-center">
-                        <div className="flex items-center gap-2">
-                            <div className="p-1.5 bg-indigo-600 rounded-lg">
-                                <Bot className="w-4 h-4 text-white" />
+                    <div className="bg-primary p-4 flex justify-between items-center">
+                        <div className="flex items-center gap-3">
+                            <div className="p-1.5 bg-accent/20 rounded-lg">
+                                <Bot className="w-5 h-5 text-accent" />
                             </div>
-                            <span className="font-semibold text-slate-200">Sentinel Assistant</span>
+                            <div>
+                                <span className="block font-heading font-extrabold text-white text-sm">Helm Assistant</span>
+                                <span className="block text-[8px] text-accent font-bold uppercase tracking-widest">Active Intelligence</span>
+                            </div>
                         </div>
-                        <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-white transition-colors" aria-label="Close chat">
+                        <button onClick={() => setIsOpen(false)} className="text-white/60 hover:text-white transition-colors p-1" aria-label="Close chat">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
 
                     {/* Messages */}
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-800/50">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50 dark:bg-black/20 custom-scrollbar">
                         {messages.map((msg, idx) => (
                             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[80%] rounded-lg px-4 py-2 text-sm ${ 
+                                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm font-medium shadow-sm transition-all ${ 
                                     msg.role === 'user' 
-                                        ? 'bg-indigo-600 text-white rounded-br-none' 
-                                        : 'bg-slate-700 text-slate-200 rounded-bl-none'
+                                        ? 'bg-accent text-white rounded-br-none' 
+                                        : 'bg-white dark:bg-[#1E293B] text-foreground border border-border/50 rounded-bl-none'
                                 }`}>
                                     {msg.text}
                                 </div>
@@ -106,10 +77,10 @@ const ChatWindow = ({ siteId }) => {
                         ))}
                         {isTyping && (
                             <div className="flex justify-start">
-                                <div className="bg-slate-700 rounded-lg rounded-bl-none px-4 py-3 flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></span>
-                                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></span>
-                                    <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
+                                <div className="bg-white dark:bg-[#1E293B] border border-border/50 rounded-2xl rounded-bl-none px-4 py-3 flex items-center gap-1.5 shadow-sm">
+                                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce"></span>
+                                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></span>
+                                    <span className="w-1.5 h-1.5 bg-accent rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></span>
                                 </div>
                             </div>
                         )}
@@ -117,19 +88,19 @@ const ChatWindow = ({ siteId }) => {
                     </div>
 
                     {/* Input */}
-                    <form onSubmit={handleSubmit} className="p-4 bg-slate-900 border-t border-slate-700">
+                    <form onSubmit={handleSubmit} className="p-4 bg-white dark:bg-[#0F172A] border-t border-border/50">
                         <div className="flex gap-2">
                             <input
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                placeholder="Ask about your data..."
-                                className="flex-1 bg-slate-800 border border-slate-600 rounded-md px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                                placeholder="Consult the Helm..."
+                                className="flex-1 bg-secondary/30 dark:bg-black/20 border border-border/60 rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50 placeholder:text-muted-foreground/50 transition-all font-medium"
                             />
                             <button 
                                 type="submit" 
                                 disabled={!input.trim() || isTyping}
-                                className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white p-2 rounded-md transition-colors"
+                                className="bg-accent hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed text-white p-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-accent/20"
                                 aria-label="Send message"
                             >
                                 <Send className="w-4 h-4" />
@@ -142,23 +113,21 @@ const ChatWindow = ({ siteId }) => {
             {/* Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="pointer-events-auto bg-indigo-600 hover:bg-indigo-700 text-white p-4 rounded-full shadow-lg transition-transform hover:scale-105 flex items-center justify-center group"
+                className="pointer-events-auto bg-primary text-white p-4 rounded-2xl shadow-xl transition-all hover:scale-105 active:scale-95 flex items-center justify-center group relative overflow-hidden"
                 aria-label={isOpen ? "Close chat" : "Open chat assistant"}
             >
+                <div className="absolute inset-0 bg-accent/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 {isOpen ? (
-                    <X className="w-6 h-6" />
+                    <X className="w-6 h-6 relative z-10" />
                 ) : (
-                    <MessageSquare className="w-6 h-6" />
-                )}
-                {/* Tooltip */}
-                {!isOpen && (
-                   <span className="absolute right-full mr-4 bg-slate-900 text-slate-200 text-sm px-3 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700">
-                       Ask Sentinel
-                   </span> 
+                    <div className="relative z-10 flex items-center gap-2">
+                        <MessageSquare className="w-6 h-6" />
+                        <span className="max-w-0 overflow-hidden group-hover:max-w-xs transition-all duration-500 font-bold text-xs uppercase tracking-widest">Ask Helm</span>
+                    </div>
                 )}
             </button>
         </div>
     );
 };
 
-export default ChatWindow;
+export default ChatWidget;

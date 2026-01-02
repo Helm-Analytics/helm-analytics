@@ -8,9 +8,10 @@ const InsightsCard = () => {
 
   if (loading && !insights) {
     return (
-      <div className="bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 rounded-xl p-6 shadow-lg animate-pulse h-64 flex flex-col justify-center items-center">
-        <Sparkles className="w-8 h-8 text-indigo-400 mb-4 animate-spin-slow" />
-        <span className="text-slate-400 text-sm">Analyzing your data with Gemini AI...</span>
+      <div className="premium-card bg-[#0F172A] border-accent/20 rounded-2xl p-8 shadow-2xl animate-pulse h-72 flex flex-col justify-center items-center overflow-hidden relative">
+        <div className="absolute inset-0 bg-accent/5 animate-pulse"></div>
+        <Sparkles className="w-10 h-10 text-accent mb-4 animate-spin-slow relative z-10" />
+        <span className="text-slate-400 text-xs font-bold uppercase tracking-widest relative z-10">Syncing Intelligence...</span>
       </div>
     );
   }
@@ -20,25 +21,28 @@ const InsightsCard = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-indigo-900/30 to-slate-800 border border-indigo-500/30 rounded-xl p-6 shadow-lg relative overflow-hidden">
-      <div className="absolute top-0 right-0 p-4 opacity-10">
-        <Sparkles className="w-32 h-32 text-indigo-400" />
+    <div className="premium-card bg-[#0F172A] border-accent/20 rounded-2xl p-8 shadow-2xl relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+        <Sparkles className="w-40 h-40 text-accent" />
       </div>
       
       <div className="relative z-10">
-        <h3 className="text-xl font-bold text-slate-100 mb-4 flex items-center gap-2">
-          <Sparkles className="w-5 h-5 text-indigo-400" />
-          AI Insights
-        </h3>
+        <div className="flex items-center justify-between mb-8">
+            <h3 className="text-xl font-heading font-extrabold text-white flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-accent" />
+              Helm Intelligence
+            </h3>
+            <span className="text-[10px] bg-accent/20 text-accent px-2 py-1 rounded-md font-bold uppercase tracking-widest border border-accent/30">Gemini Powered</span>
+        </div>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
+        <div className="space-y-6">
+          <div className="space-y-4">
             {insights.insights && insights.insights.map((insight, idx) => (
-              <div key={idx} className="flex items-start gap-3 text-slate-300 text-sm">
-                <div className="mt-1 min-w-[6px] h-[6px] rounded-full bg-indigo-500" />
+              <div key={idx} className="flex items-start gap-4 text-slate-300 text-[13px] leading-relaxed">
+                <div className="mt-1.5 min-w-[8px] h-[8px] rounded-full bg-accent shadow-[0_0_8px_rgba(14,165,233,0.5)] flex-shrink-0" />
                 <div className="flex-1">
                   <ReactMarkdown 
-                    className="prose prose-invert max-w-none text-sm prose-p:my-0 prose-p:leading-relaxed prose-strong:text-indigo-300"
+                    className="prose prose-invert max-w-none text-[13px] prose-p:my-0 prose-p:leading-relaxed prose-strong:text-accent font-medium"
                     components={{
                       p: ({node, ...props}) => <p className="mb-0" {...props} />
                     }}
@@ -51,14 +55,14 @@ const InsightsCard = () => {
           </div>
 
           {insights.recommendation && (
-            <div className="mt-6 bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-4">
-              <h4 className="text-indigo-300 font-semibold text-sm mb-2 flex items-center gap-2">
+            <div className="mt-8 bg-accent/5 border border-accent/10 rounded-2xl p-6 backdrop-blur-sm">
+              <h4 className="text-accent font-bold text-xs uppercase tracking-widest mb-3 flex items-center gap-2">
                 <Lightbulb className="w-4 h-4" />
-                Recommendation
+                Command Recommendation
               </h4>
-              <div className="text-indigo-100 text-sm italic">
+              <div className="text-slate-200 text-[13px] italic leading-relaxed font-medium">
                 <ReactMarkdown 
-                   className="prose prose-invert max-w-none text-sm prose-p:my-0"
+                   className="prose prose-invert max-w-none text-[13px] prose-p:my-0"
                    components={{
                       p: ({node, ...props}) => <p className="mb-0" {...props} />
                    }}

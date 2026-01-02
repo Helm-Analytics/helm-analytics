@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
-import { Activity, MousePointer2 } from 'lucide-react';
+import { Activity, MousePointer2, ExternalLink } from 'lucide-react';
 
 const HeatmapPage = () => {
   const { selectedSite } = useOutletContext();

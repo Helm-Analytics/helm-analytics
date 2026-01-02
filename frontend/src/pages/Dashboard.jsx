@@ -235,21 +235,22 @@ const Dashboard = () => {
           <InsightsCard />
 
           {/* Tracking Script Setup Card */}
-          <div className="premium-card bg-primary text-primary-foreground">
-            <h3 className="text-lg font-heading font-extrabold mb-2 text-white">Setup Helm</h3>
-            <p className="text-white/60 text-xs mb-6">
-              Inject the code below into your site's head to start collecting data.
+          <div className="premium-card bg-[#0F172A] border-none shadow-2xl shadow-primary/20 overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-accent/20 transition-all duration-700"></div>
+            <h3 className="text-lg font-heading font-extrabold mb-2 text-white relative z-10">Setup Helm</h3>
+            <p className="text-slate-400 text-xs mb-6 relative z-10 leading-relaxed font-medium">
+              Integrate the tracking script to begin receiving nautical intelligence flow.
             </p>
             <div className="space-y-4">
-              <div className="bg-black/20 rounded-lg p-3 font-mono text-[10px] break-all border border-white/10 text-white/90">
+              <div className="bg-black/40 rounded-xl p-4 font-mono text-[10px] break-all border border-white/5 text-slate-300 relative z-10 backdrop-blur-sm">
                 {`<script src="https://api-sentinel.getmusterup.com/static/tracker-v4.js" data-site-id="${selectedSite.id}"></script>`}
               </div>
               <button
                 onClick={copyTrackingScript}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-white text-primary font-bold text-xs rounded-xl transition-transform active:scale-95 shadow-lg"
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3.5 bg-accent hover:bg-accent/90 text-white font-bold text-xs rounded-xl transition-all active:scale-95 shadow-lg relative z-10"
               >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                <span>{copied ? "Copied to Clipboard" : "Copy Snippet"}</span>
+                <span>{copied ? "Copied to Clipboard" : "Copy Tracking Script"}</span>
               </button>
             </div>
           </div>
