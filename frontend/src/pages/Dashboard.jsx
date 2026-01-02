@@ -100,7 +100,7 @@ const Dashboard = () => {
 
       {/* Hero Stats Section */}
       {dashboardData && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div id="tut-stats-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <StatCard
             title="Total Views"
             value={dashboardData.totalViews?.toLocaleString() || "0"}
@@ -140,8 +140,9 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Left Column: Graph & Insights */}
         <div className="lg:col-span-8 space-y-8">
+
           {/* Visitor Traffic Graph */}
-          <div className="premium-card !p-0 overflow-hidden shadow-2xl shadow-slate-200">
+          <div id="tut-traffic-graph" className="premium-card !p-0 overflow-hidden shadow-2xl shadow-slate-200">
             <div className="p-6 border-b border-border/50 flex items-center justify-between bg-slate-50/50">
               <h3 className="text-lg font-heading font-extrabold flex items-center">
                 <Users className="w-5 h-5 mr-3 text-accent" />
@@ -153,6 +154,30 @@ const Dashboard = () => {
                 data={dashboardData?.dailyStats?.map(d => d.count) || []}
                 labels={dashboardData?.dailyStats?.map(d => d.value) || []}
               />
+            </div>
+          </div>
+
+          {/* Technology Distribution */}
+          <div className="premium-card">
+            <h3 className="text-base font-heading font-extrabold mb-6 flex items-center border-b border-border/50 pb-4 -mx-6 px-6">
+              <Sparkles className="w-4 h-4 mr-2 text-accent" />
+              Technology Distribution
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Top Browsers</p>
+                <DoughnutChart
+                  data={dashboardData?.topBrowsers?.map(b => b.count) || []}
+                  labels={dashboardData?.topBrowsers?.map(b => b.value) || []}
+                />
+              </div>
+              <div className="md:border-l md:border-border/50 md:pl-8">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Operating Systems</p>
+                <DoughnutChart
+                  data={dashboardData?.topOS?.map(os => os.count) || []}
+                  labels={dashboardData?.topOS?.map(os => os.value) || []}
+                />
+              </div>
             </div>
           </div>
 
@@ -187,7 +212,9 @@ const Dashboard = () => {
         {/* Right Column: Setup & Technology */}
         <div className="lg:col-span-4 space-y-8">
           {/* AI Intelligence Insights */}
-          <InsightsCard />
+          <div id="tut-insights-card">
+              <InsightsCard />
+          </div>
 
           {/* Setup Guide - Sidebar Placement */}
           <div className="premium-card bg-[#0F172A] border-none shadow-2xl relative overflow-hidden group">
@@ -223,25 +250,7 @@ const Dashboard = () => {
           </div>
 
           {/* Technology Blocks */}
-          <div className="premium-card">
-            <h3 className="text-base font-heading font-extrabold mb-6 border-b border-border/50 pb-4 -mx-6 px-6">Technology Distribution</h3>
-            <div className="space-y-10">
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Top Browsers</p>
-                <DoughnutChart
-                  data={dashboardData?.topBrowsers?.map(b => b.count) || []}
-                  labels={dashboardData?.topBrowsers?.map(b => b.value) || []}
-                />
-              </div>
-              <div className="pt-8 border-t border-border/50">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Operating Systems</p>
-                <DoughnutChart
-                  data={dashboardData?.topOS?.map(os => os.count) || []}
-                  labels={dashboardData?.topOS?.map(os => os.value) || []}
-                />
-              </div>
-            </div>
-          </div>
+
 
           {/* Web Vitals Section */}
           <div className="space-y-4 pt-4">

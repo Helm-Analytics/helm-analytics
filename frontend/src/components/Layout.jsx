@@ -130,95 +130,94 @@ const Layout = () => {
   return (
     <div className="min-h-screen flex text-foreground font-sans helm-bg">
       {/* Sidebar - Integrated Modern Style */}
-      <aside className="w-64 bg-white dark:bg-[#0b0f1a] border-r border-border/60 flex-shrink-0 flex flex-col h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-        <div className="p-6">
-          <Logo className="mb-10 scale-105 origin-left" />
+      <aside className="w-56 bg-white dark:bg-[#0b0f1a] border-r border-border/60 flex-shrink-0 flex flex-col h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        <div className="p-4 flex flex-col h-full">
+          <Logo className="mb-6 origin-left scale-90" />
 
           {/* Site Switcher Section */}
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.2em] px-1">Managed Sites</h3>
+          <div className="mb-6 flex-shrink-0">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-muted-foreground text-[9px] font-bold uppercase tracking-[0.2em] px-1">Managed Sites</h3>
               <button 
                 onClick={() => navigate('/sites/new')} 
                 className="p-1 hover:bg-secondary rounded-md text-muted-foreground transition-colors"
                 title="Manage Sites"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3.5 h-3.5" />
               </button>
             </div>
             
-            <div className="space-y-1.5 max-h-[240px] overflow-y-auto pr-2 scrollbar-hide">
+            <div className="space-y-1 max-h-[140px] overflow-y-auto pr-1 scrollbar-thin">
               {sites.length > 0 ? (
                 sites.map((site) => (
                   <button
                     key={site.id}
                     onClick={() => setSelectedSite(site)}
-                    className={`w-full flex items-center justify-between group px-3 py-2.5 rounded-xl text-sm transition-all duration-200 border ${
+                    className={`w-full flex items-center justify-between group px-2.5 py-2 rounded-lg text-xs transition-all duration-200 border ${
                       selectedSite?.id === site.id 
-                        ? "bg-primary text-white border-primary shadow-md active:scale-[0.98]" 
+                        ? "bg-primary text-white border-primary shadow-sm active:scale-[0.98]" 
                         : "text-muted-foreground hover:bg-secondary hover:text-foreground border-transparent"
                     }`}
                   >
-                    <div className="flex items-center space-x-3 overflow-hidden">
-                      <Globe className={`w-4 h-4 flex-shrink-0 ${selectedSite?.id === site.id ? 'text-accent' : 'text-muted-foreground/50 group-hover:text-accent/50'}`} />
+                    <div className="flex items-center space-x-2.5 overflow-hidden">
+                      <Globe className={`w-3.5 h-3.5 flex-shrink-0 ${selectedSite?.id === site.id ? 'text-accent' : 'text-muted-foreground/50 group-hover:text-accent/50'}`} />
                       <span className="truncate font-medium">{site.name}</span>
                     </div>
-                    {selectedSite?.id === site.id && <ChevronRight className="w-3.5 h-3.5 text-accent" />}
+                    {selectedSite?.id === site.id && <ChevronRight className="w-3 h-3 text-accent" />}
                   </button>
                 ))
               ) : (
-                <div className="text-muted-foreground/50 text-xs italic px-3 py-2 border border-dashed border-border rounded-xl">Initialize your first site...</div>
+                <div className="text-muted-foreground/50 text-[10px] italic px-2 py-1.5 border border-dashed border-border rounded-lg">Initialize site...</div>
               )}
             </div>
           </div>
 
           {/* Primary Navigation */}
-          <nav className="space-y-1.5">
-             <h3 className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.2em] px-1 mb-4">Intelligence</h3>
+          <nav className="space-y-0.5 flex-1 min-h-0 overflow-y-auto scrollbar-thin pr-1">
+             <h3 className="text-muted-foreground text-[9px] font-bold uppercase tracking-[0.2em] px-1 mb-2">Intelligence</h3>
              {navItems.map((item) => {
                const Icon = item.icon
                const isActive = location.pathname === item.path
                return (
                  <Link
                    key={item.path}
+                   id={`tut-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                    to={item.path}
-                   className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
+                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
                      isActive 
                        ? "bg-accent/10 dark:bg-accent/20 text-accent border border-accent/20" 
                        : "text-muted-foreground hover:bg-secondary hover:text-foreground border border-transparent"
                    }`}
                  >
-                   <Icon className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-accent' : 'text-muted-foreground/60'}`} />
-                   <span className={`font-semibold ${isActive ? 'text-accent' : 'text-muted-foreground'}`}>{item.label}</span>
+                   <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${isActive ? 'text-accent' : 'text-muted-foreground/60'}`} />
+                   <span className={`text-xs font-semibold ${isActive ? 'text-accent' : 'text-muted-foreground'}`}>{item.label}</span>
                  </Link>
                )
              })}
           </nav>
-        </div>
 
-        {/* User / Footer Section */}
-        <div className="mt-auto p-4 space-y-2">
-           <div className="bg-secondary/40 rounded-2xl p-4 border border-border/40 backdrop-blur-sm space-y-2">
-              <button
-                onClick={() => setShowTutorial(true)}
-                className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-accent transition-colors group"
-              >
-                <div className="p-2 bg-white dark:bg-black/20 rounded-lg shadow-sm border border-border/50 group-hover:border-accent/20 group-hover:bg-accent/5">
-                  <Sparkles className="w-4 h-4 text-accent/70 group-hover:text-accent" />
-                </div>
-                <span className="font-bold text-[10px] uppercase tracking-wider">Show Tutorial</span>
-              </button>
+          {/* User / Footer Section */}
+          <div className="mt-4 pt-4 border-t border-border/40 space-y-1.5 flex-shrink-0">
+               <button
+                 onClick={() => setShowTutorial(true)}
+                 className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-accent transition-colors group"
+               >
+                 <div className="p-1.5 bg-white dark:bg-black/20 rounded-md shadow-sm border border-border/50 group-hover:border-accent/20 group-hover:bg-accent/5">
+                   <Sparkles className="w-3.5 h-3.5 text-accent/70 group-hover:text-accent" />
+                 </div>
+                 <span className="font-bold text-[9px] uppercase tracking-wider">Tutorial</span>
+               </button>
 
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-rose-500 transition-colors group"
-              >
-                <div className="p-2 bg-white dark:bg-black/20 rounded-lg shadow-sm border border-border/50 group-hover:border-rose-200 group-hover:bg-rose-50 dark:group-hover:bg-rose-950/20">
-                  <LogOut className="w-4 h-4" />
-                </div>
-                <span className="font-bold text-xs uppercase tracking-wider">Log Out</span>
-              </button>
-           </div>
+               <button
+                 onClick={handleLogout}
+                 className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-rose-500 transition-colors group"
+               >
+                 <div className="p-1.5 bg-white dark:bg-black/20 rounded-md shadow-sm border border-border/50 group-hover:border-rose-200 group-hover:bg-rose-50 dark:group-hover:bg-rose-950/20">
+                   <LogOut className="w-3.5 h-3.5" />
+                 </div>
+                 <span className="font-bold text-[9px] uppercase tracking-wider">Log Out</span>
+               </button>
+          </div>
         </div>
       </aside>
 

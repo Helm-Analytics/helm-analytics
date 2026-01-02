@@ -118,7 +118,7 @@ const FirewallPage = () => {
         </div>
         
         {/* Shield Mode Toggle */}
-        <div className={`flex items-center gap-4 px-6 py-4 rounded-2xl border transition-all duration-300 shadow-sm ${shieldMode ? 'bg-rose-50 border-rose-200 dark:bg-rose-950/20 dark:border-rose-800' : 'bg-white border-border dark:bg-card'}`}>
+        <div id="tut-shield-toggle" className={`flex items-center gap-4 px-6 py-4 rounded-2xl border transition-all duration-300 shadow-sm ${shieldMode ? 'bg-rose-50 border-rose-200 dark:bg-rose-950/20 dark:border-rose-800' : 'bg-white border-border dark:bg-card'}`}>
             <div className="flex flex-col">
                 <span className={`text-xs font-bold uppercase tracking-wider ${shieldMode ? 'text-rose-600' : 'text-muted-foreground'}`}>
                     Shield Mode
