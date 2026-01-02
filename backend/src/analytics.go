@@ -319,7 +319,7 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
-	log.Printf("DEBUG: Received JS Error: %s from %s", jsErr.Message, jsErr.URL)
+	log.Printf("DEBUG: Received JS Error: %s from %s (SiteID: %s)", jsErr.Message, jsErr.URL, jsErr.SiteID)
 
 	ipStr := getClientIP(r)
 
@@ -424,6 +424,7 @@ func GetHeatmapDataHandler(w http.ResponseWriter, r *http.Request) {
 
 func GetErrorsStatsHandler(w http.ResponseWriter, r *http.Request) {
 	siteID := r.URL.Query().Get("siteId")
+	log.Printf("DEBUG: Fetching errors for SiteID: %s", siteID)
 	if siteID == "" {
 		http.Error(w, "siteId is required", http.StatusBadRequest)
 		return
