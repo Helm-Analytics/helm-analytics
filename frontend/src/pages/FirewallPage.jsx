@@ -22,11 +22,11 @@ const FirewallPage = () => {
   const toggleShieldMode = async () => {
       try {
           const newMode = !shieldMode;
-          setShieldMode(newMode); // Optimistic update
+          setShieldMode(newMode);
           await api.updateSite(selectedSite.id, { ...selectedSite, shieldMode: newMode });
       } catch (err) {
           console.error("Failed to toggle Shield Mode:", err);
-          setShieldMode(!shieldMode); // Revert
+          setShieldMode(!shieldMode);
           setError("Failed to update Shield Mode settings.");
       }
   };
@@ -55,7 +55,7 @@ const FirewallPage = () => {
     try {
       await api.addFirewallRule(selectedSite.id, { rule_type: ruleType, value, reason: 'Manual Block' });
       setValue('');
-      fetchRules(); // Refresh the list
+      fetchRules();
     } catch (err) {
       setError('Failed to add rule.');
       console.error(err);
@@ -65,7 +65,7 @@ const FirewallPage = () => {
   const handleDeleteRule = async (ruleId) => {
     try {
       await api.deleteFirewallRule(selectedSite.id, ruleId);
-      fetchRules(); // Refresh the list
+      fetchRules();
     } catch (err) {
       setError('Failed to delete rule.');
       console.error(err);
@@ -83,160 +83,219 @@ const FirewallPage = () => {
 
   if (!selectedSite) {
     return (
-        <div className="flex items-center justify-center h-64 text-slate-400">
-            Select a site to manage firewall rules.
+      <div className="flex items-center justify-center h-96 helm-bg">
+        <div className="premium-card text-center max-w-md">
+          <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-border/50">
+            <Shield className="w-8 h-8 text-accent/50" />
+          </div>
+          <h2 className="text-xl font-heading font-extrabold text-foreground mb-2">No site selected</h2>
+          <p className="text-muted-foreground text-sm">Select a website from the sidebar to manage security rules and active defense.</p>
         </div>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-border/50">
         <div>
-            <h1 className="text-3xl font-bold text-slate-200 flex items-center gap-3">
-                <Shield className="w-8 h-8 text-indigo-500" />
-                Sentinel Firewall
-            </h1>
-            <p className="text-slate-400 mt-1 max-w-2xl">
-                Configure blocking rules and active defense mechanisms.
-            </p>
+          <div className="flex items-center space-x-2 text-rose-500 font-bold text-xs uppercase tracking-widest mb-2">
+            <Shield className="w-4 h-4" />
+            <span>Active Defense</span>
+          </div>
+          <h1 className="text-4xl font-heading font-extrabold text-foreground tracking-tight">
+            Nautical Firewall
+          </h1>
+          <p className="text-muted-foreground mt-1">Configure automated mitigation and manual blocking rules.</p>
         </div>
         
         {/* Shield Mode Toggle */}
-        <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-colors ${shieldMode ? 'bg-red-500/10 border-red-500/30' : 'bg-slate-800 border-slate-700'}`}>
+        <div className={`flex items-center gap-4 px-6 py-4 rounded-2xl border transition-all duration-300 shadow-sm ${shieldMode ? 'bg-rose-50 border-rose-200 dark:bg-rose-950/20 dark:border-rose-800' : 'bg-white border-border dark:bg-card'}`}>
             <div className="flex flex-col">
-                <span className={`text-sm font-bold ${shieldMode ? 'text-red-400' : 'text-slate-300'}`}>
+                <span className={`text-xs font-bold uppercase tracking-wider ${shieldMode ? 'text-rose-600' : 'text-muted-foreground'}`}>
                     Shield Mode
                 </span>
-                <span className="text-xs text-slate-500">
-                    {shieldMode ? "Active: Blocking low-trust IPs" : "Inactive"}
+                <span className="text-[10px] font-medium text-muted-foreground/70 mt-0.5">
+                    {shieldMode ? "Active: Blocking low-trust traffic" : "Inactive: Detection only"}
                 </span>
             </div>
             <button 
                 onClick={toggleShieldMode}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-900 ${shieldMode ? 'bg-red-500' : 'bg-slate-600'}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 ${shieldMode ? 'bg-rose-500' : 'bg-muted'}`}
             >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${shieldMode ? 'translate-x-6' : 'translate-x-1'}`} />
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${shieldMode ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
         </div>
       </div>
 
-      {/* Honey Pot Card */}
-      <div className="bg-gradient-to-br from-amber-900/20 to-slate-800 border border-amber-500/20 rounded-xl p-6 shadow-lg">
-          <h2 className="text-lg font-bold text-amber-400 mb-2 flex items-center gap-2">
-              <span className="text-xl">🍯</span> Honey Pot Module
-          </h2>
-          <p className="text-sm text-slate-400 mb-4">
-              Catch bots automatically by adding this invisible link to your website footer. 
-              Real humans won't see it, but scrapers will follow it and get banned immediately.
-          </p>
-          <div className="bg-slate-900 border border-slate-700 rounded-lg p-3 font-mono text-xs text-amber-200/80 break-all select-all">
-            {`<a href="https://api-sentinel.getmusterup.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin</a>`}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        <div className="xl:col-span-2 space-y-8">
+          {/* Add Rule Section */}
+          <div className="premium-card">
+            <h2 className="text-lg font-heading font-extrabold text-foreground mb-6 flex items-center gap-2">
+                <Plus className="w-5 h-5 text-accent" />
+                Add Mitigation Rule
+            </h2>
+            <form onSubmit={handleAddRule} className="grid grid-cols-1 md:grid-cols-12 gap-4">
+              <div className="md:col-span-3">
+                 <select
+                    value={ruleType}
+                    onChange={(e) => setRuleType(e.target.value)}
+                    className="w-full bg-secondary border border-border/50 text-foreground py-2.5 px-3 rounded-xl font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-accent cursor-pointer transition-all"
+                >
+                    <option value="ip">IP Address</option>
+                    <option value="country">Country</option>
+                    <option value="asn">ASN / Data Center</option>
+                </select>
+              </div>
+             
+              <div className="md:col-span-6">
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => setValue(e.target.value)}
+                  placeholder={ruleType === 'ip' ? "e.g. 192.168.1.1" : ruleType === 'country' ? "e.g. US, CN, RU" : "e.g. Google Cloud"}
+                  className="w-full px-4 py-2.5 bg-secondary border border-border/50 rounded-xl text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                />
+              </div>
+              
+              <div className="md:col-span-3">
+                <button 
+                  type="submit" 
+                  className="w-full bg-primary text-primary-foreground font-bold text-xs uppercase tracking-widest py-3 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-primary/10"
+                >
+                  Apply Rule
+                </button>
+              </div>
+            </form>
+            {error && (
+                <div className="mt-4 flex items-center gap-3 text-rose-500 text-xs font-bold bg-rose-50 border border-rose-100 p-3 rounded-xl animate-in slide-in-from-top-2">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    {error}
+                </div>
+            )}
           </div>
-      </div>
 
-      {/* Add Rule Card */}
-      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg">
-        <h2 className="text-xl font-bold text-slate-200 mb-4 flex items-center gap-2">
-            <Plus className="w-5 h-5 text-indigo-400" />
-            Add Blocking Rule
-        </h2>
-        <form onSubmit={handleAddRule} className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-          <div className="relative">
-             <select
-                value={ruleType}
-                onChange={(e) => setRuleType(e.target.value)}
-                className="appearance-none bg-slate-900 border border-slate-600 text-slate-200 py-2 pl-3 pr-10 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-            >
-                <option value="ip">IP Address</option>
-                <option value="country">Country Code</option>
-                <option value="asn">ASN (Organization)</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+          {/* Rules Table */}
+          <div className="premium-card !p-0 overflow-hidden">
+            <div className="p-6 border-b border-border/50">
+                <h2 className="text-lg font-heading font-extrabold">Active mitigations</h2>
             </div>
+            
+            {loading ? (
+                 <div className="flex justify-center p-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent"></div>
+                 </div>
+            ) : rules.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-border/50">
+                  <thead className="bg-secondary/30">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Target</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Identifier</th>
+                      <th className="px-6 py-4 text-left text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Context</th>
+                      <th className="px-6 py-4 text-right text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Command</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50 bg-white dark:bg-card">
+                    {rules.map((rule) => (
+                      <tr key={rule.id} className="hover:bg-secondary/20 transition-colors group">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-secondary rounded-lg text-accent group-hover:scale-110 transition-transform">{getRuleIcon(rule.rule_type)}</div>
+                                <span className="uppercase font-bold text-[10px] tracking-wider text-muted-foreground">{rule.rule_type}</span>
+                            </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="font-mono text-sm text-foreground font-bold">{rule.value}</span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                            <span className="px-2 py-1 bg-secondary text-muted-foreground rounded-md text-[10px] font-bold uppercase tracking-tight">
+                              {rule.reason || "Manual Block"}
+                            </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right">
+                          <button
+                            onClick={() => handleDeleteRule(rule.id)}
+                            className="p-2 text-muted-foreground hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                            title="Remove mitigation"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="p-16 text-center">
+                <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-6 opacity-30">
+                  <Shield className="w-8 h-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-base font-heading font-extrabold text-muted-foreground">No active blocks</h3>
+                <p className="text-muted-foreground/60 text-sm mt-1">Traffic is currently flowing according to default policies.</p>
+              </div>
+            )}
           </div>
-         
-          <input
-            type="text"
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            placeholder={ruleType === 'ip' ? "e.g. 192.168.1.1" : ruleType === 'country' ? "e.g. US, CN, RU" : "e.g. Google Cloud"}
-            className="flex-grow px-3 py-2 bg-slate-900 border border-slate-600 rounded-md text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-auto"
-          />
-          
-          <button 
-            type="submit" 
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md font-medium transition-colors shadow-md w-full sm:w-auto flex justify-center"
-          >
-            Add Rule
-          </button>
-        </form>
-        {error && (
-            <div className="mt-4 flex items-center gap-2 text-red-400 text-sm bg-red-400/10 p-3 rounded-md border border-red-400/20">
-                <AlertTriangle className="w-4 h-4" />
-                {error}
-            </div>
-        )}
-      </div>
-
-      {/* Existing Rules Table */}
-      <div className="bg-slate-800 border border-slate-700 rounded-xl shadow-lg overflow-hidden">
-        <div className="p-6 border-b border-slate-700">
-            <h2 className="text-xl font-bold text-slate-200">Active Rules</h2>
         </div>
-        
-        {loading ? (
-             <div className="flex justify-center p-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-             </div>
-        ) : rules.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-700">
-              <thead className="bg-slate-900/50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Type</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Value</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">Reason</th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wider">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-700 bg-slate-800">
-                {rules.map((rule) => (
-                  <tr key={rule.id} className="hover:bg-slate-700/50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                        <div className="flex items-center gap-2">
-                            <span className="p-1.5 bg-slate-700 rounded text-indigo-400">{getRuleIcon(rule.rule_type)}</span>
-                            <span className="uppercase font-mono text-xs">{rule.rule_type}</span>
-                        </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-white">
-                        {rule.value}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
-                        {rule.reason || <span className="text-slate-600 italic">Manual</span>}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleDeleteRule(rule.id)}
-                        className="text-slate-400 hover:text-red-400 transition-colors"
-                        title="Delete rule"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+        {/* Info Column */}
+        <div className="space-y-8">
+          {/* Honey Pot Sidebar */}
+          <div className="premium-card bg-primary text-primary-foreground border-transparent overflow-hidden">
+              <div className="flex items-center gap-3 mb-4">
+                 <div className="p-2 bg-white/10 rounded-xl">
+                    <span className="text-xl">🍯</span>
+                 </div>
+                 <h2 className="text-lg font-heading font-extrabold text-white">Spider Trap</h2>
+              </div>
+              <p className="text-white/70 text-xs leading-relaxed mb-6">
+                  Catch automated crawlers by adding this invisible gateway to your site's header or footer. 
+                  Bots that interact with this link will be identified and mitigated instantly.
+              </p>
+              <div className="bg-black/20 border border-white/5 rounded-xl p-4 font-mono text-[10px] text-accent/80 break-all select-all mb-4">
+                {`<a href="https://api-sentinel.getmusterup.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
+              </div>
+              <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase font-bold tracking-widest">
+                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                 <span>Module Ready</span>
+              </div>
           </div>
-        ) : (
-          <div className="p-12 text-center">
-            <Shield className="w-12 h-12 mx-auto mb-4 text-slate-600" />
-            <p className="text-slate-400">No firewall rules defined yet.</p>
-            <p className="text-slate-500 text-sm mt-1">Traffic is currently unrestricted.</p>
+
+          <div className="premium-card">
+              <h3 className="text-base font-heading font-extrabold mb-4">Firewall Intelligence</h3>
+              <div className="space-y-4">
+                  <div className="flex gap-4 p-3 rounded-xl bg-secondary/30">
+                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                         <Hash className="w-4 h-4 text-accent" />
+                      </div>
+                      <div>
+                         <p className="text-xs font-bold text-foreground mb-0.5">IP Filtering</p>
+                         <p className="text-[10px] text-muted-foreground">Block specific IP addresses from accessing your site.</p>
+                      </div>
+                  </div>
+                  <div className="flex gap-4 p-3 rounded-xl bg-secondary/30">
+                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                         <Globe className="w-4 h-4 text-accent" />
+                      </div>
+                      <div>
+                         <p className="text-xs font-bold text-foreground mb-0.5">Geo Blocking</p>
+                         <p className="text-[10px] text-muted-foreground">Block traffic originating from specific ISO country codes.</p>
+                      </div>
+                  </div>
+                  <div className="flex gap-4 p-3 rounded-xl bg-secondary/30">
+                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                         <Server className="w-4 h-4 text-accent" />
+                      </div>
+                      <div>
+                         <p className="text-xs font-bold text-foreground mb-0.5">ASN Blocking</p>
+                         <p className="text-[10px] text-muted-foreground">Blacklist entire data centers or hosting providers.</p>
+                      </div>
+                  </div>
+              </div>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

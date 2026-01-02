@@ -24,6 +24,7 @@ type Event struct {
 	Referrer    string   `json:"referrer"`
 	ScreenWidth int      `json:"screenWidth"`
 	EventType   string   `json:"eventType"`
+	SessionID   string   `json:"sessionId"`
 	LCP         *float64 `json:"LCP,omitempty"`
 	CLS         *float64 `json:"CLS,omitempty"`
 	FID         *float64 `json:"FID,omitempty"`
@@ -40,6 +41,7 @@ type EventData struct {
 	OS          string
 	Country     string
 	EventType   string
+	SessionID   string
 	TrustScore  uint8
 	LCP         sql.NullFloat64
 	CLS         sql.NullFloat64
@@ -215,6 +217,7 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 		OS:          osFamily,
 		Country:     country,
 		EventType:   event.EventType,
+		SessionID:   event.SessionID,
 		TrustScore:  trustScore,
 		LCP:         nullFloat64(event.LCP),
 		CLS:         nullFloat64(event.CLS),
@@ -231,11 +234,11 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	err := chConn.AsyncInsert(ctx, `INSERT INTO sentinel.events 
-		(Timestamp, SiteID, ClientIP, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, LCP, CLS, FID, EventType) 
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, false,
+		(Timestamp, SiteID, ClientIP, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, LCP, CLS, FID, EventType, SessionID) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, false,
 		eventData.Timestamp, eventData.SiteID, eventData.ClientIP, eventData.URL, eventData.Referrer,
 		eventData.ScreenWidth, eventData.Browser, eventData.OS, eventData.Country, eventData.TrustScore,
-		eventData.LCP, eventData.CLS, eventData.FID, eventData.EventType,
+		eventData.LCP, eventData.CLS, eventData.FID, eventData.EventType, eventData.SessionID,
 	)
 	if err != nil {
 		log.Printf("Error inserting event into ClickHouse: %v", err)
@@ -545,8 +548,8 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 		return stats, err
 	}
 
-	// Unique Visitors
-	queryUniqueVisitors := "SELECT uniq(ClientIP) FROM events WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%'"
+	// Unique Visitors (Visits) - Count unique SessionIDs
+	queryUniqueVisitors := "SELECT uniq(SessionID) FROM events WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%'"
 	err = chConn.QueryRow(ctx, queryUniqueVisitors, siteID, startDaysAgo, endDaysAgo).Scan(&stats.UniqueVisitors)
 	if err != nil && err != sql.ErrNoRows {
 		return stats, err
@@ -556,10 +559,10 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 	queryBounceRate := `
 		SELECT (countIf(pageviews = 1) / count()) * 100
 		FROM (
-			            SELECT ClientIP, count() AS pageviews
+			            SELECT SessionID, count() AS pageviews
 			            FROM events
 			            WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%'
-			            GROUP BY ClientIP
+			            GROUP BY SessionID
 		)`
 	err = chConn.QueryRow(ctx, queryBounceRate, siteID, startDaysAgo, endDaysAgo).Scan(&stats.BounceRate)
 	if err != nil {
@@ -576,14 +579,14 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 			avg(visit_duration)
 		FROM (
 			SELECT
-				ClientIP,
+				SessionID,
 				count(*) * 15 AS visit_duration
 			FROM events
 			WHERE SiteID = ?
 			  AND EventType = 'heartbeat'
 			  AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY
 			  AND ClientIP NOT IN ('127.0.0.1', '::1')
-			GROUP BY ClientIP
+			GROUP BY SessionID
 			HAVING count(*) > 0
 		)
 	`
@@ -599,7 +602,7 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 	queryDaily := `
 		SELECT 
 			formatDateTime(Timestamp, '%Y-%m-%d') as date, 
-			uniq(ClientIP) as count 
+			uniq(SessionID) as count 
 		FROM events 
 		WHERE SiteID = ? 
 		  AND EventType = 'pageview'

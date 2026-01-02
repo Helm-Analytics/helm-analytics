@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
-import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon } from "lucide-react"
+import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon, ChevronRight, Globe } from "lucide-react"
 import { api } from "../api"
-import LogoImg from "../assets/Logo.png"
+import Logo from "./Logo"
 import ChatWidget from "./ChatWidget"
 
 const Layout = () => {
@@ -34,7 +34,6 @@ const Layout = () => {
       const sitesData = await api.getSites()
       setSites(sitesData || [])
       
-      // Restore selection from local storage or default to first
       const savedSiteId = localStorage.getItem("siteId")
       if (savedSiteId && sitesData) {
           const found = sitesData.find(s => s.id === savedSiteId)
@@ -66,7 +65,7 @@ const Layout = () => {
     try {
       const newSite = await api.addSite(newSiteName)
       setNewSiteName("")
-      fetchSites() // Refresh list
+      fetchSites()
       if (newSite) {
         setSelectedSite(newSite)
       }
@@ -105,128 +104,120 @@ const Layout = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent"></div>
       </div>
     )
   }
 
   const navItems = [
-    { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/session-replay", label: "Session Replay", icon: PlayCircle },
+    { path: "/dashboard", label: "Overview", icon: LayoutDashboard },
+    { path: "/session-replay", label: "Sessions", icon: PlayCircle },
     { path: "/heatmap", label: "Heatmaps", icon: MousePointer2 },
-    { path: "/errors", label: "Issues", icon: AlertOctagon },
     { path: "/funnels", label: "Funnels", icon: GitMerge },
-    { path: "/firewall", label: "Firewall", icon: Shield },
+    { path: "/firewall", label: "Security", icon: Shield },
+    { path: "/errors", label: "Issues", icon: AlertOctagon },
   ]
 
   return (
-    <div
-      className="min-h-screen bg-slate-900 flex text-slate-200 font-sans"
-      style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.15) 1px, transparent 0)`,
-        backgroundSize: "20px 20px",
-      }}
-    >
-      {/* Sidebar */}
-      <div className="w-80 bg-slate-800 border-r border-slate-700 flex-shrink-0 flex flex-col p-6 h-screen sticky top-0 overflow-y-auto">
-        <img src={LogoImg} alt="Helm" className="mb-8 w-32" />
+    <div className="min-h-screen flex text-foreground font-sans helm-bg">
+      {/* Sidebar - Integrated Modern Style */}
+      <aside className="w-72 bg-white dark:bg-[#0b0f1a] border-r border-border/60 flex-shrink-0 flex flex-col h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        <div className="p-6">
+          <Logo className="mb-10 scale-105 origin-left" />
 
-        {/* Site Switcher */}
-        <div className="mb-8">
-          <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-4">Your Sites</h3>
-          <div className="space-y-2">
-            {sites.length > 0 ? (
-              sites.map((site) => (
-                <div key={site.id} className="flex items-center justify-between group">
+          {/* Site Switcher Section */}
+          <div className="mb-10">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.2em] px-1">Managed Sites</h3>
+              <button 
+                onClick={() => navigate('/sites/new')} 
+                className="p-1 hover:bg-secondary rounded-md text-muted-foreground transition-colors"
+                title="Manage Sites"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
+            
+            <div className="space-y-1.5 max-h-[240px] overflow-y-auto pr-2 scrollbar-hide">
+              {sites.length > 0 ? (
+                sites.map((site) => (
                   <button
+                    key={site.id}
                     onClick={() => setSelectedSite(site)}
-                    className={`flex-1 text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                    className={`w-full flex items-center justify-between group px-3 py-2.5 rounded-xl text-sm transition-all duration-200 border ${
                       selectedSite?.id === site.id 
-                        ? "bg-indigo-600 text-white font-medium" 
-                        : "text-slate-300 hover:bg-slate-700"
+                        ? "bg-primary text-white border-primary shadow-md active:scale-[0.98]" 
+                        : "text-muted-foreground hover:bg-secondary hover:text-foreground border-transparent"
                     }`}
                   >
-                    {site.name}
+                    <div className="flex items-center space-x-3 overflow-hidden">
+                      <Globe className={`w-4 h-4 flex-shrink-0 ${selectedSite?.id === site.id ? 'text-accent' : 'text-muted-foreground/50 group-hover:text-accent/50'}`} />
+                      <span className="truncate font-medium">{site.name}</span>
+                    </div>
+                    {selectedSite?.id === site.id && <ChevronRight className="w-3.5 h-3.5 text-accent" />}
                   </button>
-                  <button
-                    onClick={() => handleDeleteSite(site.id)}
-                    className="p-2 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Delete site"
-                    aria-label={`Delete site ${site.name}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div className="text-slate-500 text-sm px-3">No sites yet.</div>
-            )}
+                ))
+              ) : (
+                <div className="text-muted-foreground/50 text-xs italic px-3 py-2 border border-dashed border-border rounded-xl">Initialize your first site...</div>
+              )}
+            </div>
           </div>
+
+          {/* Primary Navigation */}
+          <nav className="space-y-1.5">
+             <h3 className="text-muted-foreground text-[10px] font-bold uppercase tracking-[0.2em] px-1 mb-4">Intelligence</h3>
+             {navItems.map((item) => {
+               const Icon = item.icon
+               const isActive = location.pathname === item.path
+               return (
+                 <Link
+                   key={item.path}
+                   to={item.path}
+                   className={`flex items-center space-x-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
+                     isActive 
+                       ? "bg-accent/10 dark:bg-accent/20 text-accent border border-accent/20" 
+                       : "text-muted-foreground hover:bg-secondary hover:text-foreground border border-transparent"
+                   }`}
+                 >
+                   <Icon className={`w-5 h-5 transition-transform group-hover:scale-110 ${isActive ? 'text-accent' : 'text-muted-foreground/60'}`} />
+                   <span className={`font-semibold ${isActive ? 'text-accent' : 'text-muted-foreground'}`}>{item.label}</span>
+                 </Link>
+               )
+             })}
+          </nav>
         </div>
 
-        {/* Add Site */}
-        <div className="mb-8">
-          <form onSubmit={addSite} className="flex space-x-2">
-            <input
-              type="text"
-              value={newSiteName}
-              onChange={(e) => setNewSiteName(e.target.value)}
-              placeholder="New site name..."
-              className="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-md text-sm text-white focus:outline-none focus:border-indigo-500"
-            />
-            <button
-              type="submit"
-              className="p-2 bg-slate-700 hover:bg-indigo-600 text-white rounded-md transition-colors"
-              aria-label="Add new site"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </form>
+        {/* User / Footer Section */}
+        <div className="mt-auto p-4">
+           <div className="bg-secondary/40 rounded-2xl p-4 border border-border/40 backdrop-blur-sm">
+              <button
+                onClick={handleLogout}
+                className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-rose-500 transition-colors group"
+              >
+                <div className="p-2 bg-white dark:bg-black/20 rounded-lg shadow-sm border border-border/50 group-hover:border-rose-200 group-hover:bg-rose-50 dark:group-hover:bg-rose-950/20">
+                  <LogOut className="w-4 h-4" />
+                </div>
+                <span className="font-bold text-xs uppercase tracking-wider">Log Out</span>
+              </button>
+           </div>
         </div>
-
-        {/* Navigation */}
-        <div className="space-y-1 flex-1">
-           <h3 className="text-slate-400 text-xs font-semibold uppercase tracking-wider mb-4">Menu</h3>
-           {navItems.map((item) => {
-             const Icon = item.icon
-             const isActive = location.pathname === item.path
-             return (
-               <Link
-                 key={item.path}
-                 to={item.path}
-                 className={`flex items-center space-x-3 px-3 py-2 rounded-md transition-colors ${
-                   isActive 
-                     ? "bg-indigo-500/10 text-indigo-400" 
-                     : "text-slate-400 hover:bg-slate-700/50 hover:text-slate-200"
-                 }`}
-               >
-                 <Icon className="w-5 h-5" />
-                 <span className="font-medium">{item.label}</span>
-               </Link>
-             )
-           })}
-        </div>
-
-        {/* Logout */}
-        <div className="pt-6 border-t border-slate-700 mt-auto">
-            <button
-              onClick={handleLogout}
-              className="flex items-center space-x-3 px-3 py-2 w-full rounded-md text-slate-400 hover:bg-slate-700/50 hover:text-red-400 transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span className="font-medium">Sign Out</span>
-            </button>
-        </div>
-      </div>
+      </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 overflow-y-auto h-screen">
-        <div className="p-8 max-w-7xl mx-auto">
-           {/* Pass context to children */}
+      <main className="flex-1 min-w-0 overflow-y-auto h-screen bg-transparent relative">
+        <div className="p-8 pb-20 max-w-7xl mx-auto">
+           {/* Global Site Context Indicator (Mobile scale) */}
+           <div className="md:hidden flex items-center justify-between mb-8 pb-4 border-b border-border/50">
+              <Logo className="scale-90 origin-left" />
+           </div>
+
            <Outlet context={{ sites, selectedSite }} />
         </div>
-      </div>
+        
+        {/* Subtle Decorative Gradient */}
+        <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+      </main>
 
       <ChatWidget siteId={selectedSite?.id} />
     </div>

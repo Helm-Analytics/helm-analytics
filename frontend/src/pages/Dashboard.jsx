@@ -25,7 +25,7 @@ const Dashboard = () => {
   const copyTrackingScript = async () => {
     if (!selectedSite) return
 
-    const trackingScript = `<script src="https://api-sentinel.getmusterup.com/static/tracker-v4.js" data-site-id="${selectedSite.id}"></script>`
+    const trackingScript = `<!-- Helm Analytics Tracking Script -->\n<script src="https://api-sentinel.getmusterup.com/static/tracker-v4.js" data-site-id="${selectedSite.id}"></script>`
 
     try {
       await navigator.clipboard.writeText(trackingScript)
@@ -38,17 +38,16 @@ const Dashboard = () => {
 
   useEffect(() => {
     if (selectedSite) {
-      // Initial fetch
       fetchDashboardStats(selectedSite.id, dateRange)
       fetchAiInsights(selectedSite.id)
 
       const statsInterval = setInterval(() => {
         fetchDashboardStats(selectedSite.id, dateRange)
-      }, 30000) // Poll stats every 30 seconds
+      }, 30000)
 
       const aiInterval = setInterval(() => {
         fetchAiInsights(selectedSite.id)
-      }, 600000) // Poll AI every 10 minutes
+      }, 600000)
 
       return () => {
         clearInterval(statsInterval)
@@ -59,176 +58,223 @@ const Dashboard = () => {
 
   if (!selectedSite) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <div className="text-slate-400 text-lg mb-2">No site selected</div>
-          <div className="text-slate-500 text-sm">Add a site from the sidebar to view analytics data.</div>
+      <div className="flex items-center justify-center h-96 helm-bg">
+        <div className="premium-card text-center max-w-md">
+          <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-border/50">
+            <Eye className="w-8 h-8 text-accent/50" />
+          </div>
+          <h2 className="text-xl font-heading font-extrabold text-foreground mb-2">No site selected</h2>
+          <p className="text-muted-foreground text-sm">Select or add a website from the sidebar to start viewing your traffic intelligence.</p>
         </div>
       </div>
     )
   }
 
   return (
-    <>
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-border/50">
         <div>
-          <h1 className="text-3xl font-bold text-slate-200 mb-2">Dashboard for {selectedSite.name}</h1>
-          <p className="text-slate-400">Analytics and insights for your website</p>
+          <div className="flex items-center space-x-2 text-accent font-bold text-xs uppercase tracking-widest mb-2">
+            <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+            <span>Live Intelligence</span>
+          </div>
+          <h1 className="text-4xl font-heading font-extrabold text-foreground tracking-tight">
+            {selectedSite.name}
+          </h1>
+          <p className="text-muted-foreground mt-1">Real-time visitor tracking and security metrics.</p>
         </div>
         
-        <div>
-           <select 
-              value={dateRange}
-              onChange={(e) => setDateRange(e.target.value)}
-              className="bg-slate-800 border border-slate-700 text-slate-200 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block w-full p-2.5"
-            >
-              <option value="1">Last 24 Hours</option>
-              <option value="7">Last 7 Days</option>
-              <option value="30">Last 30 Days</option>
-              <option value="90">Last 3 Months</option>
-           </select>
+        <div className="flex items-center space-x-3 bg-secondary/50 p-1.5 rounded-xl border border-border/50">
+           <button 
+             onClick={() => setDateRange("1")}
+             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${dateRange === "1" ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+           >
+             24h
+           </button>
+           <button 
+             onClick={() => setDateRange("7")}
+             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${dateRange === "7" ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+           >
+             7d
+           </button>
+           <button 
+             onClick={() => setDateRange("30")}
+             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${dateRange === "30" ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+           >
+             30d
+           </button>
+           <button 
+             onClick={() => setDateRange("90")}
+             className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${dateRange === "90" ? 'bg-white shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+           >
+             90d
+           </button>
         </div>
       </div>
 
-      <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 mb-8 shadow-lg">
-        <h3 className="text-slate-200 font-semibold mb-3">Tracking Script</h3>
-        <p className="text-slate-400 text-sm mb-4">
-          Add this code to your website's HTML to start tracking analytics
-        </p>
-        <div className="relative">
-          <pre className="bg-slate-900 border border-slate-600 rounded-lg p-4 text-sm text-slate-300 overflow-x-auto font-mono">
-            <code>{`<script src="https://api-sentinel.getmusterup.com/static/tracker-v4.js" data-site-id="${selectedSite.id}"></script>`}</code>
-          </pre>
-          <button
-            onClick={copyTrackingScript}
-            className="absolute top-3 right-3 flex items-center space-x-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded-md transition-colors shadow-md"
-          >
-            {copied ? (
-              <>
-                <Check className="w-4 h-4" />
-                <span>Copied!</span>
-              </>
-            ) : (
-              <>
-                <Copy className="w-4 h-4" />
-                <span>Copy</span>
-              </>
-            )}
-          </button>
+      {/* Hero Stats Section */}
+      {dashboardData && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <StatCard
+            title="Total Views"
+            value={dashboardData.totalViews?.toLocaleString() || "0"}
+            icon={Eye}
+            change={dashboardData.totalViewsChange}
+          />
+          <StatCard
+            title="Total Visits"
+            value={dashboardData.uniqueVisitors?.toLocaleString() || "0"}
+            icon={Users}
+            change={dashboardData.uniqueVisitorsChange}
+          />
+          <StatCard
+            title="Bounce Rate"
+            value={`${dashboardData.bounceRate?.toFixed(1) || 0}%`}
+            icon={TrendingDown}
+            change={dashboardData.bounceRateChange}
+            inverse={true}
+          />
+          <StatCard
+            title="Avg. Duration"
+            value={dashboardData.avgVisitTime || "0s"}
+            icon={Clock}
+            change={dashboardData.avgVisitTimeChange}
+          />
+          <StatCard
+            title="Traffic Quality"
+            value={`${dashboardData.trafficQualityScore?.toFixed(0) || 0}%`}
+            icon={ShieldCheck}
+            change={dashboardData.trafficQualityScoreChange}
+            isQualityScore={true}
+          />
         </div>
-      </div>
+      )}
 
-      {dashboardData ? (
-        <>
-          {/* AI Insights */}
-          <div className="mb-8">
-             <InsightsCard />
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {/* Charts and Details */}
+        <div className="xl:col-span-2 space-y-8">
+          {/* Main Chart Card */}
+          <div className="premium-card !p-0 overflow-hidden">
+            <div className="p-6 border-b border-border/50 flex items-center justify-between">
+              <h3 className="text-lg font-heading font-extrabold flex items-center">
+                <Users className="w-5 h-5 mr-2 text-accent" />
+                Visitor Traffic
+              </h3>
+            </div>
+            <div className="p-6">
+              <LineChart
+                data={dashboardData?.dailyStats?.map(d => d.count) || []}
+                labels={dashboardData?.dailyStats?.map(d => d.value) || []}
+                height={300}
+              />
+            </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <StatCard
-              title="Total Page Views"
-              value={dashboardData.totalViews?.toLocaleString() || "0"}
-              icon={Eye}
-              change={dashboardData.totalViewsChange}
-            />
-            <StatCard
-              title="Unique Visitors"
-              value={dashboardData.uniqueVisitors?.toLocaleString() || "0"}
-              icon={Users}
-              change={dashboardData.uniqueVisitorsChange}
-            />
-            <StatCard
-              title="Bounce Rate"
-              value={`${dashboardData.bounceRate?.toFixed(1) || 0}%`}
-              icon={TrendingDown}
-              change={dashboardData.bounceRateChange}
-              inverse={true} // Higher bounce rate is usually bad
-            />
-            <StatCard
-              title="Avg. Visit Time"
-              value={dashboardData.avgVisitTime || "0s"}
-              icon={Clock}
-              change={dashboardData.avgVisitTimeChange}
-            />
-            <StatCard
-              title="Traffic Quality Score"
-              value={`${dashboardData.trafficQualityScore?.toFixed(1) || 0}%`}
-              icon={ShieldCheck}
-              change={dashboardData.trafficQualityScoreChange}
-              isQualityScore={true} // Use this to trigger special styling
-            />
+          {/* Secondary Charts Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="premium-card">
+              <h3 className="text-base font-heading font-extrabold mb-6 flex items-center">
+                <Copy className="w-4 h-4 mr-2 text-accent" />
+                Top Content
+              </h3>
+              <BarChart
+                data={dashboardData?.topPages?.map(p => p.count) || []}
+                labels={dashboardData?.topPages?.map(p => p.value) || []}
+              />
+            </div>
+            <div className="premium-card">
+              <h3 className="text-base font-heading font-extrabold mb-6 flex items-center">
+                <Users className="w-4 h-4 mr-2 text-accent" />
+                Geographic Reach
+              </h3>
+              <DoughnutChart
+                data={dashboardData?.topCountries?.map(c => c.count) || []}
+                labels={dashboardData?.topCountries?.map(c => c.value) || []}
+                innerRadius={60}
+              />
+            </div>
           </div>
 
-          {/* Web Vitals Cards */}
-          <h3 className="text-xl font-bold text-slate-200 mb-4">Core Web Vitals</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <StatCard
-              title="LCP (Loading)"
-              value={`${dashboardData.avgLcp?.toFixed(0) || 0}ms`}
-              icon={Clock}
-              change={dashboardData.avgLcpChange}
-              inverse={true}
-            />
-            <StatCard
-              title="CLS (Stability)"
-              value={`${dashboardData.avgCls?.toFixed(3) || 0}`}
-              icon={TrendingDown}
-              change={dashboardData.avgClsChange}
-              inverse={true}
-            />
-            <StatCard
-              title="FID (Interactivity)"
-              value={`${dashboardData.avgFid?.toFixed(0) || 0}ms`}
-              icon={Users}
-              change={dashboardData.avgFidChange}
-              inverse={true}
-            />
-          </div>
-
-          {/* Charts Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <LineChart
-              title="Daily Visitors"
-              data={dashboardData.dailyStats?.map(d => d.count) || []}
-              labels={dashboardData.dailyStats?.map(d => d.value) || []}
-            />
-            <BarChart
-              title="Top Pages"
-              data={dashboardData.topPages?.map(p => p.count) || []}
-              labels={dashboardData.topPages?.map(p => p.value) || []}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <DoughnutChart
-              title="Visitors by Country"
-              data={dashboardData.topCountries?.map(c => c.count) || []}
-              labels={dashboardData.topCountries?.map(c => c.value) || []}
-            />
-            <DoughnutChart
-              title="Visitors by OS"
-              data={dashboardData.topOS?.map(os => os.count) || []}
-              labels={dashboardData.topOS?.map(os => os.value) || []}
-            />
-          </div>
-        </>
-      ) : isLoadingStats ? (
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-        </div>
-      ) : (
-        <div className="flex items-center justify-center h-64">
-          <div className="text-center">
-            <div className="text-slate-400 text-lg mb-2">No analytics data available</div>
-            <div className="text-slate-500 text-sm">
-              Install the tracking script above and wait for visitors to see analytics data here.
+           {/* Web Vitals Section */}
+           <div className="space-y-4">
+            <h3 className="text-xl font-heading font-extrabold text-foreground flex items-center px-1">
+              <Clock className="w-5 h-5 mr-2 text-accent" />
+              Core Web Vitals
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <StatCard
+                title="LCP (Loading)"
+                value={`${dashboardData?.avgLcp?.toFixed(0) || 0}ms`}
+                icon={Clock}
+                change={dashboardData?.avgLcpChange}
+                inverse={true}
+              />
+              <StatCard
+                title="CLS (Stability)"
+                value={`${dashboardData?.avgCls?.toFixed(3) || 0}`}
+                icon={TrendingDown}
+                change={dashboardData?.avgClsChange}
+                inverse={true}
+              />
+              <StatCard
+                title="FID (Interaction)"
+                value={`${dashboardData?.avgFid?.toFixed(0) || 0}ms`}
+                icon={Users}
+                change={dashboardData?.avgFidChange}
+                inverse={true}
+              />
             </div>
           </div>
         </div>
-      )}
-    </>
+
+        {/* Sidebar Region */}
+        <div className="space-y-8">
+          {/* AI Insights Sidebar */}
+          <InsightsCard />
+
+          {/* Tracking Script Setup Card */}
+          <div className="premium-card bg-primary text-primary-foreground">
+            <h3 className="text-lg font-heading font-extrabold mb-2 text-white">Setup Helm</h3>
+            <p className="text-white/60 text-xs mb-6">
+              Inject the code below into your site's head to start collecting data.
+            </p>
+            <div className="space-y-4">
+              <div className="bg-black/20 rounded-lg p-3 font-mono text-[10px] break-all border border-white/10 text-white/90">
+                {`<script src="https://api-sentinel.getmusterup.com/static/tracker-v4.js" data-site-id="${selectedSite.id}"></script>`}
+              </div>
+              <button
+                onClick={copyTrackingScript}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-white text-primary font-bold text-xs rounded-xl transition-transform active:scale-95 shadow-lg"
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                <span>{copied ? "Copied to Clipboard" : "Copy Snippet"}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Simple Breakdown */}
+          <div className="premium-card">
+            <h3 className="text-base font-heading font-extrabold mb-6">Browsers & Tech</h3>
+            <div className="space-y-6">
+              <DoughnutChart
+                data={dashboardData?.topBrowsers?.map(b => b.count) || []}
+                labels={dashboardData?.topBrowsers?.map(b => b.value) || []}
+                innerRadius={70}
+              />
+              <div className="pt-4 border-t border-border/50">
+                 <DoughnutChart
+                  data={dashboardData?.topOS?.map(os => os.count) || []}
+                  labels={dashboardData?.topOS?.map(os => os.value) || []}
+                  innerRadius={70}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

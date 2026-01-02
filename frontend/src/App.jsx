@@ -14,8 +14,8 @@ const ErrorsPage = lazy(() => import("./pages/ErrorsPage"))
 
 // Loading component
 const PageLoader = () => (
-  <div className="flex items-center justify-center h-screen bg-slate-900">
-    <div className="w-12 h-12 border-4 border-indigo-500 rounded-full animate-spin border-t-transparent"></div>
+  <div className="flex items-center justify-center h-screen bg-background">
+    <div className="w-12 h-12 border-4 border-accent rounded-full animate-spin border-t-transparent"></div>
   </div>
 )
 

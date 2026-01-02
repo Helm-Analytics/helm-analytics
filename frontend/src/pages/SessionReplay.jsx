@@ -31,7 +31,6 @@ const SessionReplay = () => {
         fetchSessions();
     }, [selectedSite]);
 
-    // Load rrweb-player assets
     useEffect(() => {
         const loadRrwebPlayer = () => {
             if (document.querySelector('#rrweb-player-css')) {
@@ -58,45 +57,19 @@ const SessionReplay = () => {
         loadRrwebPlayer();
     }, []);
 
-    // Fetch events when session changes
     useEffect(() => {
         const fetchEvents = async () => {
             if (!selectedSite || !selectedSession) return;
             
             setLoadingEvents(true);
             setError(null);
-            setEvents([]); // Clear previous events
+            setEvents([]); 
 
             try {
                 const fetchedEvents = await api.getSessionEvents(selectedSite.id, selectedSession);
                 let eventList = Array.isArray(fetchedEvents) ? fetchedEvents : [];
-                
-                // Sort events by timestamp to ensure playback order
                 eventList.sort((a, b) => a.timestamp - b.timestamp);
-
-                // Pre-process events: Unpack if necessary
-                try {
-                     eventList = eventList.map(e => {
-                         if (typeof e === 'string') return JSON.parse(e);
-                         // Try to unpack if it looks like a packed event (usually has 'v' property)
-                         // But for safety, we can just try passing it.
-                         // Actually, standard practice with v2 is to just pass them, but if they are packed, we MUST unpack.
-                         // Let's assume they are NOT packed by default in our simple tracker, 
-                         // BUT if the recorder uses 'packFn', we need this.
-                         // Since we are using a simple recorder, let's just make sure they are valid objects.
-                         return e;
-                     });
-                } catch (e) {
-                    console.warn("Error parsing events", e);
-                }
-
-                console.log("Session Replay: Fetched", eventList.length, "events");
-                
-                if (eventList.length < 2) {
-                    setError(`Not enough events recorded (${eventList.length}) to replay this session.`);
-                } else {
-                    setEvents(eventList);
-                }
+                setEvents(eventList);
             } catch (error) {
                 console.error("Failed to fetch session events:", error);
                 setError(`Fetch Error: ${error.message || "Unknown error"}`);
@@ -108,82 +81,78 @@ const SessionReplay = () => {
         fetchEvents();
     }, [selectedSite, selectedSession]);
 
-    // Initialize player when events and ref are ready
     useEffect(() => {
         if (!playerLoaded || !window.rrwebPlayer || events.length < 2 || !playerRef.current) return;
-
-        // Clear previous content
         playerRef.current.innerHTML = '';
 
         try {
-            console.log('Initializing rrweb player with', events.length, 'events');
-            
-            // Validate events have required fields
             const validEvents = events.filter(e => e && typeof e === 'object' && e.type !== undefined);
-            
             if (validEvents.length < 2) {
-                setError(`Invalid event data. Expected 2+, got ${validEvents.length} valid events.`);
+                setError(`Insufficient state snapshots found (${validEvents.length}). Replay aborted.`);
                 return;
             }
 
-            // Create player instance and store ref
             const playerInstance = new window.rrwebPlayer({
                 target: playerRef.current,
                 props: {
                     events: validEvents,
                     width: playerRef.current.clientWidth || 800,
-                    height: 500,
-                    autoPlay: false, // Changed to false to prevent auto-destruction
+                    height: 550,
+                    autoPlay: false,
                     showController: true,
-                    UNSAFE_replayCanvas: true, // Use canvas mode for better compatibility
+                    UNSAFE_replayCanvas: true,
                 },
             });
 
-            console.log('rrweb player initialized successfully');
-
-            // Cleanup function
             return () => {
                 try {
                     if (playerInstance && typeof playerInstance.pause === 'function') {
                         playerInstance.pause();
                     }
-                } catch (err) {
-                    console.warn('Player cleanup error:', err);
-                }
+                } catch (err) {}
             };
         } catch (playerError) {
             console.error("rrwebPlayer instantiation failed:", playerError);
-            setError(`Player Error: ${playerError.message || 'Failed to initialize player'}`);
+            setError(`Playback initialization failed. Data format mismatch.`);
         }
     }, [events, playerLoaded]);
 
     if (!selectedSite) {
-        return (
-            <div className="flex items-center justify-center h-64 text-slate-400">
-                Select a site from the sidebar to view session replays.
+      return (
+        <div className="flex items-center justify-center h-96 helm-bg">
+          <div className="premium-card text-center max-w-md">
+            <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-border/50">
+              <PlayCircle className="w-8 h-8 text-accent/50" />
             </div>
-        );
+            <h2 className="text-xl font-heading font-extrabold text-foreground mb-2">No site selected</h2>
+            <p className="text-muted-foreground text-sm">Select a website from the sidebar to observe live session replays.</p>
+          </div>
+        </div>
+      );
     }
 
     return (
-        <div className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="space-y-8 animate-in fade-in duration-500 max-w-7xl mx-auto">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-border/50">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-200 flex items-center gap-3">
-                        <PlayCircle className="w-8 h-8 text-indigo-500" />
-                        Session Replay
+                   <div className="flex items-center space-x-2 text-accent font-bold text-xs uppercase tracking-widest mb-2">
+                        <PlayCircle className="w-4 h-4" />
+                        <span>Behavioral Intelligence</span>
+                    </div>
+                    <h1 className="text-4xl font-heading font-extrabold text-foreground tracking-tight">
+                        Session Observation
                     </h1>
-                    <p className="text-slate-400 mt-1">Watch how users interact with your site.</p>
+                    <p className="text-muted-foreground mt-1 text-sm">High-fidelity playback of user interactions and journeys.</p>
                 </div>
                 
-                <div className="w-full md:w-64">
-                    <label htmlFor="session-select" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                        Select Session
+                <div className="w-full md:w-80">
+                    <label htmlFor="session-select" className="block text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2.5 ml-1">
+                        Active Logs
                     </label>
                     <div className="relative">
                         <select
                             id="session-select"
-                            className="block w-full pl-3 pr-10 py-2 text-base border border-slate-600 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md bg-slate-800 text-slate-200"
+                            className="block w-full pl-4 pr-10 py-3 text-sm border border-border/60 focus:outline-none focus:ring-2 focus:ring-accent rounded-xl bg-white dark:bg-card text-foreground font-semibold shadow-sm transition-all"
                             value={selectedSession || ''}
                             onChange={(e) => setSelectedSession(e.target.value)}
                             disabled={sessions.length === 0}
@@ -191,41 +160,77 @@ const SessionReplay = () => {
                             {sessions.length > 0 ? (
                                 sessions.map(sessionID => (
                                     <option key={sessionID} value={sessionID}>
-                                        {sessionID.substring(0, 8)}... ( {sessionID} )
+                                        TS-{sessionID.substring(0, 8).toUpperCase()} (Current Trace)
                                     </option>
                                 ))
                             ) : (
-                                <option>No sessions found</option>
+                                <option>Awaiting session ingest...</option>
                             )}
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-slate-400">
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-accent">
                             <Film className="h-4 w-4" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-lg min-h-[600px] flex flex-col">
+            <div className="premium-card !p-8 min-h-[650px] flex flex-col bg-secondary/10 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent/0 via-accent/40 to-accent/0"></div>
+                
                 {loadingEvents ? (
-                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
-                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mb-4"></div>
-                        <p>Loading session data...</p>
+                    <div className="flex-1 flex flex-col items-center justify-center">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent mb-6"></div>
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Reconstructing DOM state...</p>
                     </div>
                 ) : error ? (
-                    <div className="flex-1 flex flex-col items-center justify-center text-slate-400">
-                        <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-                        <p>{error}</p>
+                    <div className="flex-1 flex flex-col items-center justify-center text-center p-12">
+                        <div className="w-16 h-16 bg-rose-50 dark:bg-rose-950/20 rounded-full flex items-center justify-center mb-6 border border-rose-100 dark:border-rose-900">
+                          <AlertCircle className="w-8 h-8 text-rose-500" />
+                        </div>
+                        <h4 className="text-lg font-heading font-extrabold text-foreground mb-2">Replay Failure</h4>
+                        <p className="text-muted-foreground text-sm max-w-xs">{error}</p>
                     </div>
                 ) : selectedSession ? (
-                    <div className="flex-1 bg-slate-900 rounded-lg overflow-hidden border border-slate-700 relative">
-                        <div ref={playerRef} className="w-full h-full"></div>
+                    <div className="flex-1 bg-white dark:bg-black/40 rounded-2xl overflow-hidden border border-border/60 shadow-inner p-1">
+                        <div ref={playerRef} className="w-full h-full rounded-xl overflow-hidden min-h-[550px]"></div>
                     </div>
                 ) : (
-                    <div className="flex-1 flex flex-col items-center justify-center text-slate-500">
-                        <Film className="w-16 h-16 mb-4 opacity-20" />
-                        <p>Select a session to start watching</p>
+                    <div className="flex-1 flex flex-col items-center justify-center opacity-40">
+                        <Film className="w-20 h-20 mb-6 text-muted-foreground" />
+                        <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Command: Select session for observation</p>
                     </div>
                 )}
+            </div>
+            
+            {/* Quick tips */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+               <div className="premium-card !p-5 bg-secondary/30 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
+                     <PlayCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-bold uppercase tracking-wider">Dynamic Reconstruct</h5>
+                    <p className="text-[10px] text-muted-foreground">Full DOM state rebuild per frame.</p>
+                  </div>
+               </div>
+               <div className="premium-card !p-5 bg-secondary/30 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
+                     <AlertCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-bold uppercase tracking-wider">Privacy Safe</h5>
+                    <p className="text-[10px] text-muted-foreground">Sensitive inputs are masked at ingest.</p>
+                  </div>
+               </div>
+               <div className="premium-card !p-5 bg-secondary/30 flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center text-accent">
+                     <Film className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h5 className="text-xs font-bold uppercase tracking-wider">Network Agnostic</h5>
+                    <p className="text-[10px] text-muted-foreground">Asynchronous event capture engine.</p>
+                  </div>
+               </div>
             </div>
         </div>
     );

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { api } from "../api"
-import LogoImg from "../assets/Logo.png"
+import Logo from "../components/Logo"
 
 const Login = () => {
   const [email, setEmail] = useState("")
@@ -26,25 +26,21 @@ const Login = () => {
   }
 
   return (
-    <div
-      className="min-h-screen bg-slate-900 flex items-center justify-center p-4"
-      style={{
-        backgroundImage: `radial-gradient(circle at 1px 1px, rgba(148, 163, 184, 0.15) 1px, transparent 0)`,
-        backgroundSize: "20px 20px",
-      }}
-    >
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <img src={LogoImg} alt="Helm Logo" className="w-32 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-slate-200">Welcome back</h2>
-          <p className="text-slate-400 mt-2">Sign in to your account</p>
+    <div className="min-h-screen helm-bg flex items-center justify-center p-6 bg-background">
+      <div className="w-full max-w-[440px] animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="text-center mb-10">
+          <Logo className="justify-center mb-6 scale-125" />
+          <h2 className="text-3xl font-heading font-extrabold text-foreground tracking-tight">Intelligence Awaits</h2>
+          <p className="text-muted-foreground mt-2 text-sm font-medium">Log in to your Helm Analytics dashboard</p>
         </div>
 
-        <div className="bg-slate-800 rounded-xl p-8 shadow-lg border border-slate-700">
+        <div className="premium-card !p-10 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-accent/0 via-accent to-accent/0 opacity-50"></div>
+          
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-200 mb-2">
-                Email
+            <div className="space-y-2">
+              <label htmlFor="email" className="block text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">
+                Command Email
               </label>
               <input
                 id="email"
@@ -52,14 +48,14 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="Enter your email"
+                className="w-full p-4 bg-secondary/50 border border-border/60 rounded-xl text-foreground placeholder-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all font-medium"
+                placeholder="admiral@example.com"
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-200 mb-2">
-                Password
+            <div className="space-y-2">
+              <label htmlFor="password" className="block text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] ml-1">
+                Access Key
               </label>
               <input
                 id="password"
@@ -67,33 +63,40 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                placeholder="Enter your password"
+                className="w-full p-4 bg-secondary/50 border border-border/60 rounded-xl text-foreground placeholder-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-accent/50 transition-all font-medium"
+                placeholder="••••••••••••"
               />
             </div>
 
             {error && (
-              <div className="p-3 bg-red-900/50 border border-red-700 rounded-lg text-red-300 text-sm">{error}</div>
+              <div className="p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-500 text-xs font-bold animate-in shake-1 border-rose-200">
+                {error}
+              </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full p-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-slate-800"
+              className="w-full py-4 bg-primary text-primary-foreground font-bold text-xs uppercase tracking-widest rounded-xl transition-all active:scale-[0.98] shadow-xl shadow-primary/10 disabled:opacity-70"
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading ? "Authenticating..." : "Establish Connection"}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-slate-400">
-              Don't have an account?{" "}
-              <a href="/signup" className="text-indigo-400 hover:text-indigo-300 font-medium">
-                Sign up
+          <div className="mt-8 text-center pt-8 border-t border-border/50">
+            <p className="text-muted-foreground text-xs font-medium">
+              New to the platform?{" "}
+              <a href="/signup" className="text-accent hover:text-accent/80 font-bold transition-colors">
+                Create Account
               </a>
             </p>
           </div>
         </div>
+        
+        {/* Footer info */}
+        <p className="mt-8 text-center text-muted-foreground/40 text-[10px] uppercase font-bold tracking-widest leading-loose">
+          Encrypted Session &bull; ISO-27001 Compliant &bull; 256-bit AES
+        </p>
       </div>
     </div>
   )

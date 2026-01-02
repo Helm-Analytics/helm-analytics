@@ -25,6 +25,13 @@
         let events = [];
         let lastUrl = location.href;
 
+        // Generate or retrieve Session ID
+        let sessionId = sessionStorage.getItem('sentinel_session_id');
+        if (!sessionId) {
+            sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+            sessionStorage.setItem('sentinel_session_id', sessionId);
+        }
+
         function track(payload = {}, options = {}) {
             const data = {
                 siteId: siteId,
@@ -32,6 +39,7 @@
                 referrer: document.referrer || '',
                 screenWidth: window.screen.width,
                 eventType: 'pageview', // Default to pageview if not overridden
+                sessionId: sessionId,
                 ...payload
             };
 
@@ -150,7 +158,9 @@
         });
 
         // --- RRWeb Session Recording ---
-        let sessionId = null;
+        // Note: sessionId here is for rrweb session recording, which might be different from the analytics sessionId
+        // but for simplicity and consistency, let's use the same one if possible.
+        let rrSessionId = null;
 
         // Check if rrweb is actually available
         if (window.rrweb) {
@@ -171,7 +181,7 @@
 
         function flushEvents(isUnload = false) {
              if (events.length > 0) {
-                const body = JSON.stringify({ siteId: siteId, events: events, sessionId: sessionId });
+                const body = JSON.stringify({ siteId: siteId, events: events, sessionId: rrSessionId });
                 events = []; // Clear buffer
                 fetch(sessionEndpoint, {
                     method: 'POST',
@@ -182,7 +192,7 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.sessionId) {
-                        sessionId = data.sessionId;
+                        rrSessionId = data.sessionId;
                     }
                 })
                 .catch(err => console.error('Sentinel session recording error:', err));
