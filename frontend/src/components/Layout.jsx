@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react"
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
-import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon, ChevronRight, Globe } from "lucide-react"
+import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon, ChevronRight, Globe, Book, Sparkles } from "lucide-react"
 import { api } from "../api"
 import Logo from "./Logo"
 import ChatWidget from "./ChatWidget"
+import Tutorial from "./Tutorial"
 
 const Layout = () => {
   const [sites, setSites] = useState([])
   const [selectedSite, setSelectedSite] = useState(null)
   const [newSiteName, setNewSiteName] = useState("")
   const [authLoading, setAuthLoading] = useState(true)
+  const [showTutorial, setShowTutorial] = useState(false)
   
   const location = useLocation()
   const navigate = useNavigate()
@@ -27,6 +29,11 @@ const Layout = () => {
       }
     }
     checkAuth()
+    
+    const hasSeenTutorial = localStorage.getItem("helm_seen_tutorial")
+    if (!hasSeenTutorial) {
+      setShowTutorial(true)
+    }
   }, [navigate])
 
   const fetchSites = async () => {
@@ -116,7 +123,7 @@ const Layout = () => {
     { path: "/heatmap", label: "Heatmaps", icon: MousePointer2 },
     { path: "/funnels", label: "Funnels", icon: GitMerge },
     { path: "/firewall", label: "Security", icon: Shield },
-    { path: "/errors", label: "Issues", icon: AlertOctagon },
+    { path: "/docs", label: "Help & Docs", icon: Book },
   ]
 
   return (
@@ -189,8 +196,18 @@ const Layout = () => {
         </div>
 
         {/* User / Footer Section */}
-        <div className="mt-auto p-4">
-           <div className="bg-secondary/40 rounded-2xl p-4 border border-border/40 backdrop-blur-sm">
+        <div className="mt-auto p-4 space-y-2">
+           <div className="bg-secondary/40 rounded-2xl p-4 border border-border/40 backdrop-blur-sm space-y-2">
+              <button
+                onClick={() => setShowTutorial(true)}
+                className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-accent transition-colors group"
+              >
+                <div className="p-2 bg-white dark:bg-black/20 rounded-lg shadow-sm border border-border/50 group-hover:border-accent/20 group-hover:bg-accent/5">
+                  <Sparkles className="w-4 h-4 text-accent/70 group-hover:text-accent" />
+                </div>
+                <span className="font-bold text-[10px] uppercase tracking-wider">Show Tutorial</span>
+              </button>
+
               <button
                 onClick={handleLogout}
                 className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-rose-500 transition-colors group"
@@ -220,6 +237,12 @@ const Layout = () => {
       </main>
 
       <ChatWidget siteId={selectedSite?.id} />
+      {showTutorial && (
+        <Tutorial onComplete={() => {
+          setShowTutorial(false)
+          localStorage.setItem("helm_seen_tutorial", "true")
+        }} />
+      )}
     </div>
   )
 }
