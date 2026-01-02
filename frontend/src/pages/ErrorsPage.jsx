@@ -66,8 +66,9 @@ const ErrorsPage = () => {
               <table className="w-full text-left border-collapse">
                   <thead className="bg-secondary/30 text-muted-foreground text-[10px] font-bold uppercase tracking-wider">
                       <tr>
+                          <th className="px-6 py-4 font-bold">Severity</th>
                           <th className="px-6 py-4 font-bold">Trace & Origin</th>
-                          <th className="px-6 py-4 font-bold">Code Point</th>
+                          <th className="px-6 py-4 font-bold text-right">Impact</th>
                           <th className="px-6 py-4 font-bold text-right">Occurrence</th>
                           <th className="px-6 py-4 font-bold text-right">Last Detected</th>
                       </tr>
@@ -75,6 +76,15 @@ const ErrorsPage = () => {
                   <tbody className="divide-y divide-border/50 bg-white dark:bg-card">
                       {errors.map((err, idx) => (
                           <tr key={idx} className="hover:bg-secondary/20 transition-all group">
+                              <td className="px-6 py-6">
+                                  <span className={`px-2 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-widest ${
+                                      err.severity === 'Critical' 
+                                      ? 'bg-rose-500 text-white animate-pulse' 
+                                      : 'bg-amber-500 text-white'
+                                  }`}>
+                                      {err.severity || 'Error'}
+                                  </span>
+                              </td>
                               <td className="px-6 py-6">
                                   <div className="flex items-start gap-4">
                                       <div className="p-2 bg-rose-50 dark:bg-rose-950/20 rounded-xl group-hover:scale-110 transition-transform">
@@ -84,18 +94,16 @@ const ErrorsPage = () => {
                                           <div className="font-mono text-sm text-foreground font-bold break-all leading-relaxed">{err.message}</div>
                                           <div className="text-[10px] text-muted-foreground/60 mt-1.5 flex items-center gap-2 font-bold uppercase tracking-tight">
                                               <Terminal className="w-3.5 h-3.5" />
-                                              <span className="truncate max-w-[300px]">{err.source || 'Anonymous Runtime'}</span>
+                                              <span className="truncate max-w-[300px]">{err.source || 'Anonymous Runtime'} (Line: {err.lineNo})</span>
                                           </div>
                                       </div>
                                   </div>
                               </td>
-                              <td className="px-6 py-6">
-                                  <span className="font-mono text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded-md border border-border/30">
-                                    Line: {err.lineNo}
-                                  </span>
+                              <td className="px-6 py-6 text-right font-bold text-sm text-foreground">
+                                  {err.userImpact} <span className="text-[10px] text-muted-foreground uppercase">Users</span>
                               </td>
                               <td className="px-6 py-6 text-right">
-                                  <span className="bg-rose-500 text-white px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm shadow-rose-500/20">
+                                  <span className="bg-secondary text-foreground px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm">
                                       {err.count}
                                   </span>
                               </td>
