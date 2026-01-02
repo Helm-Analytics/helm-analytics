@@ -334,30 +334,33 @@ const FirewallPage = () => {
           </div>
 
           {/* Honey Pot Sidebar */}
-          <div className="premium-card bg-primary text-primary-foreground border-transparent overflow-hidden">
+          <div className="premium-card bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20 overflow-hidden">
               <div className="flex items-center gap-3 mb-4">
-                 <div className="p-2 bg-white/10 rounded-xl">
+                 <div className="p-2 bg-amber-500/20 rounded-xl">
                     <span className="text-xl">🍯</span>
                  </div>
-                 <h2 className="text-lg font-heading font-extrabold text-white">Spider Trap</h2>
+                 <div>
+                    <h2 className="text-lg font-heading font-extrabold text-foreground">Spider Trap</h2>
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Honeypot Implementation</p>
+                 </div>
               </div>
-              <p className="text-white/70 text-xs leading-relaxed mb-6">
+              <p className="text-muted-foreground text-xs leading-relaxed mb-6">
                   Catch automated crawlers by adding this invisible gateway to your site's header or footer. 
                   Bots that interact with this link will be identified and mitigated instantly.
               </p>
               <div className="relative group mb-4">
-                  <div className="bg-black/20 border border-white/5 rounded-xl p-4 font-mono text-[10px] text-accent/80 break-all select-all">
+                  <div className="bg-secondary/50 border border-border/50 rounded-xl p-4 font-mono text-[10px] text-accent/80 break-all select-all">
                     {`<a href="https://api-sentinel.getmusterup.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
                   </div>
                   <button 
                         onClick={() => copyToClipboard(`<a href="https://api-sentinel.getmusterup.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`)}
-                        className="absolute top-2 right-2 p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all border border-white/5 backdrop-blur-sm opacity-0 group-hover:opacity-100"
+                        className="absolute top-2 right-2 p-2 bg-background/80 hover:bg-background rounded-lg transition-all border border-border/50 backdrop-blur-sm opacity-0 group-hover:opacity-100"
                         title="Copy Snippet"
                     >
-                        {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-white" />}
+                        {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-foreground" />}
                   </button>
               </div>
-              <div className="flex items-center gap-2 text-white/40 text-[10px] uppercase font-bold tracking-widest">
+              <div className="flex items-center gap-2 text-muted-foreground/60 text-[10px] uppercase font-bold tracking-widest">
                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
                  <span>Module Ready</span>
               </div>

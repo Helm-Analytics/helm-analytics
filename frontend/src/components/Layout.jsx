@@ -171,7 +171,7 @@ const Layout = () => {
                     onClick={() => setSelectedSite(site)}
                     className={`w-full flex items-center justify-between group px-2.5 py-2 rounded-lg text-xs transition-all duration-200 border ${
                       selectedSite?.id === site.id 
-                        ? "bg-primary text-white border-primary shadow-sm active:scale-[0.98]" 
+                        ? "bg-primary text-white border-primary shadow-sm active:scale-[0.98] dark:bg-accent/10 dark:text-accent dark:border-accent/20" 
                         : "text-muted-foreground hover:bg-secondary hover:text-foreground border-transparent"
                     }`}
                   >
