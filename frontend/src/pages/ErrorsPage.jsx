@@ -27,6 +27,23 @@ const ErrorsPage = () => {
     }
   };
 
+  const handleExpand = async (idx) => {
+    const isExpanding = expandedId !== idx;
+    setExpandedId(isExpanding ? idx : null);
+    
+    const err = errors[idx];
+    if (isExpanding && !err.mitigation) {
+        try {
+            const response = await api.analyzeError(err.message, err.source);
+            const updatedErrors = [...errors];
+            updatedErrors[idx].mitigation = response.mitigation;
+            setErrors(updatedErrors);
+        } catch (e) {
+            console.error("AI Analysis failed", e);
+        }
+    }
+  };
+
   if (!selectedSite) {
     return (
       <div className="flex items-center justify-center h-96 helm-bg">
@@ -75,47 +92,109 @@ const ErrorsPage = () => {
                       </tr>
                   </thead>
                   <tbody className="divide-y divide-border/50 bg-white dark:bg-card">
-                      {errors.map((err, idx) => (
-                          <tr key={idx} className="hover:bg-secondary/20 transition-all group">
-                              <td className="px-6 py-6">
-                                  <span className={`px-2 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-widest ${
-                                      err.severity === 'Critical' 
-                                      ? 'bg-rose-500 text-white animate-pulse' 
-                                      : 'bg-amber-500 text-white'
-                                  }`}>
-                                      {err.severity || 'Error'}
-                                  </span>
-                              </td>
-                              <td className="px-6 py-6">
-                                  <div className="flex items-start gap-4">
-                                      <div className="p-2 bg-rose-50 dark:bg-rose-950/20 rounded-xl group-hover:scale-110 transition-transform">
-                                        <AlertTriangle className="w-5 h-5 text-rose-500 flex-shrink-0" />
-                                      </div>
-                                      <div>
-                                          <div className="font-mono text-sm text-foreground font-bold break-all leading-relaxed">{err.message}</div>
-                                          <div className="text-[10px] text-muted-foreground/60 mt-1.5 flex items-center gap-2 font-bold uppercase tracking-tight">
-                                              <Terminal className="w-3.5 h-3.5" />
-                                              <span className="truncate max-w-[300px]">{err.source || 'Anonymous Runtime'} (Line: {err.lineNo})</span>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </td>
-                              <td className="px-6 py-6 text-right font-bold text-sm text-foreground">
-                                  {err.userImpact} <span className="text-[10px] text-muted-foreground uppercase">Users</span>
-                              </td>
-                              <td className="px-6 py-6 text-right">
-                                  <span className="bg-secondary text-foreground px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm">
-                                      {err.count}
-                                  </span>
-                              </td>
-                              <td className="px-6 py-6 text-right">
-                                  <div className="flex items-center justify-end gap-2 text-[10px] font-bold text-muted-foreground/80 uppercase tracking-tight">
-                                     <Clock className="w-3.5 h-3.5" />
-                                     {new Date(err.lastSeen).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
-                                  </div>
-                              </td>
-                          </tr>
-                      ))}
+                       {errors.map((err, idx) => (
+                           <React.Fragment key={idx}>
+                           <tr 
+                             className={`hover:bg-secondary/20 transition-all group cursor-pointer ${expandedId === idx ? 'bg-secondary/30' : ''}`}
+                             onClick={() => handleExpand(idx)}
+                           >
+                               <td className="px-6 py-6 transition-all">
+                                   <div className="flex items-center gap-3">
+                                       {expandedId === idx ? <ChevronDown className="w-4 h-4 text-muted-foreground" /> : <ChevronRight className="w-4 h-4 text-muted-foreground" />}
+                                       <span className={`px-2 py-1 rounded-md text-[10px] font-extrabold uppercase tracking-widest ${
+                                           err.severity === 'Critical' 
+                                           ? 'bg-rose-500 text-white animate-pulse' 
+                                           : 'bg-amber-500 text-white'
+                                       }`}>
+                                           {err.severity || 'Error'}
+                                       </span>
+                                   </div>
+                               </td>
+                               <td className="px-6 py-6">
+                                   <div className="flex items-start gap-4">
+                                       <div className="p-2 bg-rose-50 dark:bg-rose-950/20 rounded-xl group-hover:scale-110 transition-transform">
+                                         <AlertTriangle className="w-5 h-5 text-rose-500 flex-shrink-0" />
+                                       </div>
+                                       <div className="max-w-md">
+                                           <div className="font-mono text-sm text-foreground font-bold break-words leading-relaxed line-clamp-2">{err.message}</div>
+                                           <div className="text-[10px] text-muted-foreground/60 mt-1.5 flex items-center gap-2 font-bold uppercase tracking-tight">
+                                               <Terminal className="w-3.5 h-3.5" />
+                                               <span className="truncate">{err.source || 'Anonymous Runtime'} (Line: {err.lineNo})</span>
+                                           </div>
+                                       </div>
+                                   </div>
+                               </td>
+                               <td className="px-6 py-6 text-right font-bold text-sm text-foreground">
+                                   <span className="text-accent">{err.userImpact}</span> <span className="text-[10px] text-muted-foreground uppercase ml-1">Users</span>
+                               </td>
+                               <td className="px-6 py-6 text-right">
+                                   <span className="bg-secondary text-foreground px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm border border-border/40">
+                                       {err.count}
+                                   </span>
+                               </td>
+                               <td className="px-6 py-6 text-right">
+                                   <div className="flex items-center justify-end gap-2 text-[10px] font-bold text-muted-foreground/80 uppercase tracking-tight">
+                                      <Clock className="w-3.5 h-3.5" />
+                                      {new Date(err.lastSeen).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })}
+                                   </div>
+                               </td>
+                           </tr>
+                           {expandedId === idx && (
+                               <tr className="bg-secondary/5 border-l-4 border-l-accent animate-in slide-in-from-top-4 duration-300">
+                                   <td colSpan="5" className="px-12 py-10 space-y-10">
+                                       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                                           {/* Technical Context */}
+                                           <div className="space-y-4">
+                                               <div className="flex items-center justify-between">
+                                                   <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center">
+                                                       <Terminal className="w-4 h-4 mr-2" />
+                                                       Stack Context
+                                                   </h4>
+                                                   <button 
+                                                     className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-card border border-border/50 text-foreground text-[10px] font-extrabold uppercase tracking-wider rounded-xl hover:bg-secondary/50 hover:border-accent/40 hover:text-accent transition-all shadow-sm"
+                                                     onClick={(e) => {
+                                                       e.stopPropagation();
+                                                       window.location.href = `/session-replay?clientIp=${err.clientIp}`;
+                                                     }}
+                                                   >
+                                                       <Play className="w-3.5 h-3.5" />
+                                                       Replay Occurrence
+                                                   </button>
+                                               </div>
+                                               <div className="bg-slate-900 rounded-2xl p-6 font-mono text-xs text-slate-300 overflow-x-auto shadow-2xl border border-white/5 max-h-80 custom-scrollbar">
+                                                   <pre className="whitespace-pre-wrap leading-relaxed">{err.errorObj || 'No stack trace available for this event.'}</pre>
+                                               </div>
+                                           </div>
+
+                                           {/* AI Intelligence */}
+                                           <div className="space-y-4">
+                                               <h4 className="text-xs font-bold uppercase tracking-widest text-accent flex items-center">
+                                                   <Sparkles className="w-4 h-4 mr-2" />
+                                                   Helm Intelligence
+                                               </h4>
+                                               <div className="premium-card bg-white dark:bg-card border-accent/20 border-2 p-8 relative overflow-hidden group min-h-[220px] shadow-2xl shadow-accent/5">
+                                                   <div className="absolute -top-12 -right-12 w-40 h-40 bg-accent/10 rounded-full blur-3xl opacity-50 group-hover:scale-125 transition-transform duration-1000"></div>
+                                                   <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:rotate-12 transition-transform">
+                                                       <Sparkles className="w-16 h-16 text-accent" />
+                                                   </div>
+                                                   <div className="relative text-sm text-foreground/90 leading-relaxed space-y-3 prose prose-slate dark:prose-invert max-w-none">
+                                                        {err.mitigation ? (
+                                                            <div className="space-y-4" dangerouslySetInnerHTML={{ __html: err.mitigation }} />
+                                                        ) : (
+                                                            <div className="italic text-muted-foreground flex flex-col items-center justify-center py-12 gap-4">
+                                                                <div className="w-6 h-6 border-2 border-accent border-t-transparent rounded-full animate-spin"></div>
+                                                                <span className="font-bold uppercase tracking-widest text-[10px]">Processing Trace Log...</span>
+                                                            </div>
+                                                        )}
+                                                   </div>
+                                               </div>
+                                           </div>
+                                       </div>
+                                   </td>
+                               </tr>
+                           )}
+                           </React.Fragment>
+                       ))}
                   </tbody>
               </table>
            </div>
