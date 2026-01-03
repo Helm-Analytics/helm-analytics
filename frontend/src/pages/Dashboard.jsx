@@ -142,8 +142,8 @@ const Dashboard = () => {
         <div className="lg:col-span-8 space-y-8">
 
           {/* Visitor Traffic Graph */}
-          <div id="tut-traffic-graph" className="premium-card !p-0 overflow-hidden shadow-2xl shadow-slate-200">
-            <div className="p-6 border-b border-border/50 flex items-center justify-between bg-slate-50/50">
+          <div id="tut-traffic-graph" className="premium-card !p-0 overflow-hidden shadow-2xl shadow-slate-200 dark:shadow-none">
+            <div className="p-6 border-b border-border/50 flex items-center justify-between">
               <h3 className="text-lg font-heading font-extrabold flex items-center">
                 <Users className="w-5 h-5 mr-3 text-accent" />
                 Visitor Traffic
