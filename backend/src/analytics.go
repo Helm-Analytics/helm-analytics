@@ -450,6 +450,7 @@ func GetErrorsStatsHandler(w http.ResponseWriter, r *http.Request) {
 		LIMIT 20
 	`
 
+	log.Printf("DEBUG: Executing Error Stats Query for SiteID: %s", siteID)
 	rows, err := chConn.Query(ctx, query, siteID)
 	if err != nil {
 		log.Printf("Error querying error stats: %v", err)
@@ -471,14 +472,17 @@ func GetErrorsStatsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var stats []ErrorStat
+	rowCount := 0
 	for rows.Next() {
+		rowCount++
 		var s ErrorStat
 		if err := rows.Scan(&s.Message, &s.Source, &s.LineNo, &s.Count, &s.UserImpact, &s.LastSeen, &s.Severity, &s.Mitigation, &s.ErrorObj); err != nil {
-			log.Printf("Scan error: %v", err)
+			log.Printf("ERROR: Scan error in GetErrorsStats: %v", err)
 			continue
 		}
 		stats = append(stats, s)
 	}
+	log.Printf("DEBUG: Found %d error rows for SiteID: %s", len(stats), siteID)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(stats)
