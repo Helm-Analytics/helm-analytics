@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, Bot } from 'lucide-react';
+import { MessageSquare, X, Send, MessageCircleQuestion } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { api } from '../api';
 
@@ -53,7 +53,7 @@ const ChatWidget = ({ siteId }) => {
                         <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
                         <div className="flex items-center gap-4 relative z-10">
                             <div className="p-2 bg-accent/20 rounded-xl shadow-inner border border-white/5">
-                                <Bot className="w-5 h-5 text-accent" />
+                                <MessageCircleQuestion className="w-5 h-5 text-accent" />
                             </div>
                             <div>
                                 <span className="block font-heading font-extrabold text-white text-base tracking-tight">Helm Assistant</span>

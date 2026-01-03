@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
-import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon, ChevronRight, Globe, Book, Sparkles, Sun, Moon } from "lucide-react"
+import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon, ChevronRight, Globe, Book, Sparkles, Sun, Moon, GraduationCap } from "lucide-react"
 import { api } from "../api"
 import Logo from "./Logo"
 import ChatWidget from "./ChatWidget"
@@ -219,7 +219,7 @@ const Layout = () => {
                  className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-accent transition-colors group"
                >
                  <div className="p-1.5 bg-white dark:bg-black/20 rounded-md shadow-sm border border-border/50 group-hover:border-accent/20 group-hover:bg-accent/5">
-                   <Sparkles className="w-3.5 h-3.5 text-accent/70 group-hover:text-accent" />
+                   <GraduationCap className="w-3.5 h-3.5 text-accent/70 group-hover:text-accent" />
                  </div>
                  <span className="font-bold text-[9px] uppercase tracking-wider">Tutorial</span>
                </button>

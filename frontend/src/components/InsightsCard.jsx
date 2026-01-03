@@ -1,6 +1,6 @@
 import React from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { Sparkles, Lightbulb, Zap, RefreshCcw } from 'lucide-react';
+import { TrendingUp, Lightbulb, Zap, RefreshCcw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useDashboardStore } from '../store/useDashboardStore';
 
@@ -18,7 +18,7 @@ const InsightsCard = () => {
     return (
       <div className="premium-card bg-slate-900 border-none rounded-2xl p-8 shadow-2xl animate-pulse h-full flex flex-col justify-center items-center overflow-hidden relative min-h-[350px]">
         <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-transparent animate-pulse"></div>
-        <Sparkles className="w-10 h-10 text-accent mb-4 animate-spin-slow relative z-10" />
+        <RefreshCcw className="w-10 h-10 text-accent mb-4 animate-spin relative z-10" />
         <span className="text-slate-400 text-xs font-bold uppercase tracking-widest relative z-10">Syncing Intelligence...</span>
       </div>
     );
@@ -38,7 +38,7 @@ const InsightsCard = () => {
         <div className="flex items-center justify-between mb-8">
             <h3 className="text-xl font-heading font-extrabold text-white flex items-center gap-3">
               <div className="p-2 bg-accent/20 rounded-lg">
-                <Sparkles className="w-5 h-5 text-accent" />
+                <TrendingUp className="w-5 h-5 text-accent" />
               </div>
               Helm Intelligence
             </h3>

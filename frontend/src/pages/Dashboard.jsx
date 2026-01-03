@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useOutletContext } from "react-router-dom"
-import { Eye, Users, TrendingDown, Clock, Copy, Check, ShieldCheck, Sparkles } from "lucide-react"
+import { Eye, Users, TrendingDown, Clock, Copy, Check, ShieldCheck, Sparkles, Laptop } from "lucide-react"
 import { useDashboardStore } from "../store/useDashboardStore"
 import StatCard from "../components/StatCard"
 import InsightsCard from "../components/InsightsCard"
@@ -157,13 +157,12 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Technology Distribution */}
-          <div className="premium-card">
-            <h3 className="text-base font-heading font-extrabold mb-6 flex items-center border-b border-border/50 pb-4 -mx-6 px-6">
-              <Sparkles className="w-4 h-4 mr-2 text-accent" />
-              Technology Distribution
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="premium-card">
+              <h3 className="text-base font-heading font-extrabold mb-6 flex items-center border-b border-border/50 pb-4 -mx-6 px-6">
+                <Laptop className="w-4 h-4 mr-2 text-accent" />
+                Technology Distribution
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Top Browsers</p>
                 <DoughnutChart
