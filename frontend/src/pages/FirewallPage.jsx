@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
-import { Shield, Plus, Trash2, AlertTriangle, Globe, Hash, Server, Copy, Check } from 'lucide-react';
+import { Shield, Plus, Trash2, AlertTriangle, Globe, Hash, Server, Copy, Check, Cpu, Hexagon } from 'lucide-react';
 import PremiumSelect from '../components/PremiumSelect';
 
 const FirewallPage = () => {
@@ -282,7 +282,7 @@ const FirewallPage = () => {
            <div className="premium-card bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-indigo-500/20">
               <div className="flex items-center gap-3 mb-4">
                   <div className="p-2 bg-indigo-500/20 rounded-xl">
-                      <span className="text-xl">🤖</span>
+                      <Cpu className="w-6 h-6 text-indigo-400" />
                   </div>
                   <div>
                       <h2 className="text-lg font-heading font-extrabold text-foreground">Helm Intelligence</h2>
@@ -337,7 +337,7 @@ const FirewallPage = () => {
           <div className="premium-card bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20 overflow-hidden">
               <div className="flex items-center gap-3 mb-4">
                  <div className="p-2 bg-amber-500/20 rounded-xl">
-                    <span className="text-xl">🍯</span>
+                    <Hexagon className="w-6 h-6 text-amber-500" />
                  </div>
                  <div>
                     <h2 className="text-lg font-heading font-extrabold text-foreground">Spider Trap</h2>

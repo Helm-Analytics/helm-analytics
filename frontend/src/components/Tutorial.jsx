@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { X, ChevronRight, ChevronLeft, Zap, Shield, LayoutDashboard, Sparkles, CheckCircle2 } from 'lucide-react';
+import { X, ChevronRight, ChevronLeft, Zap, Shield, LayoutDashboard, CheckCircle2, GraduationCap } from 'lucide-react';
 
 const Tutorial = ({ onComplete }) => {
     const navigate = useNavigate();
@@ -178,7 +178,7 @@ const Tutorial = ({ onComplete }) => {
             >
                 <div className="flex justify-between items-start mb-4">
                     <div className="p-2 bg-accent/10 rounded-lg">
-                        <Sparkles className="w-5 h-5 text-accent" />
+                        <GraduationCap className="w-5 h-5 text-accent" />
                     </div>
                     <button onClick={onComplete} className="text-muted-foreground hover:text-foreground">
                         <X className="w-4 h-4" />

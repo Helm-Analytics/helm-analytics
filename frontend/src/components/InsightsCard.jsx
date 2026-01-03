@@ -1,6 +1,6 @@
 import React from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { TrendingUp, Lightbulb, Zap, RefreshCcw } from 'lucide-react';
+import { TrendingUp, Lightbulb, BrainCircuit, RefreshCcw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useDashboardStore } from '../store/useDashboardStore';
 
@@ -52,7 +52,7 @@ const InsightsCard = () => {
                     <RefreshCcw className={`w-3.5 h-3.5 md:w-4 md:h-4 ${loading ? 'animate-spin' : 'group-hover/btn:rotate-180 transition-transform duration-500'}`} />
                 </button>
                 <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
-                    <Zap className="w-3 h-3 text-accent fill-accent" />
+                    <BrainCircuit className="w-3 h-3 text-accent" />
                     <span className="text-[10px] text-white font-bold uppercase tracking-widest">AI Engine</span>
                 </div>
             </div>

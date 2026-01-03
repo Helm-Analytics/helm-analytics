@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useOutletContext } from "react-router-dom"
-import { Eye, Users, TrendingDown, Clock, Copy, Check, ShieldCheck, Sparkles, Laptop } from "lucide-react"
+import { ScanEye, Users, ArrowDownRight, Timer, Copy, Check, Fingerprint, Laptop } from "lucide-react"
 import { useDashboardStore } from "../store/useDashboardStore"
 import StatCard from "../components/StatCard"
 import InsightsCard from "../components/InsightsCard"
@@ -61,7 +61,7 @@ const Dashboard = () => {
       <div className="flex items-center justify-center h-96 helm-bg">
         <div className="premium-card text-center max-w-md">
           <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-border/50">
-            <Eye className="w-8 h-8 text-accent/50" />
+            <ScanEye className="w-8 h-8 text-accent/50" />
           </div>
           <h2 className="text-xl font-heading font-extrabold text-foreground mb-2">No site selected</h2>
           <p className="text-muted-foreground text-sm">Select or add a website from the sidebar to start viewing your traffic intelligence.</p>
@@ -104,7 +104,7 @@ const Dashboard = () => {
           <StatCard
             title="Total Views"
             value={dashboardData.totalViews?.toLocaleString() || "0"}
-            icon={Eye}
+            icon={ScanEye}
             change={dashboardData.totalViewsChange}
           />
           <StatCard
@@ -116,20 +116,20 @@ const Dashboard = () => {
           <StatCard
             title="Bounce Rate"
             value={`${dashboardData.bounceRate?.toFixed(1) || 0}%`}
-            icon={TrendingDown}
+            icon={ArrowDownRight}
             change={dashboardData.bounceRateChange}
             inverse={true}
           />
           <StatCard
             title="Avg. Duration"
             value={dashboardData.avgVisitTime || "0s"}
-            icon={Clock}
+            icon={Timer}
             change={dashboardData.avgVisitTimeChange}
           />
           <StatCard
             title="Traffic Quality"
             value={`${dashboardData.trafficQualityScore?.toFixed(0) || 0}%`}
-            icon={ShieldCheck}
+            icon={Fingerprint}
             change={dashboardData.trafficQualityScoreChange}
             isQualityScore={true}
           />
@@ -210,21 +210,21 @@ const Dashboard = () => {
           {/* Web Vitals Section */}
           <div className="space-y-6">
             <h3 className="text-lg font-heading font-extrabold text-foreground flex items-center px-1 border-b border-border/50 pb-4">
-              <Clock className="w-5 h-5 mr-3 text-accent" />
+              <Timer className="w-5 h-5 mr-3 text-accent" />
               Web Vitals
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <StatCard
                 title="LCP (Loading)"
                 value={`${dashboardData?.avgLcp?.toFixed(0) || 0}ms`}
-                icon={Clock}
+                icon={Timer}
                 change={dashboardData?.avgLcpChange}
                 inverse={true}
               />
               <StatCard
                 title="CLS (Stability)"
                 value={`${dashboardData?.avgCls?.toFixed(3) || 0}`}
-                icon={TrendingDown}
+                icon={ArrowDownRight}
                 change={dashboardData?.avgClsChange}
                 inverse={true}
               />
@@ -245,7 +245,7 @@ const Dashboard = () => {
           {/* Setup Guide - Sidebar Placement */}
           <div id="tut-setup-guide" className="premium-card bg-[#0F172A] border-none shadow-2xl relative overflow-hidden group mb-8">
             <div className="absolute top-0 right-0 p-4 opacity-10">
-              <ShieldCheck className="w-12 h-12 text-accent rotate-12" />
+              <Fingerprint className="w-12 h-12 text-accent rotate-12" />
             </div>
             <h3 className="text-lg font-heading font-extrabold mb-2 text-white flex items-center">
               Setup Helm
