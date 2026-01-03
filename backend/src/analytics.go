@@ -324,8 +324,8 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request) {
 	ipStr := getClientIP(r)
 
 	ctx := context.Background()
-	err := chConn.AsyncInsert(ctx, "INSERT INTO sentinel.errors VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", false,
-		time.Now().UTC(), jsErr.SiteID, ipStr, jsErr.URL, jsErr.Message, jsErr.Source, uint32(jsErr.LineNo), uint32(jsErr.ColNo), jsErr.ErrorObj,
+	err := chConn.AsyncInsert(ctx, "INSERT INTO sentinel.errors VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", true,
+		time.Now().UTC(), jsErr.SiteID, ipStr, jsErr.URL, jsErr.Message, jsErr.Source, uint32(jsErr.LineNo), uint32(jsErr.ColNo), jsErr.ErrorObj, "", "",
 	)
 	if err != nil {
 		log.Printf("Error inserting JS error: %v", err)
