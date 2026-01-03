@@ -51,6 +51,13 @@ const Tutorial = ({ onComplete }) => {
             targetId: "tut-shield-toggle",
             path: "/firewall",
             position: "bottom"
+        },
+        {
+            title: "Docs & Help",
+            description: "Need integration guides? Check our comprehensive documentation for one-click code snippets and API references.",
+            targetId: "tut-nav-help-&-docs",
+            path: "/dashboard", // Sidebar is visible here
+            position: "right"
         }
     ];
 

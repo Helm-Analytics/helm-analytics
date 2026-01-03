@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	_ "sentinel-backend/docs"
+	//	_ "sentinel-backend/docs"
 	sentinel "sentinel-backend/src"
 
 	"github.com/rs/cors"
@@ -90,7 +90,9 @@ func main() {
 	mux.Handle("/api/ai/analyze-error", apiCors.Handler(sentinel.AuthMiddleware(sentinel.AnalyzeErrorHandler)))
 
 	// Swagger documentation
-	mux.HandleFunc("/docs/", httpSwagger.WrapHandler)
+	mux.Handle("/docs/", httpSwagger.Handler(
+		httpSwagger.URL("/static/swagger.yaml"), // The url pointing to API definition
+	))
 
 	log.Println("HELM BACKEND: Analytics Fixes Applied (v2.1) - Starting server on :6060")
 	if err := http.ListenAndServe(":6060", mux); err != nil {
