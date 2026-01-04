@@ -13,6 +13,7 @@ const HeatmapPage = lazy(() => import("./pages/HeatmapPage"))
 const ErrorsPage = lazy(() => import("./pages/ErrorsPage"))
 const CustomEventsPage = lazy(() => import("./pages/CustomEventsPage"))
 const DocsPage = lazy(() => import("./pages/DocsPage"))
+const ActivityPage = lazy(() => import("./pages/ActivityPage"))
 
 // Loading component
 const PageLoader = () => (
@@ -37,6 +38,7 @@ function App() {
             <Route path="/errors" element={<ErrorsPage />} />
             <Route path="/funnels" element={<FunnelsPage />} />
             <Route path="/custom-events" element={<CustomEventsPage />} />
+            <Route path="/activity" element={<ActivityPage />} />
             <Route path="/firewall" element={<FirewallPage />} />
             <Route path="/docs" element={<DocsPage />} />
           </Route>

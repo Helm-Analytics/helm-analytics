@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
-import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
-import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon, ChevronRight, Globe, Book, Sun, Moon, GraduationCap, Activity } from "lucide-react"
-import { api } from "../api"
-import Logo from "./Logo"
+import { Outlet,useLocation, Link, useNavigate } from "react-router-dom"
+import { LayoutDashboard, PlayCircle, MousePointer2, GitMerge, AlertOctagon, Activity, Shield, Book, Globe, Plus, ChevronRight, Trash2, List, LogOut, Moon, Sun, Menu, X } from "lucide-react"
+import api from "../api"
+import Logo from "../assets/logo.jsx"
 import ChatWidget from "./ChatWidget"
 import Tutorial from "./Tutorial"
+
 
 const Layout = () => {
   const [sites, setSites] = useState([])
@@ -140,6 +141,7 @@ const Layout = () => {
     { path: "/heatmap", label: "Heatmaps", icon: MousePointer2 },
     { path: "/funnels", label: "Funnels", icon: GitMerge },
     { path: "/custom-events", label: "Events", icon: Activity },
+    { path: "/activity", label: "Activity Log", icon: List },
     { path: "/firewall", label: "Security", icon: Shield },
     { path: "/errors", label: "Issues", icon: AlertOctagon },
     { path: "/docs", label: "Help & Docs", icon: Book },
@@ -168,21 +170,32 @@ const Layout = () => {
             <div className="space-y-1 max-h-[140px] overflow-y-auto pr-1 scrollbar-thin">
               {sites.length > 0 ? (
                 sites.map((site) => (
-                  <button
+                  <div
                     key={site.id}
-                    onClick={() => setSelectedSite(site)}
                     className={`w-full flex items-center justify-between group px-2.5 py-2 rounded-lg text-xs transition-all duration-200 border ${
                       selectedSite?.id === site.id 
-                        ? "bg-primary text-white border-primary shadow-sm active:scale-[0.98] dark:bg-accent/10 dark:text-accent dark:border-accent/20" 
+                        ? "bg-primary text-white border-primary shadow-sm dark:bg-accent/10 dark:text-accent dark:border-accent/20" 
                         : "text-muted-foreground hover:bg-secondary hover:text-foreground border-transparent"
                     }`}
                   >
-                    <div className="flex items-center space-x-2.5 overflow-hidden">
+                    <button
+                      onClick={() => setSelectedSite(site)}
+                      className="flex items-center space-x-2.5 overflow-hidden flex-1"
+                    >
                       <Globe className={`w-3.5 h-3.5 flex-shrink-0 ${selectedSite?.id === site.id ? 'text-accent' : 'text-muted-foreground/50 group-hover:text-accent/50'}`} />
                       <span className="truncate font-medium">{site.name}</span>
-                    </div>
-                    {selectedSite?.id === site.id && <ChevronRight className="w-3 h-3 text-accent" />}
-                  </button>
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSite(site.id);
+                      }}
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/10 rounded transition-all"
+                      title="Delete site"
+                    >
+                      <Trash2 className="w-3 h-3 text-red-500" />
+                    </button>
+                  </div>
                 ))
               ) : (
                 <div className="text-muted-foreground/50 text-[10px] italic px-2 py-1.5 border border-dashed border-border rounded-lg">Initialize site...</div>
