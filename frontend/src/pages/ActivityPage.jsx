@@ -52,11 +52,9 @@ export default function ActivityPage() {
 
   const filters = [
     { value: 'all', label: 'All Activity' },
-    { value: 'pageview', label: 'Pageviews' },
-    { value: 'event', label: 'Events' },
-    { value: 'visitor', label: 'Visitors' },
-    { value: 'block', label: 'Blocks' },
-    { value: 'error', label: 'Errors' },
+    { value: 'pageviews', label: 'Pageviews' },
+    { value: 'events', label: 'Events' },
+    { value: 'errors', label: 'Errors' },
   ];
 
   return (
