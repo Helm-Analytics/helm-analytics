@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Activity, Copy, Check, TrendingUp, Code, Sparkles, Filter } from 'lucide-react';
 import { api } from '../api';
 
 export default function CustomEventsPage() {
+  const { selectedSite } = useOutletContext();
   const [events, setEvents] = useState([]);
   const [showCode, setShowCode] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -10,16 +12,18 @@ export default function CustomEventsPage() {
   const [timeRange, setTimeRange] = useState('7d');
 
   useEffect(() => {
-    fetchEvents();
-  }, [filter, timeRange]);
+    if (selectedSite?.id) {
+      fetchEvents();
+    }
+  }, [selectedSite, filter, timeRange]);
 
   const fetchEvents = async () => {
     try {
-      const data = await api.getCustomEvents({
+      const response = await api.getCustomEvents(selectedSite.id, {
         timeRange,
         eventName: filter === 'all' ? null : filter,
       });
-      setEvents(data || []);
+      setEvents(response?.events || []);
     } catch (error) {
       console.error('Failed to fetch events:', error);
     }

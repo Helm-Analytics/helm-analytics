@@ -130,4 +130,18 @@ export const api = {
       method: "POST",
       data: { message, source },
     }),
+  
+  // Custom Events
+  getCustomEvents: (siteId, params = {}) => {
+    const { timeRange = '7d', eventName } = params;
+    let url = `/api/custom-events?siteId=${siteId}&days=${timeRange.replace('d', '')}`;
+    if (eventName) url += `&eventName=${eventName}`;
+    return request({ url });
+  },
+  
+  // Activity Log
+  getActivityLog: (siteId, filter = 'all', limit = 100) =>
+    request({
+      url: `/api/activity?siteId=${siteId}&filter=${filter}&limit=${limit}`,
+    }),
 };
