@@ -1,82 +1,62 @@
-version: '3.8'
-
+# This is the master file for your local development environment.
 services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
-    container_name: helm-backend
-    environment:
-      - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-community}
-      - LICENSE_KEY=${LICENSE_KEY}
-      - DATABASE_URL=${DATABASE_URL:-postgresql://helm:changeme@postgres:5432/helm}
-      - CLICKHOUSE_URL=${CLICKHOUSE_URL:-http://clickhouse:9000}
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
-      - SESSION_SECRET=${SESSION_SECRET:-change-this-in-production}
-      - JWT_SECRET=${JWT_SECRET:-change-this-in-production}
-      - PORT=8080
-      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+      dockerfile: dockerfile
     ports:
-      - "8080:8080"
-    networks:
-      - helm-network
-    restart: unless-stopped
-    volumes:
-      - ./backend/GeoLite2-Country.mmdb:/app/GeoLite2-Country.mmdb:ro
-      - ./backend/GeoLite2-ASN.mmdb:/app/GeoLite2-ASN.mmdb:ro
+      - "6060:6060"
+    environment:
+      - DATABASE_URL=postgres://sentinel:password@db:5432/sentinel?sslmode=disable
+      - GEMINI_API_KEY=AIzaSyCt26Utwx3zt2DvW-5c5th747D875dAGWE        
     depends_on:
-      - postgres
+      - db
       - clickhouse
+    networks:
+      - sentinel-net
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
-    container_name: helm-frontend
-    environment:
-      - VITE_API_URL=${VITE_API_URL:-http://localhost:8080}
     ports:
-      - "3000:80"
+      - "8012:80"
     networks:
-      - helm-network
-    restart: unless-stopped
-    depends_on:
-      - backend
+      - sentinel-net
 
-  postgres:
-    image: postgres:16-alpine
-    container_name: helm-postgres
+  db:
+    image: postgres:15-alpine
+    restart: always
     environment:
-      - POSTGRES_USER=helm
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
-      - POSTGRES_DB=helm
-    ports:
-      - "5432:5432"
+      - POSTGRES_USER=sentinel
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=sentinel
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/migrations:/docker-entrypoint-initdb.d
     networks:
-      - helm-network
-    restart: unless-stopped
+      - sentinel-net
 
   clickhouse:
-    image: clickhouse/clickhouse-server:latest
-    container_name: helm-clickhouse
+    image: clickhouse/clickhouse-server
     environment:
-      - CLICKHOUSE_DB=helm
-      - CLICKHOUSE_USER=default
-      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-}
+      - CLICKHOUSE_DB=sentinel
+      - CLICKHOUSE_USER=sentinel
+      - CLICKHOUSE_PASSWORD=password
     ports:
-      - "9000:9000"
       - "8123:8123"
+      - "9000:9000"
     volumes:
+      - ./backend/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql
       - clickhouse_data:/var/lib/clickhouse
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 262144
+        hard: 262144
     networks:
-      - helm-network
-    restart: unless-stopped
+      - sentinel-net
 
 networks:
-  helm-network:
+  sentinel-net:
     driver: bridge
 
 volumes:
