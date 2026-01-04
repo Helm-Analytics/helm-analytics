@@ -82,6 +82,9 @@ func runMigrations(ctx context.Context) {
 		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS SessionID String DEFAULT ''",
 		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS EventName String DEFAULT ''",
 		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS Properties String DEFAULT ''",
+		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS City String DEFAULT ''",
+		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS Device String DEFAULT ''",
+		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS UserAgent String DEFAULT ''",
 		"ALTER TABLE sentinel.events MODIFY TTL Timestamp + INTERVAL 30 DAY",
 
 		// Session Events Table (Retention: 2 Days - Aggressive cleanup)
