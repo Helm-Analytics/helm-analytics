@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Zap, Code, Shield, Sparkles, Server, Book, ExternalLink, Copy, Check, ChevronRight } from 'lucide-react';
+import { Zap, Code, Shield, Server, Book, ExternalLink, Copy, Check, ChevronRight, Activity, Globe, Eye, Lock } from 'lucide-react';
 
 export default function DocsPage() {
   const [copied, setCopied] = useState(false);
@@ -13,38 +13,39 @@ export default function DocsPage() {
 
   const sections = [
     { id: 'quick-start', label: 'Quick Start', icon: Zap },
-    { id: 'core-features', label: 'Core Features', icon: Sparkles },
+    { id: 'about', label: 'About Helm', icon: Activity },
+    { id: 'features', label: 'Core Features', icon: Eye },
     { id: 'custom-events', label: 'Custom Events', icon: Code },
     { id: 'security', label: 'Security Features', icon: Shield },
-    { id: 'sdks', label: 'SDKs', icon: Server },
+    { id: 'server-sdks', label: 'Server SDKs', icon: Server },
     { id: 'self-hosting', label: 'Self-Hosting', icon: Server },
   ];
 
   const siteId = "your-site-id";
-  const trackingScript = `<script src="https://api.helm.io/static/tracker-v5.js" 
+  const trackingScript = `<script src="https://api-sentinel.getmusterup.com/static/tracker-v5.js" 
   data-site-id="${siteId}"></script>`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-900 dark:to-blue-950">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen p-6">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-12 text-center">
-          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-1.5 rounded-full text-sm font-medium mb-4 shadow-lg shadow-blue-500/20">
+          <div className="inline-flex items-center gap-2 bg-accent text-accent-foreground px-4 py-1.5 rounded-full text-sm font-medium mb-4">
             <Book className="w-4 h-4" />
             Documentation
           </div>
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-            Helm Analytics Documentation
+          <h1 className="text-5xl font-bold mb-4">
+            Helm Analytics <span className="text-accent">Documentation</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Privacy-first analytics with AI and security built-in
+            Privacy-first web analytics with AI-powered insights and built-in security
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="sticky top-6 space-y-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 shadow-sm">
+            <div className="sticky top-6 space-y-2 bg-card rounded-lg border border-border p-4">
               <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">Contents</h3>
               {sections.map((section) => {
                 const Icon = section.icon;
@@ -54,8 +55,8 @@ export default function DocsPage() {
                     onClick={() => setActiveSection(section.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                       activeSection === section.id
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md'
-                        : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-foreground'
+                        ? 'bg-accent text-accent-foreground'
+                        : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -72,79 +73,140 @@ export default function DocsPage() {
             {/* Quick Start */}
             {activeSection === 'quick-start' && (
               <div className="space-y-6">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 text-white shadow-xl">
+                <div className="bg-accent text-accent-foreground rounded-lg p-8">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                      <Zap className="w-6 h-6" />
-                    </div>
+                    <Zap className="w-6 h-6" />
                     <h2 className="text-3xl font-bold">Quick Start</h2>
                   </div>
-                  <p className="text-blue-100 mb-6">Get started with Helm Analytics in under 5 minutes.</p>
+                  <p className="opacity-90">Get started with Helm Analytics in under 5 minutes.</p>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                <div className="bg-card rounded-lg border border-border p-6">
                   <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 text-white text-sm font-bold">1</span>
+                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-accent text-accent-foreground text-sm font-bold">1</span>
                     Get Your Site ID
                   </h3>
                   <p className="text-muted-foreground mb-4">Go to your dashboard and create a new site. Copy your unique Site ID.</p>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                <div className="bg-card rounded-lg border border-border p-6">
                   <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-bold">2</span>
+                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-accent text-accent-foreground text-sm font-bold">2</span>
                     Add the Tracking Script
                   </h3>
-                  <p className="text-muted-foreground mb-4">Add this just before the closing <code className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded text-sm">&lt;/body&gt;</code> tag:</p>
+                  <p className="text-muted-foreground mb-4">Add this just before the closing <code className="px-2 py-1 bg-secondary rounded text-sm">&lt;/body&gt;</code> tag:</p>
                   <div className="relative">
-                    <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm font-mono">
+                    <pre className="bg-secondary text-foreground p-4 rounded-lg overflow-x-auto text-sm font-mono border border-border">
                       {trackingScript}
                     </pre>
                     <button
                       onClick={() => copyCode(trackingScript)}
-                      className="absolute top-3 right-3 p-2 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+                      className="absolute top-3 right-3 p-2 bg-card hover:bg-secondary rounded-md transition-colors border border-border"
                     >
-                      {copied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4 text-gray-400" />}
+                      {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-muted-foreground" />}
                     </button>
                   </div>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                <div className="bg-card rounded-lg border border-border p-6">
                   <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-r from-pink-600 to-orange-600 text-white text-sm font-bold">3</span>
+                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-accent text-accent-foreground text-sm font-bold">3</span>
                     Start Tracking
                   </h3>
-                  <p className="text-muted-foreground">That's it! Helm will automatically track pageviews, errors, and performance metrics.</p>
+                  <p className="text-muted-foreground">That's it! Helm will automatically track pageviews, errors, performance metrics, and user behavior.</p>
                 </div>
               </div>
             )}
 
-            {/* Core Features */}
-            {activeSection === 'core-features' && (
+            {/* About Helm */}
+            {activeSection === 'about' && (
               <div className="space-y-6">
-                <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-xl">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                      <Sparkles className="w-6 h-6" />
+                <div className="bg-accent text-accent-foreground rounded-lg p-8">
+                  <h2 className="text-3xl font-bold mb-4">What is Helm Analytics?</h2>
+                  <p className="text-lg opacity-90">
+                    Helm is a privacy-first, open-source analytics platform that gives you complete control over your website data while providing powerful insights powered by AI.
+                  </p>
+                </div>
+
+                <div className="bg-card rounded-lg border border-border p-6">
+                  <h3 className="text-2xl font-bold mb-4">Why Helm?</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <Lock className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-bold mb-1">Privacy-First</h4>
+                        <p className="text-muted-foreground text-sm">No cookies, fully GDPR/CCPA compliant, complete data ownership</p>
+                      </div>
                     </div>
-                    <h2 className="text-3xl font-bold">Core Features</h2>
+                    <div className="flex items-start gap-3">
+                      <Activity className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-bold mb-1">Real-Time Insights</h4>
+                        <p className="text-muted-foreground text-sm">See visitor activity as it happens with live dashboards</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Shield className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-bold mb-1">Built-in Security</h4>
+                        <p className="text-muted-foreground text-sm">Bot detection, firewall rules, and threat monitoring included</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <Globe className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-bold mb-1">Open Source</h4>
+                        <p className="text-muted-foreground text-sm">Transparent, self-hostable, community-driven development</p>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-purple-100">Everything you need to understand your website's performance.</p>
+                </div>
+
+                <div className="bg-card rounded-lg border border-border p-6">
+                  <h3 className="text-2xl font-bold mb-4">Use Cases</h3>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      E-commerce conversion tracking and optimization
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      SaaS product analytics and user behavior insights
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      Content website performance monitoring
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      Security monitoring and bot prevention
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Features */}
+            {activeSection === 'features' && (
+              <div className="space-y-6">
+                <div className="bg-accent text-accent-foreground rounded-lg p-8">
+                  <h2 className="text-3xl font-bold mb-4">Core Features</h2>
+                  <p className="opacity-90">Everything you need to understand and protect your website</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {[
-                    { title: 'Real-time Dashboard', desc: 'See visitors as they browse your site', color: 'from-blue-500 to-cyan-500' },
-                    { title: 'Session Replay', desc: 'Watch recordings of user sessions', color: 'from-purple-500 to-pink-500' },
-                    { title: 'Heatmaps', desc: 'Visualize where users click', color: 'from-orange-500 to-red-500' },
-                    { title: 'Error Tracking', desc: 'Catch and fix errors fast', color: 'from-green-500 to-emerald-500' },
-                    { title: 'Funnels', desc: 'Track conversion rates', color: 'from-indigo-500 to-purple-500' },
-                    { title: 'Web Vitals', desc: 'Monitor performance metrics', color: 'from-yellow-500 to-orange-500' },
+                    { title: 'Real-time Dashboard', desc: 'Monitor visitors as they browse', icon: Activity },
+                    { title: 'Session Replay', desc: 'Watch user sessions anonymously', icon: Eye },
+                    { title: 'Heatmaps', desc: 'Visualize clicks and engagement', icon: Activity },
+                    { title: 'Error Tracking', desc: 'Catch and fix JavaScript errors', icon: Activity },
+                    { title: 'Funnels', desc: 'Track conversion rates and drop-offs', icon: Activity },
+                    { title: 'Web Vitals', desc: 'Monitor Core Web Vitals (LCP, FID, CLS)', icon: Activity },
+                    { title: 'Bot Detection', desc: 'Identify and block malicious traffic', icon: Shield },
+                    { title: 'Firewall', desc: 'Create custom blocking rules', icon: Shield },
                   ].map((feature, idx) => (
-                    <div key={idx} className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
-                      <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center text-white font-bold text-xl mb-4`}>
-                        {idx + 1}
-                      </div>
+                    <div key={idx} className="bg-card rounded-lg border border-border p-6 hover:border-accent/50 transition-all">
+                      <feature.icon className="w-10 h-10 text-accent mb-4" />
                       <h3 className="text-lg font-bold mb-2">{feature.title}</h3>
                       <p className="text-muted-foreground text-sm">{feature.desc}</p>
                     </div>
@@ -156,20 +218,15 @@ export default function DocsPage() {
             {/* Custom Events */}
             {activeSection === 'custom-events' && (
               <div className="space-y-6">
-                <div className="bg-gradient-to-r from-green-600 to-emerald-600 rounded-2xl p-8 text-white shadow-xl">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                      <Code className="w-6 h-6" />
-                    </div>
-                    <h2 className="text-3xl font-bold">Custom Events</h2>
-                  </div>
-                  <p className="text-green-100">Track any user action with custom events.</p>
+                <div className="bg-accent text-accent-foreground rounded-lg p-8">
+                  <h2 className="text-3xl font-bold mb-4">Custom Events</h2>
+                  <p className="opacity-90">Track any user action with custom events</p>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                <div className="bg-card rounded-lg border border-border p-6">
                   <h3 className="text-xl font-bold mb-4">Basic Event Tracking</h3>
-                  <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm font-mono mb-4">
-                    {`// Track a button click
+                  <pre className="bg-secondary text-foreground p-4 rounded-lg overflow-x-auto text-sm font-mono border border-border mb-4">
+{`// Track a button click
 helm.trackEvent('button_clicked', {
   location: 'header',
   text: 'Sign Up'
@@ -177,10 +234,10 @@ helm.trackEvent('button_clicked', {
                   </pre>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
+                <div className="bg-card rounded-lg border border-border p-6">
                   <h3 className="text-xl font-bold mb-4">E-commerce Tracking</h3>
-                  <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm font-mono">
-                    {`// Track purchases
+                  <pre className="bg-secondary text-foreground p-4 rounded-lg overflow-x-auto text-sm font-mono border border-border">
+{`// Track purchases
 helm.trackEvent('purchase', {
   amount: 99.99,
   product: 'Pro License',
@@ -191,46 +248,169 @@ helm.trackEvent('purchase', {
               </div>
             )}
 
-            {/* More sections... */}
+            {/* Security */}
             {activeSection === 'security' && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 shadow-sm text-center">
-                <Shield className="w-16 h-16 mx-auto mb-4 text-blue-600" />
-                <h2 className="text-2xl font-bold mb-2">Security Features</h2>
-                <p className="text-muted-foreground">Bot detection, firewall, and more coming soon!</p>
-              </div>
-            )}
-
-            {activeSection === 'sdks' && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-8 shadow-sm text-center">
-                <Server className="w-16 h-16 mx-auto mb-4 text-purple-600" />
-                <h2 className="text-2xl font-bold mb-2">SDKs & Integrations</h2>
-                <p className="text-muted-foreground">React, Vue, Angular SDKs coming soon!</p>
-              </div>
-            )}
-
-            {activeSection === 'self-hosting' && (
               <div className="space-y-6">
-                <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-8 text-white shadow-xl">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 bg-white/20 rounded-lg backdrop-blur-sm">
-                      <Server className="w-6 h-6" />
-                    </div>
-                    <h2 className="text-3xl font-bold">Self-Hosting</h2>
-                  </div>
-                  <p className="text-indigo-100">Run Helm on your own infrastructure.</p>
+                <div className="bg-accent text-accent-foreground rounded-lg p-8">
+                  <h2 className="text-3xl font-bold mb-4">Security Features</h2>
+                  <p className="opacity-90">Protect your site from bots and malicious traffic</p>
                 </div>
 
-                <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 shadow-sm">
-                  <pre className="bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto text-sm font-mono">
-                    {`git clone https://github.com/helm-analytics/helm.git
-cd helm
-docker-compose up -d`}
+                <div className="bg-card rounded-lg border border-border p-6">
+                  <h3 className="text-xl font-bold mb-4">Bot Detection</h3>
+                  <p className="text-muted-foreground mb-4">Helm automatically detects and flags:</p>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      Known bot user agents
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      Data center IPs
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      Headless browsers
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      Suspicious traffic patterns
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-card rounded-lg border border-border p-6">
+                  <h3 className="text-xl font-bold mb-4">Firewall Rules</h3>
+                  <p className="text-muted-foreground">Block traffic by IP address, country, or ASN (data center) through the Security dashboard.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Server SDKs */}
+            {activeSection === 'server-sdks' && (
+              <div className="space-y-6">
+                <div className="bg-accent text-accent-foreground rounded-lg p-8">
+                  <h2 className="text-3xl font-bold mb-4">Server-Side SDKs</h2>
+                  <p className="opacity-90">Track events from your backend with official SDKs</p>
+                </div>
+
+                <div className="bg-card rounded-lg border border-border p-6">
+                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Server className="w-6 h-6 text-accent" />
+                    Node.js SDK
+                  </h3>
+                  <pre className="bg-secondary text-foreground p-4 rounded-lg overflow-x-auto text-sm font-mono border border-border">
+{`const Helm = require('@helm-analytics/node');
+
+const helm = new Helm({
+  siteId: 'your-site-id',
+  apiUrl: 'https://api.helm.io'
+});
+
+// Track an event
+helm.track({
+  event: 'purchase',
+  properties: {
+    amount: 99.99,
+    product: 'Pro License'
+  }
+});`}
                   </pre>
                 </div>
 
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <ExternalLink className="w-4 h-4" />
-                  <a href="https://github.com/helm-analytics/helm" className="hover:text-blue-600 transition-colors">
+                <div className="bg-card rounded-lg border border-border p-6">
+                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Server className="w-6 h-6 text-accent" />
+                    Python SDK
+                  </h3>
+                  <pre className="bg-secondary text-foreground p-4 rounded-lg overflow-x-auto text-sm font-mono border border-border">
+{`from helm_analytics import Helm
+
+helm = Helm(
+    site_id='your-site-id',
+    api_url='https://api.helm.io'
+)
+
+# Track an event
+helm.track(
+    event='purchase',
+    properties={
+        'amount': 99.99,
+        'product': 'Pro License'
+    }
+)`}
+                  </pre>
+                </div>
+
+                <div className="bg-card rounded-lg border border-border p-6">
+                  <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                    <Server className="w-6 h-6 text-accent" />
+                    Go SDK
+                  </h3>
+                  <pre className="bg-secondary text-foreground p-4 rounded-lg overflow-x-auto text-sm font-mono border border-border">
+{`package main
+
+import "github.com/helm-analytics/helm-go"
+
+func main() {
+    client := helm.New(helm.Config{
+        SiteID: "your-site-id",
+        APIUrl: "https://api.helm.io",
+    })
+
+    // Track an event
+    client.Track(helm.Event{
+        Name: "purchase",
+        Properties: map[string]interface{}{
+            "amount":  99.99,
+            "product": "Pro License",
+        },
+    })
+}`}
+                  </pre>
+                </div>
+              </div>
+            )}
+
+            {/* Self-Hosting */}
+            {activeSection === 'self-hosting' && (
+              <div className="space-y-6">
+                <div className="bg-accent text-accent-foreground rounded-lg p-8">
+                  <h2 className="text-3xl font-bold mb-4">Self-Hosting</h2>
+                  <p className="opacity-90">Run Helm on your own infrastructure</p>
+                </div>
+
+                <div className="bg-card rounded-lg border border-border p-6">
+                  <h3 className="text-xl font-bold mb-4">Docker Compose (Recommended)</h3>
+                  <pre className="bg-secondary text-foreground p-4 rounded-lg overflow-x-auto text-sm font-mono border border-border mb-4">
+{`git clone https://github.com/Helm-Analytics/sentinel-mvp.git
+cd sentinel-mvp
+docker-compose up -d`}
+                  </pre>
+                  <p className="text-muted-foreground">Access the dashboard at <code className="px-2 py-1 bg-secondary rounded text-sm">http://localhost:3000</code></p>
+                </div>
+
+                <div className="bg-card rounded-lg border border-border p-6">
+                  <h3 className="text-xl font-bold mb-4">Requirements</h3>
+                  <ul className="space-y-2 text-muted-foreground">
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      Docker & Docker Compose
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      PostgreSQL (included in docker-compose)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <ChevronRight className="w-4 h-4 text-accent" />
+                      ClickHouse (included in docker-compose)
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm">
+                  <ExternalLink className="w-4 h-4 text-accent" />
+                  <a href="https://github.com/Helm-Analytics/sentinel-mvp" className="text-accent hover:underline">
                     View on GitHub
                   </a>
                 </div>

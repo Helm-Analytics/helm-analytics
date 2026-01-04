@@ -25,7 +25,8 @@ const Dashboard = () => {
   const copyTrackingScript = async () => {
     if (!selectedSite) return
 
-    const trackingScript = `<script src="https://api-sentinel.getmusterup.com/static/tracker-v4.js" data-site-id="${selectedSite.id}"></script>`
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://api-sentinel.getmusterup.com'
+    const trackingScript = `<script src="${apiUrl}/static/tracker-v5.js" data-site-id="${selectedSite.id}"></script>`
 
     try {
       await navigator.clipboard.writeText(trackingScript)
@@ -243,18 +244,18 @@ const Dashboard = () => {
         <div className="lg:col-span-4 space-y-8">
           {/* AI Intelligence Insights */}
           {/* Setup Guide - Sidebar Placement */}
-          <div id="tut-setup-guide" className="premium-card bg-[#0F172A] border-none shadow-2xl relative overflow-hidden group mb-8">
+          <div id="tut-setup-guide" className="premium-card bg-card border shadow-xl relative overflow-hidden group mb-8">
             <div className="absolute top-0 right-0 p-4 opacity-10">
               <Fingerprint className="w-12 h-12 text-accent rotate-12" />
             </div>
-            <h3 className="text-lg font-heading font-extrabold mb-2 text-white flex items-center">
+            <h3 className="text-lg font-heading font-extrabold mb-2 text-foreground flex items-center">
               Setup Helm
             </h3>
-            <p className="text-slate-400 text-xs mb-6 font-medium leading-relaxed">
+            <p className="text-muted-foreground text-xs mb-6 font-medium leading-relaxed">
               Integrate the tracking script to begin receiving nautical intelligence flow.
             </p>
             <div className="space-y-4">
-              <div className="bg-black/30 rounded-xl p-4 font-mono text-[10px] break-all border border-white/5 text-slate-300">
+              <div className="bg-secondary rounded-xl p-4 font-mono text-[10px] break-all border border-border text-foreground">
                 {`<script src="https://api-sentinel.getmusterup.com/static/tracker-v4.js" data-site-id="${selectedSite.id}"></script>`}
               </div>
               <button
@@ -265,9 +266,9 @@ const Dashboard = () => {
                 <span>{copied ? "Copied" : "Copy Script"}</span>
               </button>
             </div>
-            <div className="mt-6 pt-6 border-t border-white/5">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">Optional: Spider Trap</p>
-                <div className="bg-black/20 p-3 rounded-lg border border-white/5">
+            <div className="mt-6 pt-6 border-t border-border">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Optional: Spider Trap</p>
+                <div className="bg-secondary p-3 rounded-lg border border-border">
                     <code className="text-[9px] text-accent/80 font-mono italic">
                         &lt;a href="/track/trap" style="display:none"&gt;Health Check&lt;/a&gt;
                     </code>

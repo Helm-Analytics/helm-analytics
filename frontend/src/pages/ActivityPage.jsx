@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 import { Activity, Filter, Clock, Globe, Monitor, AlertCircle, Shield, Eye } from 'lucide-react';
 
 export default function ActivityPage() {
-  const { siteId } = useParams();
   const [activities, setActivities] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
@@ -12,12 +10,11 @@ export default function ActivityPage() {
     fetchActivities();
     const interval = setInterval(fetchActivities, 5000); // Refresh every 5s
     return () => clearInterval(interval);
-  }, [siteId, filter]);
+  }, [filter]);
 
   const fetchActivities = async () => {
     try {
       const params = new URLSearchParams();
-      if (siteId) params.append('site_id', siteId);
       if (filter !== 'all') params.append('activity_type', filter);
       
       const response = await fetch(`/api/activity?${params}`);
@@ -43,13 +40,13 @@ export default function ActivityPage() {
 
   const getActivityColor = (type) => {
     const colors = {
-      pageview: 'text-blue-500',
-      event: 'text-purple-500',
+      pageview: 'text-accent',
+      event: 'text-accent',
       visitor: 'text-green-500',
-      block: 'text-red-500',
+      block: 'text-destructive',
       error: 'text-orange-500',
     };
-    return colors[type] || 'text-gray-500';
+    return colors[type] || 'text-muted-foreground';
   };
 
   const filters = [
@@ -66,8 +63,8 @@ export default function ActivityPage() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-            Activity Feed
+          <h1 className="text-3xl font-bold">
+            Activity <span className="text-accent">Feed</span>
           </h1>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="w-4 h-4" />
@@ -86,8 +83,8 @@ export default function ActivityPage() {
             onClick={() => setFilter(f.value)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               filter === f.value
-                ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                : 'bg-secondary text-foreground hover:bg-secondary/80'
+                ? 'bg-accent text-accent-foreground'
+                : 'bg-card text-foreground hover:bg-secondary border border-border'
             }`}
           >
             {f.label}
@@ -99,13 +96,13 @@ export default function ActivityPage() {
       <div className="space-y-2">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <div className="w-8 h-8 border-4 border-primary rounded-full animate-spin border-t-transparent" />
+            <div className="w-8 h-8 border-4 border-accent rounded-full animate-spin border-t-transparent" />
           </div>
         ) : activities.length === 0 ? (
-          <div className="text-center py-12 bg-secondary/30 rounded-lg border border-dashed border-border">
+          <div className="text-center py-12 bg-card rounded-lg border border-border">
             <Activity className="w-12 h-12 mx-auto mb-3 text-muted-foreground/50" />
-            <p className="text-muted-foreground">No activity yet</p>
-            <p className="text-sm text-muted-foreground/70 mt-1">Activity will appear here as users interact with your site</p>
+            <p className="text-foreground font-medium">No activity yet</p>
+            <p className="text-sm text-muted-foreground mt-1">Activity will appear here as users interact with your site</p>
           </div>
         ) : (
           activities.map((activity, index) => {
@@ -115,7 +112,7 @@ export default function ActivityPage() {
             return (
               <div
                 key={index}
-                className="bg-card border border-border rounded-lg p-4 hover:border-primary/50 transition-all hover:shadow-md"
+                className="bg-card border border-border rounded-lg p-4 hover:border-accent/50 transition-all"
               >
                 <div className="flex items-start gap-4">
                   <div className={`p-2 rounded-lg bg-secondary ${colorClass}`}>
