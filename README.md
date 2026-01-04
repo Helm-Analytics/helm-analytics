@@ -1,276 +1,312 @@
-<div align="center">
-  <img src="https://raw.githubusercontent.com/Sentinel-Analytics/helm-assets/main/logo-v2.png" alt="Helm Analytics Logo" width="180" />
-  <h1>Helm Analytics</h1>
-  <p><strong>The Website Intelligence Platform for the Post-Google Analytics Era.</strong></p>
-  <p>Privacy-First Analytics • Server-Side Shield • Session Replay • Traffic Quality AI</p>
+# Helm Analytics
 
-  <a href="https://github.com/Sentinel-Analytics/sentinel-mvp/actions"><img src="https://img.shields.io/github/actions/workflow/status/Sentinel-Analytics/sentinel-mvp/go.yml?style=flat-square" alt="Build Status"></a>
-  <a href="https://github.com/Sentinel-Analytics/sentinel-mvp/releases"><img src="https://img.shields.io/github/v/release/Sentinel-Analytics/sentinel-mvp?style=flat-square" alt="Release"></a>
-  <a href="https://pypi.org/project/helm-analytics/"><img src="https://img.shields.io/pypi/v/helm-analytics?style=flat-square&color=blue" alt="PyPI"></a>
-  <a href="https://www.npmjs.com/package/helm-analytics"><img src="https://img.shields.io/npm/v/helm-analytics?style=flat-square&color=red" alt="NPM"></a>
-  <a href="https://github.com/sponsors/Sentinel-Analytics"><img src="https://img.shields.io/badge/sponsor-❤-pink?style=flat-square" alt="Sponsor"></a>
+[![License](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
+[![Docker](https://img.shields.io/badge/docker-ready-brightgreen.svg)]()
+[![Deployment](https://img.shields.io/badge/deploy-dokploy-purple.svg)]()
 
-  <br />
-  <a href="#-architecture">Architecture</a> •
-  <a href="#-installation--setup">Installation</a> •
-  <a href="#%EF%B8%8F-configuration">Configuration</a> •
-  <a href="#-sdk-integration">SDKs</a> •
-  <a href="#-api-reference">API</a> •
-  <a href="#-shield-active-defense">Shield Mode</a>
-</div>
+**The First Website Intelligence Platform with AI and Security Built-In**
+
+Privacy-first analytics + AI insights + bot protection, all in one open-source platform.
+
+Self-host for free, or let us host it for you.
+
+[Live Demo](https://demo.helm.io) | [Documentation](https://docs.helm.io) | [Pricing](https://helm.io/pricing)
 
 ---
 
-## 🧐 Why Helm?
+## Why Helm?
 
-Most analytics tools are passive observers. They tell you *what happened* yesterday. 
-**Helm is an active participant.** It tells you what is happening *now*, and gives you the tools to intervene.
+- ✅ **Privacy-First** - Cookieless, GDPR-compliant, no personal data collection
+- ✅ **AI-Powered** - Get strategic insights, not just numbers
+- ✅ **Security Built-In** - Block bots & click fraud, protect your budget
+- ✅ **Self-Hostable** - Your data, your servers, forever free (AGPLv3)
+- ✅ **Beautiful & Simple** - One dashboard, all the insights you need
 
-| Feature | Google Analytics 4 | Plausible | Helm Analytics |
-| :--- | :--- | :--- | :--- |
-| **Privacy** | ❌ Cookies & Tracking | ✅ GDPR Compliant | ✅ **GDPR Compliant** |
-| **Blocking** | ❌ None | ❌ None | ✅ **Server-Side Shield** |
-| **Replays** | ❌ None | ❌ None | ✅ **Session Reporting** |
-| **Trust Score** | ❌ None | ❌ None | ✅ **Traffic Quality AI** |
-| **Hosting** | ❌ SaaS Only | ✅ Self-Hostable | ✅ **Docker Native** |
-
----
-
-## 🏗 Architecture
-
-Helm is built for performance and scale. It uses a hybrid architecture to handle high-throughput event ingestion while providing real-time queries.
-
-```mermaid
-graph TD
-    User[Visitor] -->|JS Tracker| LB[Load Balancer / Nginx]
-    Server[Backend Server] -->|Middleware| LB
-    
-    LB -->|/track| API["Helm Backend (Go)"]
-    
-    API -->|Hot Data| CH[("ClickHouse")]
-    API -->|User Data| PG[("PostgreSQL")]
-    
-    CH -->|Analytics Queries| API
-    PG -->|Auth & Settings| API
-    
-    API -->|JSON| Dashboard["Frontend (React/Vite)"]
-```
-
-*   **Backend**: Written in **Go (Golang)** for sub-millisecond API response times.
-*   **Analytics DB**: **ClickHouse** for columnar storage, enabling queries on millions of events in milliseconds.
-*   **App DB**: **PostgreSQL** for user accounts, site settings, and firewall rules.
-*   **Frontend**: **React + Vite + Tailwind** for a snappy, modern dashboard experience.
-
----
-
-## 🚀 Installation & Setup
-
-Helm is packaged as a multi-container Docker application. This is the **only** recommended way to run Helm in production.
+## Quick Start (Community Edition)
 
 ### Prerequisites
-*   Docker & Docker Compose (v2.0+)
-*   Git
-*   2GB RAM / 1 CPU (Minimum)
+- Docker & Docker Compose installed
+- 2GB RAM minimum
+- Port 3000 & 6060 available
 
-### Step 1: Clone the Repository
+### Installation (5 minutes)
+
 ```bash
-git clone https://github.com/Sentinel-Analytics/sentinel-mvp.git
-cd sentinel-mvp
-```
+# 1. Clone the repository
+git clone https://github.com/helm-analytics/helm.git
+cd helm
 
-### Step 2: Configure Environment
-Copy the example environment file (if available) or rely on defaults.
-You typically only need to set the **JWT Secret** and **Database Passwords** for production.
+# 2. Copy environment file
+cp .env.example .env
 
-### Step 3: Launch
-```bash
+# 3. Generate secure database password
+echo "DB_PASSWORD=$(openssl rand -base64 32)" >> .env
+
+# 4. Start services
 docker-compose up -d
-```
-*   **Frontend**: http://localhost:5173
-*   **Backend**: http://localhost:8080
-*   **ClickHouse**: http://localhost:8123
 
-### Step 4: Create Admin Account
-Open the dashboard at `http://localhost:5173`. The first user you register will automatically be the instance admin.
+# 5. Wait for services to be ready (30 seconds)
+sleep 30
 
----
-
-## ⚙️ Configuration
-
-Helm can be customized using environment variables passed to the `backend` container.
-
-### Backend Variables
-
-| Variable | Description | Default | Required for Prod? |
-| :--- | :--- | :--- | :--- |
-| `PORT` | API Listening Port | `8080` | No |
-| `ENV` | Environment (`dev` or `prod`) | `dev` | **Yes** |
-| `DATABASE_URL` | Postgres Connection String | `postgres://...` | **Yes** |
-| `CLICKHOUSE_HOST` | ClickHouse TCP Address | `clickhouse:9000` | **Yes** |
-| `JWT_SECRET` | Secret key for session signing | `ChangeMe...` | **CRITICAL** |
-| `ALLOW_ORIGINS` | CORS Allowed Origins (Comma Sep) | `http://localhost:5173` | **Yes** |
-| `GEMINI_API_KEY` | Key for AI Insights | *(Empty)* | Optional |
-| `HELM_PRO_KEY` | License Key for Pro Features | *(Empty)* | Optional |
-
-### Database Variables
-Manage these in `docker-compose.yml` under the `postgres` and `clickhouse` services.
-*   `POSTGRES_PASSWORD`: Set a strong password.
-*   `CLICKHOUSE_PASSWORD`: Set a strong password (update `CLICKHOUSE_HOST` accordingly).
-
----
-
-## 🌐 Client-Side Integration
-
-To track standard page views and sessions, add the tracking script to your website's `<head>`.
-
-1.  **Get your Snippet**:
-    *   Log in to your Helm Dashboard.
-    *   Go to **Settings** -> **Tracking Code**.
-    *   Copy the snippet.
-
-2.  **Add to HTML**:
-    ```html
-    <!-- Helm Analytics -->
-    <script async defer src="https://analytics.yourdomain.com/tracker.js" data-website-id="YOUR_SITE_UUID"></script>
-    ```
-
-That's it! Helm will automatically track:
-*   Page Views
-*   Unique Visitors
-*   Referrers
-*   Device/OS/Browser
-*   Screen Size
-
----
-
-## 🔌 SDK Integration
-
-Helm Middleware SDKs allow you to track server-side events and enable **Shield Mode**.
-
-### 🐍 Python (Flask, FastAPI, Django)
-**Installation**: `pip install helm_analytics`
-
-**FastAPI Example:**
-```python
-from fastapi import FastAPI
-from helm_analytics import HelmAnalytics
-
-app = FastAPI()
-helm = HelmAnalytics(
-    site_id="YOUR_SITE_ID", 
-    api_url="http://localhost:8080" # Point to your self-hosted instance
-)
-
-# Enable Shield (Blocking) Mode
-app.add_middleware(BaseHTTPMiddleware, dispatch=helm.fastapi_dispatch(shield=True))
+# 6. Open dashboard
+open http://localhost:3000
 ```
 
-### 🟢 Node.js (Express)
-**Installation**: `npm install helm-analytics`
+That's it! Create your account and start tracking.
 
-**Express Example:**
-```javascript
-const express = require('express');
-const HelmAnalytics = require('helm-analytics');
+---
 
-const app = express();
-const helm = new HelmAnalytics({
-    siteId: 'YOUR_SITE_ID',
-    apiUrl: 'http://localhost:8080'
-});
+## What's Included
 
-// Enable Shield (Blocking) Mode
-app.use(helm.middleware({ shield: true }));
+### 🆓 Community Edition (Always Free)
+
+| Feature | Description |
+|---------|-------------|
+| **Analytics Dashboard** | Real-time visitors, pageviews, referrers, countries, devices |
+| **Session Replay** | Watch how users navigate your site |
+| **Error Tracking** | Catch JavaScript errors before users complain |
+| **Heatmaps** | See exactly where users click |
+| **Funnels** | Track multi-step conversions |
+| **Firewall** | Block traffic by IP, country, or data center |
+| **Bot Detection** | TrustScore algorithm identifies suspicious traffic |
+| **AI Insights** | 5 AI-powered reports per day (bring your Gemini API key) |
+| **Unlimited Sites** | Track as many websites as you want |
+| **Unlimited Events** | No caps, no overages |
+
+### 💎 Pro License ($199/year)
+
+Unlock premium features for self-hosted deployment:
+
+- ✅ **AI Consultant** - Page-by-page strategic analysis
+- ✅ **Shield Auto-Block** - Automatic bot blocking at server level
+- ✅ **White-Label** - Remove Helm branding
+- ✅ **Retention Cohorts** - Measure user stickiness
+- ✅ **Google Search Console** integration
+- ✅ **Email/Slack Reports** - Automated summaries
+- ✅ **Priority Support** - 24hr response time
+
+[Get Pro License →](https://helm.io/pricing#pro-license)
+
+### ☁️ Cloud Hosting ($15-89/mo)
+
+Let us host it for you:
+
+| Plan | Events/Month | Price | Best For |
+|------|--------------|-------|----------|
+| **Starter** | 50k | $15/mo | Solo developers |
+| **Growth** | 300k | $49/mo | Growing startups |
+| **Business** | 1M | $89/mo | Established businesses |
+
+All cloud plans include automatic updates, 99.9% uptime, and full support.
+
+[Start Free Trial →](https://helm.io/signup)
+
+---
+
+## Deployment Options
+
+### Option 1: Docker Compose (Community)
+
+See [Quick Start](#quick-start-community-edition) above.
+
+### Option 2: Dokploy (Cloud/Production)
+
+```bash
+# Deploy to Dokploy
+git clone https://github.com/helm-analytics/helm.git
+cd helm
+
+# Use cloud configuration
+cp docker-compose.cloud.yml docker-compose.yml
+
+# Set environment variables in Dokploy dashboard
+# Deploy via Dokploy UI
 ```
 
-### 🐹 Go (Golang)
-*Coming Soon - Development in progress.*
+### Option 3: One-Click Deployments
+
+[![Deploy to Railway](https://railway.app/button.svg)](https://railway.app/new/template/helm)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/helm-analytics/helm)
 
 ---
 
-## 🛡 Shield (Active Defense)
+## Configuration
 
-**Shield Mode** turns Helm from a passive tracker into an active firewall.
+### Environment Variables
 
-1.  **How it works**: When a request hits your middleware (SDK), it sends metadata (IP, UA, ASN) to the Helm Backend.
-2.  **Decision**: Helm checks your Firewall Rules + Traffic Quality AI.
-3.  **Action**: If malicious, Helm returns a `403 Forbidden` signal. The SDK kills the request immediately.
-4.  **Result**: The bad bot never touches your database or expensive API logic.
+```bash
+# Deployment Mode
+DEPLOYMENT_MODE=community  # or "cloud"
 
-**Capabilities:**
-*   **IP Ban**: Block specific IPs or CIDR ranges.
-*   **Country Ban**: Block entire countries (GeoIP).
-*   **ASN Ban**: Block specific hosting providers (e.g., AWS, DigitalOcean) if your users are consumers.
-*   **AI Blocking**: (Experimental) Block based on behavioral trust scores.
+# License (leave blank for Community)
+LICENSE_KEY=  # Add Pro/Enterprise license key here
 
----
+# AI Features (optional)
+GEMINI_API_KEY=  # Get from https://aistudio.google.com
 
-## 📡 API Reference
+# Database
+DATABASE_URL=postgresql://helm:password@postgres:5432/helm
+CLICKHOUSE_URL=clickhouse://clickhouse:9000
 
-You can interact with Helm directly via HTTP API.
-
-### `POST /track`
-Send an analytics event.
-```json
-{
-  "siteId": "uuid",
-  "eventType": "pageview",
-  "url": "https://mysite.com",
-  "userAgent": "Mozilla/5.0...",
-  "clientIp": "1.2.3.4"
-}
+# Cloud-specific (if DEPLOYMENT_MODE=cloud)
+STRIPE_SECRET_KEY=
+PAYSTACK_SECRET_KEY=
 ```
 
-### `GET /api/sites`
-List all websites you are tracking.
-*   **Headers**: `Authorization: Bearer <token>`
+See [.env.example](.env.example) for full configuration options.
 
-### `POST /api/shield/decision`
-Check if a request should be allowed.
-```json
-{
-  "siteId": "uuid",
-  "ip": "1.2.3.4",
-  "userAgent": "Bot/1.0",
-  "url": "https://mysite.com"
-}
+---
+
+## Upgrading from Community to Pro
+
+### Add License Key
+
+```bash
+# Stop services
+docker-compose down
+
+# Add license key to .env
+echo "LICENSE_KEY=helm_pro_xxxxxxxxxxxxx" >> .env
+
+# Restart
+docker-compose up -d
+
+# Check logs
+docker-compose logs backend | grep "License activated"
 ```
-**Response**: `{"action": "allow"}` or `{"action": "block", "reason": "ip_ban"}`
+
+You should see: `✅ License activated: PRO Edition`
 
 ---
 
-## 🛠 Troubleshooting
+## Features
 
-**1. "Connection Refused" to ClickHouse**
-*   Ensure the `clickhouse` container is healthy: `docker ps`.
-*   Check logs: `docker logs sentinel-clickhouse-1`.
-*   Verify `CLICKHOUSE_HOST` in backend matches container name.
+### Analytics
+- Real-time dashboard
+- Unlimited events & sites
+- Custom date ranges
+- Top pages,referrers, countries, devices
+- UTM campaign tracking
+- Custom events (button clicks, form submissions)
 
-**2. CORS Errors in Dashboard**
-*   Update `ALLOW_ORIGINS` in backend environment variables to include your production domain.
-*   Example: `ALLOW_ORIGINS=https://dashboard.mydomain.com`.
+### AI Intelligence
+- Automatic anomaly detection
+- Natural language chat with your data
+- AI Consultant (Pro/Cloud) - strategic page analysis
+- Error analysis & debugging suggestions
 
-**3. "Shield Mode" Latency**
-*   Shield Mode adds a network round-trip. Ensure your App server is close to your Helm Backend (same region recommended).
-*   Typical overhead: 10-20ms within same datacenter.
+### Security
+- Advanced bot detection (TrustScore)
+- Firewall rules (IP, country, ASN)
+- Shield Mode (Pro/Cloud) - auto-blocking at server level
+- Real-time threat alerts
+
+### Behavioral Analytics
+- Session replay (watch user journeys)
+- Click heatmaps
+- Scroll depth tracking
+- JavaScript error tracking
+
+### Integrations
+- Google Search Console (Pro/Cloud)
+- Email/Slack reports (Pro/Cloud)
+- Webhooks & REST API
+- SDKs: Node.js, Python, Go
 
 ---
 
-## 💖 Sponsorship & Community
+## Architecture
 
-Helm is "Open Core" software. The core analytics are free forever.
-Advanced features (AI Insights, Organization Management) are supported by our sponsors.
+```
+Helm Analytics
+├── Backend (Go)
+│   ├── License validation
+│   ├── Analytics API
+│   ├── AI engine (Gemini)
+│   └── Firewall rules
+├── Frontend (React + Vite)
+│   ├── Dashboard
+│   └── Admin UI
+├── Databases
+│   ├── PostgreSQL (users, sites, sessions)
+│   └── ClickHouse (events, analytics)
+└── Tracker (JavaScript)
+    ├── <2KB, cookieless
+    └── Session replay capture
+```
 
-*   [**GitHub Sponsors**](https://github.com/sponsors/Sentinel-Analytics): Support development.
-*   **Enterprise Support**: Contact `sales@sentinel.com` (Placeholder) for managed contracts.
+---
 
-## 📄 License
+## Development
 
-Helm Analytics is licensed under the **Elastic License 2.0 (ELv2)**.
+### Requirements
+- Go 1.21+
+- Node.js 18+
+- Docker & Docker Compose
 
-*   ✅ **You can:** Use, copy, modify, and distribute the software.
-*   ✅ **You can:** Use it internally for your business.
-*   ❌ **You cannot:** Provide the software to others as a managed service (SaaS).
-*   ❌ **You cannot:** Circumvent the license key checks.
+### Setup
 
-See [LICENSE](LICENSE) for full details.
+```bash
+# Backend
+cd backend
+go mod download
+go run main.go
+
+# Frontend
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### Areas We Need Help
+- Additional SDKs (PHP, Ruby, Java)
+- Documentation improvements
+- Bug reports & feature requests
+- Translations
+
+---
+
+## Proudly Built by DataKriB 🇿🇦
+
+Helm is developed by [DataKriB](https://datakrib.com), an African tech company building open-source infrastructure for the modern web.
+
+**Our Mission:** Make powerful, privacy-first tools accessible to everyone, everywhere.
+
+---
+
+## License
+
+- **Community Edition:** AGPLv3 (see [LICENSE](LICENSE))
+- **Pro/Enterprise:** Commercial license required
+- **Cloud:** Proprietary (managed by Helm)
+
+---
+
+## Support
+
+- 📚 **Documentation:** [docs.helm.io](https://docs.helm.io)
+- 💬 **Discord:** [discord.gg/helm](https://discord.gg/helm)
+- 🐛 **Issues:** [GitHub Issues](https://github.com/helm-analytics/helm/issues)
+- 📧 **Email:** support@helm.io
+
+---
+
+## Roadmap
+
+See [ROADMAP.md](ROADMAP.md) for upcoming features.
+
+**Next Up:**
+- [ ] Scroll depth tracking (v2.1)
+- [ ] Activity log (v2.1)
+- [ ] Period comparison (v2.2)
+- [ ] User journey visualization (v2.3)
+
+---
+
+**Star us on GitHub if you find Helm useful! ⭐**

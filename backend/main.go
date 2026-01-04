@@ -29,6 +29,11 @@ func main() {
 	// All functions from your library are now prefixed with 'sentinel.'
 	sentinel.InitDB()
 	sentinel.InitAnalyticsEngine()
+	
+	// Initialize license system
+	if err := sentinel.InitLicense(); err != nil {
+		log.Printf("⚠️  License initialization warning: %v", err)
+	}
 	sentinel.InitClickHouse()
 
 	mux := http.NewServeMux()
@@ -59,6 +64,7 @@ func main() {
 	mux.Handle("/auth/login", apiCors.Handler(http.HandlerFunc(sentinel.LoginHandler)))
 	// Public tracking endpoints (no auth required)
 	mux.Handle("/track", trackCors.Handler(http.HandlerFunc(sentinel.TrackHandler)))
+	mux.Handle("/track/event", trackCors.Handler(http.HandlerFunc(sentinel.TrackCustomEventHandler))) // Custom events
 	mux.Handle("/api/debug/latest", trackCors.Handler(http.HandlerFunc(sentinel.DebugLatestEventsHandler)))
 	mux.Handle("/api/debug/visit-time", trackCors.Handler(http.HandlerFunc(sentinel.DebugAvgVisitTimeHandler)))
 	mux.Handle("/api/debug/session", trackCors.Handler(http.HandlerFunc(sentinel.DebugSessionEventsHandler)))
@@ -83,6 +89,17 @@ func main() {
 	mux.Handle("/api/session/events", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetSessionEventsHandler)))
 	mux.Handle("/api/sessions", apiCors.Handler(sentinel.AuthMiddleware(sentinel.ListSessionsHandler)))
 	mux.Handle("/api/funnels/", apiCors.Handler(sentinel.AuthMiddleware(sentinel.FunnelsApiHandler)))
+	
+	// Custom Events API
+	mux.Handle("/api/events/stats", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler)))
+	mux.Handle("/api/events/properties", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetEventPropertiesHandler)))
+	
+	// Activity Log API
+	mux.Handle("/api/activity", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetActivityLogHandler)))
+	
+	// Admin API (Cloud only - for manual subscription management)
+	mux.HandleFunc("/api/admin/subscription", sentinel.AdminUpdateSubscriptionHandler)
+	mux.HandleFunc("/api/admin/subscription/get", sentinel.AdminGetUserSubscriptionHandler)
 	
 	// AI Features
 	mux.Handle("/api/ai/insights", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetInsightsHandler)))

@@ -1,421 +1,400 @@
-import React, { useState } from 'react';
-import { Library, Terminal, Code2, Shield, Activity, BrainCircuit, Copy, Check, BarChart3, Timer, Plus, Fingerprint, Laptop, CheckCircle2 } from 'lucide-react';
-
-const CodeBlock = ({ code, language = 'javascript', label = 'Code' }) => {
-    const [copied, setCopied] = useState(false);
-
-    const handleCopy = () => {
-        navigator.clipboard.writeText(code);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
-
-    return (
-        <div className="relative group rounded-xl overflow-hidden border border-white/10 bg-[#0F172A] shadow-md transition-all hover:border-white/20">
-            <div className="flex items-center justify-between px-4 py-2 bg-white/5 border-b border-white/5">
-                <span className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">{label}</span>
-                <button 
-                    onClick={handleCopy}
-                    className="p-1.5 rounded-md hover:bg-white/10 text-slate-400 hover:text-white transition-colors"
-                >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                </button>
-            </div>
-            <div className="p-4 overflow-x-auto custom-scrollbar">
-                <pre className="font-mono text-[11px] leading-relaxed text-slate-300 whitespace-pre">{code}</pre>
-            </div>
-        </div>
-    );
-};
+import { useState } from 'react';
+import { Book, Code, Shield, BarChart3, Activity, Zap, Globe, CheckCircle, ExternalLink, Copy, Check } from 'lucide-react';
 
 const DocsPage = () => {
-    const metrics = [
-        {
-            title: "Total Views",
-            desc: "The total number of page loads. Includes reloads and internal navigation."
-        },
-        {
-            title: "Unique Visits",
-            desc: "Individual sessions identified by a privacy-preserving hash. A user visiting 5 pages counts as 1 visit."
-        },
-        {
-            title: "Bounce Rate",
-            desc: "The percentage of visitors who leave after viewing only one page. Lower is generally better."
-        },
-        {
-            title: "Avg. Duration",
-            desc: "The average time spent on your site per session. We use a 15s heartbeat for high accuracy."
-        }
-    ];
+  const [copied, setCopied] = useState('');
 
-    const webVitals = [
-        {
-            title: "LCP (Largest Contentful Paint)",
-            stat: "Loading Speed",
-            desc: "How long it takes for the main content to load. < 2.5s is good."
-        },
-        {
-            title: "CLS (Cumulative Layout Shift)",
-            stat: "Visual Stability",
-            desc: "Measures unexpected layout shifts. < 0.1 is good."
-        },
-        {
-            title: "FID (First Input Delay)",
-            stat: "Interactivity",
-            desc: "Delay before the browser responds to a click. < 100ms is good."
-        }
-    ];
+  const copyToClipboard = (text, id) => {
+    navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(''), 2000);
+  };
 
-    const quickStartCode = `<script src="https://api-sentinel.getmusterup.com/static/tracker-v4.js" data-site-id="YOUR_SITE_ID"></script>`;
-    const spiderTrapCode = `<a href="/track/trap?siteId=YOUR_SITE_ID" style="display:none" aria-hidden="true">Health Check</a>`;
+  const sections = [
+    {
+      id: 'quick-start',
+      icon: Zap,
+      title: 'Quick Start',
+      content: (
+        <div className="space-y-4">
+          <p className="text-muted-foreground">Get started with Helm Analytics in under 5 minutes.</p>
+          
+          <div className="bg-secondary/50 rounded-lg p-4">
+            <h4 className="font-bold mb-2">1. Get Your Site ID</h4>
+            <p className="text-sm text-muted-foreground">
+              Go to your dashboard and create a new site. Copy your unique Site ID.
+            </p>
+          </div>
 
-    return (
-        <div className="max-w-6xl mx-auto space-y-20 animate-in fade-in duration-700 pb-20">
-            {/* Hero Section */}
-            <div className="text-center space-y-6 pt-12">
-                <div className="inline-flex items-center justify-center p-5 bg-accent/10 rounded-3xl mb-4 border border-accent/20 ring-4 ring-accent/5">
-                    <Library className="w-12 h-12 text-accent" />
-                </div>
-                <h1 className="text-5xl md:text-6xl font-heading font-extrabold text-foreground tracking-tight">Helm Knowledge Base</h1>
-                <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-light">
-                    Everything you need to master <strong>Helm Analytics</strong>. From integration to advanced security and AI-driven insights.
-                </p>
+          <div className="bg-secondary/50 rounded-lg p-4">
+            <h4 className="font-bold mb-2 flex items-center justify-between">
+              2. Add the Tracking Script
+              <button
+                onClick={() => copyToClipboard(`<script src="https://api-sentinel.getmusterup.com/static/tracker-v5.js" data-site-id="YOUR_SITE_ID"></script>`, 'install')}
+                className="p-2 hover:bg-secondary rounded"
+              >
+                {copied === 'install' ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </h4>
+            <pre className="bg-muted p-3 rounded text-xs overflow-x-auto mt-2">
+              <code>{`<script src="https://api-sentinel.getmusterup.com/static/tracker-v5.js" 
+        data-site-id="YOUR_SITE_ID">
+</script>`}</code>
+            </pre>
+            <p className="text-sm text-muted-foreground mt-2">
+              Add this just before the closing <code className="text-accent">&lt;/body&gt;</code> tag.
+            </p>
+          </div>
+
+          <div className="bg-secondary/50 rounded-lg p-4">
+            <h4 className="font-bold mb-2">3. Start Tracking</h4>
+            <p className="text-sm text-muted-foreground">
+              That's it! Helm will automatically track pageviews, errors, and performance metrics.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'features',
+      icon: BarChart3,
+      title: 'Core Features',
+      content: (
+        <div className="space-y-6">
+          <div>
+            <h4 className="font-bold mb-3 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              Analytics Dashboard
+            </h4>
+            <ul className="space-y-2 text-sm text-muted-foreground ml-7">
+              <li>• Real-time visitor tracking</li>
+              <li>• Pageviews, unique visitors, bounce rate</li>
+              <li>• Traffic sources, referrers, countries</li>
+              <li>• Device, browser, and OS breakdowns</li>
+              <li>• Custom date ranges</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-3 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              Session Replay
+            </h4>
+            <p className="text-sm text-muted-foreground ml-7">
+              Watch recordings of user sessions to understand behavior and identify UX issues.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-3 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              Heatmaps
+            </h4>
+            <p className="text-sm text-muted-foreground ml-7">
+              See exactly where users click on your pages. Identify high-engagement areas.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-3 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              Error Tracking
+            </h4>
+            <p className="text-sm text-muted-foreground ml-7">
+              Automatically catch JavaScript errors before users report them. Includes stack traces.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold mb-3 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5 text-green-500" />
+              Funnels & Goals
+            </h4>
+            <p className="text-sm text-muted-foreground ml-7">
+              Track multi-step conversions. Identify where users drop off in your funnel.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'custom-events',
+      icon: Activity,
+      title: 'Custom Events',
+      content: (
+        <div className="space-y-4">
+          <p className="text-muted-foreground">
+            Track any user action beyond pageviews with custom events.
+          </p>
+
+          <div className="bg-secondary/50 rounded-lg p-4">
+            <h4 className="font-bold mb-2">Basic Event</h4>
+            <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+              <code>{`helm.trackEvent('button_clicked', { 
+  location: 'header',
+  text: 'Sign Up' 
+});`}</code>
+            </pre>
+          </div>
+
+          <div className="bg-secondary/50 rounded-lg p-4">
+            <h4 className="font-bold mb-2">E-Commerce</h4>
+            <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+              <code>{`helm.trackEvent('purchase', {
+  order_id: 'ORD-123',
+  amount: 99.99,
+  currency: 'USD',
+  product_id: 'prod_456'
+});`}</code>
+            </pre>
+          </div>
+
+          <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
+            <h4 className="font-bold mb-2">Auto-Tracked Events</h4>
+            <ul className="text-sm space-y-1 text-muted-foreground">
+              <li>• <code className="text-accent">outbound_click</code> - External link clicks</li>
+              <li>• <code className="text-accent">file_download</code> - PDF, ZIP, DOCX downloads</li>
+              <li>• <code className="text-accent">scroll_depth</code> - 25%, 50%, 75%, 100% milestones</li>
+            </ul>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'security',
+      icon: Shield,
+      title: 'Security Features',
+      content: (
+        <div className="space-y-4">
+          <div>
+            <h4 className="font-bold mb-2">Bot Detection</h4>
+            <p className="text-sm text-muted-foreground mb-3">
+              Every visitor gets a Trust Score (0-100) based on behavior, IP reputation, and browser fingerprint.
+            </p>
+            <div className="bg-secondary/50 rounded-lg p-3 text-sm">
+              <p className="font-medium">Score Ranges:</p>
+              <ul className="space-y-1 mt-2 text-muted-foreground">
+                <li>• 80-100: Trusted Human</li>
+                <li>• 50-79: Likely Human</li>
+                <li>• 0-49: Likely Bot</li>
+              </ul>
             </div>
+          </div>
 
-            {/* Get Started Guide */}
-            <div className="space-y-12">
-                <h2 className="text-3xl font-heading font-extrabold text-foreground text-center">Get Started in 60 Seconds</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-                    {/* Connecting Line (Desktop) */}
-                    <div className="hidden md:block absolute top-[24px] left-[16%] right-[16%] h-0.5 bg-gradient-to-r from-border/0 via-border to-border/0 border-t border-dashed border-border z-0 opacity-50"></div>
+          <div>
+            <h4 className="font-bold mb-2">Firewall</h4>
+            <p className="text-sm text-muted-foreground">
+              Block traffic by IP address, country, or data center (ASN). Perfect for stopping scrapers and click fraud.
+            </p>
+          </div>
 
-                    {/* Step 1 */}
-                    <div className="premium-card relative bg-[#0F172A] z-10 shadow-2xl hover:scale-105 transition-transform duration-300 border-border/60">
-                        <div className="absolute -top-5 -left-5 w-12 h-12 bg-accent rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-xl shadow-accent/20 rotate-3 border-2 border-white/20 ring-4 ring-background">1</div>
-                        <h3 className="text-xl font-bold text-white mb-3 mt-4 flex items-center gap-2">
-                           <Laptop className="w-5 h-5 text-accent" />
-                           Add Site
-                        </h3>
-                        <p className="text-sm text-slate-400 leading-relaxed">
-                            Click the <span className="inline-flex items-center justify-center bg-accent/20 text-accent w-5 h-5 rounded mx-1 align-middle"><Plus className="w-3 h-3" /></span> button in the sidebar. Enter your website's domain name to generate your unique tracking ID.
-                        </p>
-                    </div>
+          <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
+            <h4 className="font-bold mb-2">⚡ Shield Mode (Pro/Cloud)</h4>
+            <p className="text-sm text-muted-foreground">
+              Automatically block bad traffic at the server level before it reaches your site. Saves bandwidth and server costs.
+            </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'sdk',
+      icon: Code,
+      title: 'Server-Side SDKs',
+      content: (
+        <div className="space-y-4">
+          <p className="text-muted-foreground">
+            Track events from your backend to bypass ad-blockers.
+          </p>
 
-                    {/* Step 2 */}
-                    <div className="premium-card relative bg-[#0F172A] z-10 shadow-2xl hover:scale-105 transition-transform duration-300 border-border/60">
-                        <div className="absolute -top-5 -left-5 w-12 h-12 bg-accent rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-xl shadow-accent/20 rotate-3 border-2 border-white/20 ring-4 ring-background">2</div>
-                        <h3 className="text-xl font-bold text-white mb-3 mt-4 flex items-center gap-2">
-                            <Code2 className="w-5 h-5 text-accent" />
-                            Install Script
-                        </h3>
-                        <p className="text-sm text-slate-400 mb-4 leading-relaxed">
-                            Copy this snippet into the <code className="bg-white/10 px-1.5 py-0.5 rounded text-accent font-mono text-xs">&lt;head&gt;</code> of your website.
-                        </p>
-                        <CodeBlock code={quickStartCode} label="HTML Snippet" />
-                    </div>
+          <div className="bg-secondary/50 rounded-lg p-4">
+            <h4 className="font-bold mb-2">Node.js</h4>
+            <pre className="bg-muted p-3 rounded text-xs overflow-x-auto mb-2">
+              <code>{`npm install helm-analytics`}</code>
+            </pre>
+            <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+              <code>{`const helm = require('helm-analytics');
 
-                    {/* Step 3 */}
-                    <div className="premium-card relative bg-[#0F172A] z-10 shadow-2xl hover:scale-105 transition-transform duration-300 border-border/60">
-                        <div className="absolute -top-5 -left-5 w-12 h-12 bg-accent rounded-2xl flex items-center justify-center font-black text-white text-xl shadow-xl shadow-accent/20 rotate-3 border-2 border-white/20 ring-4 ring-background">3</div>
-                         <h3 className="text-xl font-bold text-white mb-3 mt-4 flex items-center gap-2">
-                            <Activity className="w-5 h-5 text-accent" />
-                            Deploy & Live
-                        </h3>
-                        <p className="text-sm text-slate-400 leading-relaxed">
-                            Deploy your changes to production. Visit your site to trigger the first event. Your dashboard will light up with real-time data instantly.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Dashboard Metrics */}
-            <div className="space-y-8">
-                <div className="flex items-center gap-4 border-b border-border/50 pb-4">
-                    <BarChart3 className="w-6 h-6 text-accent" />
-                    <h2 className="text-3xl font-heading font-extrabold text-foreground">Understanding Metrics</h2>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {metrics.map((m, i) => (
-                        <div key={i} className="premium-card p-6 space-y-3 hover:bg-secondary/20 transition-colors">
-                            <h3 className="font-bold text-foreground text-sm uppercase tracking-wide flex items-center gap-2">
-                                <div className="w-1 h-3 bg-accent rounded-full"></div>
-                                {m.title}
-                            </h3>
-                            <p className="text-xs text-muted-foreground leading-relaxed font-medium">{m.desc}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Feature Deep Dive Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* AI Intelligence */}
-                <div className="premium-card space-y-6">
-                    <div className="flex items-center gap-4 border-b border-border/50 pb-4">
-                        <div className="p-3 bg-amber-500/10 rounded-2xl">
-                            <BrainCircuit className="w-6 h-6 text-amber-500" />
-                        </div>
-                        <h2 className="text-2xl font-heading font-extrabold text-foreground">Helm Intelligence AI</h2>
-                    </div>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                        Our AI engine analyzes your traffic patterns every 10 minutes to identify anomalies, growth opportunities, and technical issues.
-                    </p>
-                    <ul className="space-y-4">
-                        <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                            <div className="mt-1 p-0.5 bg-accent/10 rounded-full">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
-                            </div>
-                            <span><strong className="text-foreground">Anomaly Detection:</strong> Sudden spikes or drops in traffic.</span>
-                        </li>
-                        <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                            <div className="mt-1 p-0.5 bg-accent/10 rounded-full">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
-                            </div>
-                            <span><strong className="text-foreground">Conversion Insights:</strong> Why users are dropping off.</span>
-                        </li>
-                        <li className="flex items-start gap-3 text-sm text-muted-foreground">
-                            <div className="mt-1 p-0.5 bg-accent/10 rounded-full">
-                                <CheckCircle2 className="w-3.5 h-3.5 text-accent" />
-                            </div>
-                            <span><strong className="text-foreground">Smart Caching:</strong> Reports are cached for 15 mins to save resources. Use the refresh button for instant updates.</span>
-                        </li>
-                    </ul>
-                </div>
-
-                {/* Web Vitals */}
-                <div className="premium-card space-y-6">
-                     <div className="flex items-center gap-4 border-b border-border/50 pb-4">
-                        <div className="p-3 bg-blue-500/10 rounded-2xl">
-                            <Timer className="w-6 h-6 text-blue-500" />
-                        </div>
-                        <h2 className="text-2xl font-heading font-extrabold text-foreground">Core Web Vitals</h2>
-                    </div>
-                    <div className="space-y-4">
-                        {webVitals.map((v, i) => (
-                            <div key={i} className="flex items-center justify-between p-4 bg-secondary/30 rounded-xl border border-border/50 hover:bg-secondary/50 transition-colors">
-                                <div>
-                                    <div className="font-bold text-foreground text-sm flex items-center gap-2">
-                                        {v.title}
-                                    </div>
-                                    <div className="text-[11px] text-muted-foreground mt-1">{v.desc}</div>
-                                </div>
-                                <div className="text-[10px] font-bold text-accent px-2.5 py-1 bg-accent/10 rounded-lg uppercase tracking-wider whitespace-nowrap border border-accent/20">
-                                    {v.stat}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-             {/* Security Section */}
-             <div className="premium-card bg-[#0F172A] border-none space-y-8 relative overflow-hidden ring-1 ring-white/10">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl -mr-24 -mt-24 pointer-events-none"></div>
-                
-                <div className="relative z-10 flex flex-col lg:flex-row gap-12">
-                     <div className="flex-1 space-y-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-rose-500/20 rounded-2xl">
-                                <Fingerprint className="w-6 h-6 text-rose-500" />
-                            </div>
-                            <h2 className="text-2xl font-heading font-extrabold text-white">Advanced Security Suite</h2>
-                        </div>
-                        <p className="text-slate-400 text-sm leading-relaxed max-w-lg">
-                            Helm includes enterprise-grade protection features out of the box, ensuring your users and data are safe from automated threats.
-                        </p>
-                        <div className="space-y-4">
-                            <div className="p-5 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-sm">
-                                <h4 className="text-white font-bold mb-2 flex items-center gap-2">
-                                    <Shield className="w-4 h-4 text-rose-400" />
-                                    Shield Mode (WAF)
-                                </h4>
-                                <p className="text-xs text-slate-400 w-full mb-2 leading-relaxed">
-                                    Full spectrum protection against <strong className="text-slate-200">XSS, Brute Force, and SQL Injection</strong>.
-                                </p>
-                                <p className="text-xs text-slate-500 leading-relaxed">
-                                    Automatically blocks traffic from known data centers (AWS/GCP), anonymous proxies, and malicious botnets.
-                                </p>
-                            </div>
-                            <div className="p-5 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-sm">
-                                <h4 className="text-white font-bold mb-2 flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
-                                    Spider Trap 🕸️
-                                </h4>
-                                <p className="text-xs text-slate-400 leading-relaxed">A hidden link that only bots see. If accessed, the visitor's IP is permanently banned from your entire network.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col justify-center">
-                        <div className="p-4 bg-black/40 rounded-t-xl border border-white/10 flex items-center justify-between">
-                            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                                <Code2 className="w-3 h-3" />
-                                Trap Implementation
-                            </span>
-                            <div className="flex gap-1.5">
-                                <div className="w-2.5 h-2.5 rounded-full bg-rose-500/20"></div>
-                                <div className="w-2.5 h-2.5 rounded-full bg-amber-500/20"></div>
-                                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/20"></div>
-                            </div>
-                        </div>
-                        <div className="bg-black/60 p-0 border-x border-b border-white/10 rounded-b-xl overflow-hidden">
-                             <CodeBlock code={spiderTrapCode} label="HTML" language="html" />
-                        </div>
-                        <p className="text-xs text-slate-500 mt-4 italic text-center">
-                            Place this link anywhere in your HTML body. It is hidden via CSS.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Server Side Integration */}
-            <div className="space-y-8">
-                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/50 pb-6">
-                     <div className="space-y-2">
-                        <h2 className="text-3xl font-heading font-extrabold text-foreground">Server-Side Tracking</h2>
-                        <p className="text-muted-foreground text-sm">
-                            Mission-critical analytics and threat blocking directly from your backend.
-                        </p>
-                     </div>
-                     <div className="flex gap-2">
-                         <span className="px-3 py-1 rounded-full bg-accent/10 text-accent text-xs font-bold border border-accent/20">Official SDKs</span>
-                     </div>
-                 </div>
-                 
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Node.js SDK */}
-                    <div className="premium-card p-0 overflow-hidden group">
-                         <div className="bg-secondary/30 p-4 border-b border-border/50 flex items-center justify-between group-hover:bg-secondary/50 transition-colors">
-                            <span className="font-bold text-sm flex items-center gap-2">
-                                <Terminal className="w-5 h-5 text-accent" />
-                                Node.js (Express)
-                            </span>
-                            <div className="text-[10px] bg-accent/10 px-2.5 py-1 rounded-full text-accent border border-accent/20 font-mono">v1.1.0</div>
-                         </div>
-                         <div className="p-5 bg-[#0F172A] space-y-6">
-                            <div className="space-y-2">
-                                <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Installation</div>
-                                <div className="bg-black/40 p-3 rounded-lg border border-white/10 font-mono text-xs text-emerald-400">
-                                    npm install helm-analytics
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Middleware</div>
-                                <CodeBlock 
-                                    label="Express.js"
-                                    code={`const helm = require('helm-analytics');
-
-// Initialize with your Site ID
 const analytics = new helm.HelmAnalytics({
-    siteId: 'YOUR_SITE_ID',
-    apiUrl: 'https://api.analytics.yourdomain.com'
+  siteId: 'YOUR_SITE_ID',
+  apiUrl: 'https://api-sentinel.getmusterup.com'
 });
 
-// Enable Tracking & Shield Mode (Blocking)
-app.use(analytics.middleware({ shield: true }));`} 
-                                />
-                            </div>
-                         </div>
-                    </div>
+app.use(analytics.middleware());`}</code>
+            </pre>
+          </div>
 
-                    {/* Python SDK */}
-                    <div className="premium-card p-0 overflow-hidden group">
-                         <div className="bg-secondary/30 p-4 border-b border-border/50 flex items-center justify-between group-hover:bg-secondary/50 transition-colors">
-                            <span className="font-bold text-sm flex items-center gap-2">
-                                <Terminal className="w-5 h-5 text-accent" />
-                                Python (Flask/FastAPI)
-                            </span>
-                            <div className="text-[10px] bg-accent/10 px-2.5 py-1 rounded-full text-accent border border-accent/20 font-mono">v1.1.0</div>
-                         </div>
-                         <div className="p-5 bg-[#0F172A] space-y-6">
-                            <div className="space-y-2">
-                                <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Installation</div>
-                                <div className="bg-black/40 p-3 rounded-lg border border-white/10 font-mono text-xs text-emerald-400">
-                                    pip install helm_analytics
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Flask App</div>
-                                <CodeBlock 
-                                    label="Python"
-                                    code={`from helm_analytics import HelmAnalytics
+          <div className="bg-secondary/50 rounded-lg p-4">
+            <h4 className="font-bold mb-2">Python</h4>
+            <pre className="bg-muted p-3 rounded text-xs overflow-x-auto mb-2">
+              <code>{`pip install helm-analytics`}</code>
+            </pre>
+            <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+              <code>{`from helm_analytics import HelmAnalytics
 
 helm = HelmAnalytics(
-    site_id="YOUR_SITE_ID", 
-    api_url="https://api.analytics.yourdomain.com"
+    site_id="YOUR_SITE_ID",
+    api_url="https://api-sentinel.getmusterup.com"
 )
 
-# Enable Shield Mode (Blocking)
-app.before_request(helm.flask_middleware(shield=True))`} 
-                                />
-                            </div>
-                         </div>
-                    </div>
+app.before_request(helm.flask_middleware())`}</code>
+            </pre>
+          </div>
 
-                     {/* Go SDK */}
-                     <div className="premium-card p-0 overflow-hidden md:col-span-2 group">
-                         <div className="bg-secondary/30 p-4 border-b border-border/50 flex items-center justify-between group-hover:bg-secondary/50 transition-colors">
-                            <span className="font-bold text-sm flex items-center gap-2">
-                                <Terminal className="w-5 h-5 text-accent" />
-                                Go (Golang)
-                            </span>
-                            <div className="text-[10px] bg-accent/10 px-2.5 py-1 rounded-full text-accent border border-accent/20 font-mono">v1.0.0</div>
-                         </div>
-                         <div className="p-5 bg-[#0F172A] space-y-6">
-                            <div className="space-y-2">
-                                <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Installation</div>
-                                <div className="bg-black/40 p-3 rounded-lg border border-white/10 font-mono text-xs text-emerald-400">
-                                    go get github.com/Sentinel-Analytics/sentinel-mvp/sdk/go/helm-analytics
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Initialization</div>
-                                    <CodeBlock 
-                                        label="Go"
-                                        code={`// Initialize
+          <div className="bg-secondary/50 rounded-lg p-4">
+            <h4 className="font-bold mb-2">Go</h4>
+            <pre className="bg-muted p-3 rounded text-xs overflow-x-auto mb-2">
+              <code>{`go get github.com/helm-analytics/helm-go`}</code>
+            </pre>
+            <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+              <code>{`import "github.com/helm-analytics/helm-go"
+
 analytics := helm.New(helm.Config{
     SiteID: "YOUR_SITE_ID",
-    APIURL: "https://api...",
-})`} 
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Middleware</div>
-                                    <CodeBlock 
-                                        label="Go"
-                                        code={`// Mount Middleware with Shield=true
-http.ListenAndServe(":80", 
-    analytics.Middleware(mux, true)
-)`} 
-                                    />
-                                </div>
-                            </div>
-                         </div>
-                    </div>
-                 </div>
-            </div>
+    APIURL: "https://api-sentinel.getmusterup.com",
+})
 
-             {/* Footer FAQ-style mini tips */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-12 border-t border-border/50">
-                <div className="flex gap-4 p-4 rounded-xl hover:bg-secondary/20 transition-colors">
-                    <Activity className="w-8 h-8 text-accent shrink-0" />
-                    <div>
-                         <h4 className="font-bold text-foreground mb-1">Real-time Heartbeat</h4>
-                         <p className="text-xs text-muted-foreground leading-relaxed">The tracker sends a heartbeat every 15 seconds to ensure 'Time on Page' metrics are 100% accurate even if the user closes the tab.</p>
-                    </div>
-                </div>
-                <div className="flex gap-4 p-4 rounded-xl hover:bg-secondary/20 transition-colors">
-                    <Fingerprint className="w-8 h-8 text-accent shrink-0" />
-                    <div>
-                         <h4 className="font-bold text-foreground mb-1">Privacy First</h4>
-                         <p className="text-xs text-muted-foreground leading-relaxed">Helm is cookieless. We use privacy-compliant session hashes that expire naturally, ensuring GDPR and CCPA compliance by default.</p>
-                    </div>
-                </div>
-            </div>
+http.ListenAndServe(":80", analytics.Middleware(mux))`}</code>
+            </pre>
+          </div>
         </div>
-    );
+      )
+    },
+    {
+      id: 'self-host',
+      icon: Globe,
+      title: 'Self-Hosting',
+      content: (
+        <div className="space-y-4">
+          <p className="text-muted-foreground">
+            Deploy Helm on your own infrastructure with Docker.
+          </p>
+
+          <div className="bg-secondary/50 rounded-lg p-4">
+            <h4 className="font-bold mb-2">Quick Deploy</h4>
+            <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
+              <code>{`git clone https://github.com/helm-analytics/helm.git
+cd helm
+cp .env.example .env
+docker-compose up -d`}</code>
+            </pre>
+            <p className="text-sm text-muted-foreground mt-2">
+              Access at <code className="text-accent">http://localhost:3000</code>
+            </p>
+          </div>
+
+          <div className="bg-accent/10 border border-accent/20 rounded-lg p-4">
+            <h4 className="font-bold mb-2">Pro License</h4>
+            <p className="text-sm text-muted-foreground mb-2">
+              Unlock premium features for self-hosted instances:
+            </p>
+            <ul className="text-sm space-y-1 text-muted-foreground">
+              <li>• AI Consultant (page analysis)</li>
+              <li>• Shield Auto-Block</li>
+              <li>• White-label branding</li>
+              <li>• Priority support</li>
+            </ul>
+            <p className="text-sm text-muted-foreground mt-3">
+              <strong>$199/year</strong> · <a href="https://helm.io/pricing" className="text-accent hover:underline">Get License →</a>
+            </p>
+          </div>
+        </div>
+      )
+    }
+  ];
+
+  const [activeSection, setActiveSection] = useState('quick-start');
+
+  return (
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2">Helm Analytics Documentation</h1>
+        <p className="text-muted-foreground text-lg">
+          Privacy-first analytics with AI and security built-in
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-4 gap-6">
+        {/* Sidebar Navigation */}
+        <div className="md:col-span-1">
+          <nav className="sticky top-6 space-y-1">
+            {sections.map(section => {
+              const Icon = section.icon;
+              return (
+                <button
+                  key={section.id}
+                  onClick={() => setActiveSection(section.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-colors ${
+                    activeSection === section.id
+                      ? 'bg-primary text-primary-foreground'
+                      : 'hover:bg-secondary text-muted-foreground'
+                  }`}
+                >
+                  <Icon className="w-5 h-5 flex-shrink-0" />
+                  <span className="font-medium">{section.title}</span>
+                </button>
+              );
+            })}
+
+            <a
+              href="https://helm.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left hover:bg-secondary text-muted-foreground transition-colors mt-4"
+            >
+              <ExternalLink className="w-5 h-5 flex-shrink-0" />
+              <span className="font-medium">helm.io</span>
+            </a>
+          </nav>
+        </div>
+
+        {/* Content Area */}
+        <div className="md:col-span-3">
+          <div className="bg-card border border-border rounded-xl p-8">
+            {sections.map(section => {
+              const Icon = section.icon;
+              return (
+                <div
+                  key={section.id}
+                  className={activeSection === section.id ? 'block' : 'hidden'}
+                >
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="p-3 bg-accent/10 rounded-lg">
+                      <Icon className="w-6 h-6 text-accent" />
+                    </div>
+                    <h2 className="text-3xl font-bold">{section.title}</h2>
+                  </div>
+                  {section.content}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Footer */}
+          <div className="mt-6 p-6 bg-accent/5 border border-accent/20 rounded-xl">
+            <h3 className="font-bold mb-2">Need Help?</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Join our Discord community or email us at support@helm.io
+            </p>
+            <div className="flex gap-3">
+              <a
+                href="https://discord.gg/helm"
+                className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:opacity-90 text-sm font-medium"
+              >
+                Discord
+              </a>
+              <a
+                href="mailto:support@helm.io"
+                className="px-4 py-2 bg-secondary hover:bg-secondary/80 rounded-lg text-sm font-medium"
+              >
+                Email
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default DocsPage;

@@ -128,6 +128,81 @@ func getClientIP(r *http.Request) string {
 	return ip
 }
 
+// Helper functions for enriching event data
+func getCountry(ipStr string) string {
+	ip := net.ParseIP(ipStr)
+	if geoipDb != nil && ip != nil {
+		record, err := geoipDb.Country(ip)
+		if err == nil && record.Country.IsoCode != "" {
+			return record.Country.IsoCode
+		}
+	}
+	return "Unknown"
+}
+
+func getCity(ipStr string) string {
+	return "" // Requires GeoLite2-City database
+}
+
+func getBrowser(userAgent string) string {
+	if uaParser != nil {
+		client := uaParser.Parse(userAgent)
+		browser := client.UserAgent.Family
+		if browser == "Other" || browser == "" {
+			return "Unknown"
+		}
+		return browser
+	}
+	return "Unknown"
+}
+
+func getOS(userAgent string) string {
+	if uaParser != nil {
+		client := uaParser.Parse(userAgent)
+		os := client.Os.Family
+		if os == "Other" || os == "" {
+			return "Unknown"
+		}
+		return os
+	}
+	return "Unknown"
+}
+
+func getDevice(userAgent string) string {
+	ua := strings.ToLower(userAgent)
+	if strings.Contains(ua, "mobile") || strings.Contains(ua, "android") || strings.Contains(ua, "iphone") {
+		return "Mobile"
+	}
+	if strings.Contains(ua, "tablet") || strings.Contains(ua, "ipad") {
+		return "Tablet"
+	}
+	return "Desktop"
+}
+
+func parseIntOrDefault(s string, defaultVal int) int {
+	if val, err := strconv.Atoi(s); err == nil {
+		return val
+	}
+	return defaultVal
+}
+
+func verifySiteOwnership(r *http.Request, siteID string) bool {
+	user, ok := r.Context().Value("user").(map[string]interface{})
+	if !ok {
+		return false
+	}
+	userID, ok := user["id"].(string)
+	if !ok {
+		return false
+	}
+	var ownerID string
+	err := db.QueryRow("SELECT user_id FROM sites WHERE id = $1", siteID).Scan(&ownerID)
+	if err != nil {
+		return false
+	}
+	return ownerID == userID
+}
+
 var botUserAgents = []string{
 	"bot", "spider", "crawler", "monitor", "Go-http-client", "python-requests",
 }

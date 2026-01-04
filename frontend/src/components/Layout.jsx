@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom"
-import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon, ChevronRight, Globe, Book, Sun, Moon, GraduationCap } from "lucide-react"
+import { LogOut, LayoutDashboard, Shield, GitMerge, PlayCircle, Plus, Trash2, MousePointer2, AlertOctagon, ChevronRight, Globe, Book, Sun, Moon, GraduationCap, Activity } from "lucide-react"
 import { api } from "../api"
 import Logo from "./Logo"
 import ChatWidget from "./ChatWidget"
@@ -135,10 +135,11 @@ const Layout = () => {
   }
 
   const navItems = [
-    { path: "/dashboard", label: "Overview", icon: LayoutDashboard },
+    {path: "/dashboard", label: "Overview", icon: LayoutDashboard },
     { path: "/session-replay", label: "Sessions", icon: PlayCircle },
     { path: "/heatmap", label: "Heatmaps", icon: MousePointer2 },
     { path: "/funnels", label: "Funnels", icon: GitMerge },
+    { path: "/custom-events", label: "Events", icon: Activity },
     { path: "/firewall", label: "Security", icon: Shield },
     { path: "/errors", label: "Issues", icon: AlertOctagon },
     { path: "/docs", label: "Help & Docs", icon: Book },
