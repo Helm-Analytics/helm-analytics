@@ -187,19 +187,20 @@ func parseIntOrDefault(s string, defaultVal int) int {
 }
 
 func verifySiteOwnership(r *http.Request, siteID string) bool {
-	user, ok := r.Context().Value("user").(map[string]interface{})
-	if !ok {
+	// Get userID from context (set by AuthMiddleware)
+	userID, ok := r.Context().Value("userID").(int)
+	if !ok || userID == 0 {
 		return false
 	}
-	userID, ok := user["id"].(string)
-	if !ok {
-		return false
-	}
-	var ownerID string
+	
+	// Query database to get the owner of this site
+	var ownerID int
 	err := db.QueryRow("SELECT user_id FROM sites WHERE id = $1", siteID).Scan(&ownerID)
 	if err != nil {
 		return false
 	}
+	
+	// Check if the authenticated user owns this site
 	return ownerID == userID
 }
 
