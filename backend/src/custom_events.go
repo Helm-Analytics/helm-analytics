@@ -57,7 +57,7 @@ func TrackCustomEventHandler(w http.ResponseWriter, r *http.Request) {
 	// Store in ClickHouse
 	query := `
 		INSERT INTO events (
-			SiteID, EventType, EventName, EventProperties, 
+			SiteID, EventType, EventName, Properties, 
 			URL, Referrer, ClientIP, Country, City, 
 			Browser, OS, Device, UserAgent, Timestamp
 		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -117,7 +117,7 @@ func GetCustomEventsHandler(w http.ResponseWriter, r *http.Request) {
 			EventName,
 			count() as Count,
 			uniqExact(SessionID) as UniqueUsers,
-			countIf(EventProperties != '{}') as WithProperties
+			countIf(Properties != '{}') as WithProperties
 		FROM events
 		WHERE SiteID = ?
 			AND EventType = 'custom'
@@ -177,13 +177,13 @@ func GetEventPropertiesHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Get sample properties
 	query := `
-		SELECT EventProperties
+		SELECT Properties
 		FROM events
 		WHERE SiteID = ?
 			AND EventType = 'custom'
 			AND EventName = ?
 			AND Timestamp >= now() - INTERVAL ? DAY
-			AND EventProperties != '{}'
+			AND Properties != '{}'
 		LIMIT 1000
 	`
 
