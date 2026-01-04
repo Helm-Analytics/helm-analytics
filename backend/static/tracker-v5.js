@@ -6,7 +6,20 @@
     }
     
     const siteId = scriptTag.getAttribute('data-site-id');
-    const apiBase = scriptTag.getAttribute('data-api') || 'https://api-sentinel.getmusterup.com';
+    
+    // Auto-detect API URL from script source (for self-hosters)
+    let apiBase = scriptTag.getAttribute('data-api');
+    if (!apiBase && scriptTag.src) {
+        try {
+            const scriptUrl = new URL(scriptTag.src);
+            apiBase = `${scriptUrl.protocol}//${scriptUrl.host}`;
+        } catch (e) {
+            apiBase = 'https://api-sentinel.getmusterup.com';
+        }
+    } else if (!apiBase) {
+        apiBase = 'https://api-sentinel.getmusterup.com';
+    }
+    
     const apiEndpoint = `${apiBase}/track`;
     const clickEndpoint = `${apiBase}/track/click`;
     const errorEndpoint = `${apiBase}/track/error`;
