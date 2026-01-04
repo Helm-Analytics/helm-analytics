@@ -256,7 +256,7 @@ const Dashboard = () => {
             </p>
             <div className="space-y-4">
               <div className="bg-secondary rounded-xl p-4 font-mono text-[10px] break-all border border-border text-foreground">
-                {`<script src="https://api-sentinel.getmusterup.com/static/tracker-v4.js" data-site-id="${selectedSite.id}"></script>`}
+                {`<script src="https://api-sentinel.getmusterup.com/static/tracker-v5.js" data-site-id="${selectedSite.id}"></script>`}
               </div>
               <button
                 onClick={copyTrackingScript}
