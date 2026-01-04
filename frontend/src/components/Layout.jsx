@@ -12,6 +12,7 @@ const Layout = () => {
   const [newSiteName, setNewSiteName] = useState("")
   const [authLoading, setAuthLoading] = useState(true)
   const [showTutorial, setShowTutorial] = useState(false)
+  const [isAddSiteOpen, setIsAddSiteOpen] = useState(false)
   
   const location = useLocation()
   const navigate = useNavigate()
@@ -268,6 +269,44 @@ const Layout = () => {
           setShowTutorial(false)
           localStorage.setItem("helm_seen_tutorial", "true")
         }} />
+      )}
+      
+      {/* Add Site Modal */}
+      {isAddSiteOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setIsAddSiteOpen(false)}>
+          <div className="bg-card border border-border rounded-2xl p-6 max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-xl font-bold mb-4">Add New Site</h2>
+            <form onSubmit={(e) => {
+              addSite(e);
+              setIsAddSiteOpen(false);
+            }}>
+              <input
+                type="text"
+                value={newSiteName}
+                onChange={(e) => setNewSiteName(e.target.value)}
+                placeholder="Site name (e.g., My Blog)"
+                className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent mb-4"
+                autoFocus
+              />
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setIsAddSiteOpen(false)}
+                  className="px-4 py-2 rounded-lg text-muted-foreground hover:bg-secondary transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!newSiteName.trim()}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  Add Site
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   )
