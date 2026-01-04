@@ -46,11 +46,13 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 		Events:    payload.Events,
 	}
 
-	// Insert into ClickHouse with explicit column names
-	ctx := context.Background()
-	err := chConn.AsyncInsert(ctx, `INSERT INTO sentinel.session_events 
+	// Insert into ClickHouse with timeout
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	
+	err := chConn.Exec(ctx, `INSERT INTO sentinel.session_events 
 		(Timestamp, SiteID, SessionID, Payload) 
-		VALUES (?, ?, ?, ?)`, false,
+		VALUES (?, ?, ?, ?)`,
 		sessionData.Timestamp,
 		sessionData.SiteID,
 		sessionData.SessionID,
@@ -58,7 +60,11 @@ func SessionHandler(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		log.Printf("Error inserting session into ClickHouse: %v", err)
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		// Don't fail the request - session replay is not critical
+		// Just return success to avoid blocking the tracker
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]string{"status": "accepted", "sessionId": sessionID})
 		return
 	}
 
