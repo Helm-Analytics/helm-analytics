@@ -1,7 +1,6 @@
 package sentinel
 
 import (
-	"database/sql"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -71,11 +70,11 @@ func LogActivity(siteID string, activityType ActivityType, data map[string]inter
 	return nil
 }
 
-// GetActivityLogHandler returns activity log for a site
+// GetActivityLogHandler returns activity log for a site from ClickHouse
 func GetActivityLogHandler(w http.ResponseWriter, r *http.Request) {
 	siteID := r.URL.Query().Get("siteId")
-	filter := r.URL.Query().Get("filter") // "all", "pageviews", "events", "visitors"
-	limit := parseIntOrDefault(r.URL.Query().Get("limit"), 50)
+	filter := r.URL.Query().Get("filter") // "all", "pageviews", "events", "visitors", "errors"
+	limit := parseIntOrDefault(r.URL.Query().Get("limit"), 100)
 
 	if siteID == "" {
 		http.Error(w, "siteId is required", http.StatusBadRequest)
@@ -88,72 +87,152 @@ func GetActivityLogHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Build query based on filter
+	// Query ClickHouse events table for unified activity view
+	ctx := r.Context()
 	query := `
-		SELECT id, site_id, activity_type, activity_data, ip_address, 
-		       country, city, browser, os, device, created_at
-		FROM activity_log
-		WHERE site_id = $1
+		SELECT Timestamp, EventType, EventName, URL, 
+		       ClientIP, Country, City, Browser, OS, Device, 
+		       Properties, SessionID
+		FROM events
+		WHERE SiteID = ?
 	`
 
-	var args []interface{}
-	args = append(args, siteID)
-
+	// Apply filter
 	switch filter {
 	case "pageviews":
-		query += " AND activity_type = $2"
-		args = append(args, ActivityPageview)
+		query += " AND EventType = 'pageview'"
 	case "events":
-		query += " AND activity_type = $2"
-		args = append(args, ActivityCustomEvent)
-	case "visitors":
-		query += " AND activity_type = $2"
-		args = append(args, ActivityVisitorNew)
+		query += " AND EventType = 'custom'"
+	case "errors":
+		// Query errors table instead
+		getErrorsActivity(w, r, siteID, limit)
+		return
 	}
 
-	query += " ORDER BY created_at DESC LIMIT $" + string(rune(len(args)+1))
-	args = append(args, limit)
+	query += " ORDER BY Timestamp DESC LIMIT ?"
 
-	rows, err := db.Query(query, args...)
+	rows, err := chConn.Query(ctx, query, siteID, limit)
 	if err != nil {
-		log.Printf("Failed to query activity log: %v", err)
-		http.Error(w, "Failed to fetch activity log", http.StatusInternalServerError)
+		log.Printf("Failed to query activity from ClickHouse: %v", err)
+		http.Error(w, "Failed to fetch activity", http.StatusInternalServerError)
 		return
 	}
 	defer rows.Close()
 
-	var activities []ActivityLogEntry
+	type Activity struct {
+		Timestamp time.Time              `json:"timestamp"`
+		Type      string                 `json:"type"`
+		EventName string                 `json:"eventName,omitempty"`
+		URL       string                 `json:"url"`
+		IP        string                 `json:"ip"`
+		Country   string                 `json:"country"`
+		City      string                 `json:"city"`
+		Browser   string                 `json:"browser"`
+		OS        string                 `json:"os"`
+		Device    string                 `json:"device"`
+		Data      map[string]interface{} `json:"data,omitempty"`
+		SessionID string                 `json:"sessionId"`
+	}
+
+	var activities []Activity
 
 	for rows.Next() {
-		var activity ActivityLogEntry
-		var dataJSON []byte
-		var activityTypeStr string
-		var id, siteID sql.NullString
-		var ip, country, city, browser, os, device sql.NullString
+		var activity Activity
+		var properties string
 
 		err := rows.Scan(
-			&id, &siteID, &activityTypeStr, &dataJSON,
-			&ip, &country, &city, &browser, &os, &device,
-			&activity.CreatedAt,
+			&activity.Timestamp,
+			&activity.Type,
+			&activity.EventName,
+			&activity.URL,
+			&activity.IP,
+			&activity.Country,
+			&activity.City,
+			&activity.Browser,
+			&activity.OS,
+			&activity.Device,
+			&properties,
+			&activity.SessionID,
 		)
 		if err != nil {
 			log.Printf("Error scanning activity: %v", err)
 			continue
 		}
 
-		activity.ID = id.String
-		activity.SiteID = siteID.String
-		activity.ActivityType = ActivityType(activityTypeStr)
-		activity.IPAddress = ip.String
-		activity.Country = country.String
-		activity.City = city.String
-		activity.Browser = browser.String
-		activity.OS = os.String
-		activity.Device = device.String
+		// Parse properties if present
+		if properties != "" && properties != "{}" {
+			if err := json.Unmarshal([]byte(properties), &activity.Data); err != nil {
+				activity.Data = make(map[string]interface{})
+			}
+		}
 
-		// Parse activity data
-		if err := json.Unmarshal(dataJSON, &activity.ActivityData); err != nil {
-			activity.ActivityData = make(map[string]interface{})
+		activities = append(activities, activity)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"activities": activities,
+		"count":      len(activities),
+	})
+}
+
+// Helper function to get error activities
+func getErrorsActivity(w http.ResponseWriter, r *http.Request, siteID string, limit int) {
+	ctx := r.Context()
+	query := `
+		SELECT Timestamp, URL, Message, Source, LineNo, ClientIP, 
+		       Country, City, Browser, OS, Device
+		FROM errors
+		WHERE SiteID = ?
+		ORDER BY Timestamp DESC
+		LIMIT ?
+	`
+
+	rows, err := chConn.Query(ctx, query, siteID, limit)
+	if err != nil {
+		log.Printf("Failed to query errors: %v", err)
+		http.Error(w, "Failed to fetch errors", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	type ErrorActivity struct {
+		Timestamp time.Time `json:"timestamp"`
+		Type      string    `json:"type"`
+		URL       string    `json:"url"`
+		Message   string    `json:"message"`
+		Source    string    `json:"source"`
+		LineNo    uint32    `json:"lineno"`
+		IP        string    `json:"ip"`
+		Country   string    `json:"country"`
+		City      string    `json:"city"`
+		Browser   string    `json:"browser"`
+		OS        string    `json:"os"`
+		Device    string    `json:"device"`
+	}
+
+	var activities []ErrorActivity
+
+	for rows.Next() {
+		var activity ErrorActivity
+		activity.Type = "error"
+
+		err := rows.Scan(
+			&activity.Timestamp,
+			&activity.URL,
+			&activity.Message,
+			&activity.Source,
+			&activity.LineNo,
+			&activity.IP,
+			&activity.Country,
+			&activity.City,
+			&activity.Browser,
+			&activity.OS,
+			&activity.Device,
+		)
+		if err != nil {
+			log.Printf("Error scanning error activity: %v", err)
+			continue
 		}
 
 		activities = append(activities, activity)
