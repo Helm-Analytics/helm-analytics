@@ -17,14 +17,11 @@ services:
       - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
       - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
       - PAYSTACK_SECRET_KEY=${PAYSTACK_SECRET_KEY}
-      - LICENSE_URL=http://license-server:8080
-      - LICENSE_SECRET=${LICENSE_SECRET}
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
       - SESSION_SECRET=${SESSION_SECRET}
       - JWT_SECRET=${JWT_SECRET}
       - PORT=8080
       - CORS_ORIGIN=${CORS_ORIGIN}
-    ports:
-      - "8080:8080"
     networks:
       - helm-network
     restart: unless-stopped
@@ -36,15 +33,13 @@ services:
     container_name: helm-frontend-cloud
     environment:
       - VITE_API_URL=${API_URL}
-    ports:
-      - "80:80"
     depends_on:
       - backend
     networks:
       - helm-network
     restart: unless-stopped
 
-  # License Server
+  # License Server (for cloud internal use)
   license-server:
     build:
       context: ./license-server
