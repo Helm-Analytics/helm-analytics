@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Activity, Copy, Check, TrendingUp, Code, Sparkles, Filter } from 'lucide-react';
-import api from '../api';
+import { api } from '../api';
 
 export default function CustomEventsPage() {
   const [events, setEvents] = useState([]);

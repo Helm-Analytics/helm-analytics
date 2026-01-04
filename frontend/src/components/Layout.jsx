@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react"
 import { Outlet,useLocation, Link, useNavigate } from "react-router-dom"
 import { LayoutDashboard, PlayCircle, MousePointer2, GitMerge, AlertOctagon, Activity, Shield, Book, Globe, Plus, ChevronRight, Trash2, List, LogOut, Moon, Sun, Menu, X } from "lucide-react"
-import api from "../api"
-import Logo from "../assets/logo.jsx"
+import { api } from "../api"
+import Logo from "./Logo"
 import ChatWidget from "./ChatWidget"
 import Tutorial from "./Tutorial"
 
