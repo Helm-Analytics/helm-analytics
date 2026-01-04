@@ -91,6 +91,7 @@ func main() {
 	mux.Handle("/api/funnels/", apiCors.Handler(sentinel.AuthMiddleware(sentinel.FunnelsApiHandler)))
 	
 	// Custom Events API
+	mux.Handle("/api/custom-events", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler)))
 	mux.Handle("/api/events/stats", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler)))
 	mux.Handle("/api/events/properties", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetEventPropertiesHandler)))
 	

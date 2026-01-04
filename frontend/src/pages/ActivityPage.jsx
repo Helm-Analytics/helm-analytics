@@ -1,25 +1,26 @@
 import { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Activity, Filter, Clock, Globe, Monitor, AlertCircle, Shield, Eye } from 'lucide-react';
+import { api } from '../api';
 
 export default function ActivityPage() {
+  const { selectedSite } = useOutletContext();
   const [activities, setActivities] = useState([]);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchActivities();
-    const interval = setInterval(fetchActivities, 5000); // Refresh every 5s
-    return () => clearInterval(interval);
-  }, [filter]);
+    if (selectedSite?.id) {
+      fetchActivities();
+      const interval = setInterval(fetchActivities, 5000); // Refresh every 5s
+      return () => clearInterval(interval);
+    }
+  }, [selectedSite, filter]);
 
   const fetchActivities = async () => {
     try {
-      const params = new URLSearchParams();
-      if (filter !== 'all') params.append('activity_type', filter);
-      
-      const response = await fetch(`/api/activity?${params}`);
-      const data = await response.json();
-      setActivities(data || []);
+      const response = await api.getActivityLog(selectedSite.id, filter);
+      setActivities(response?.activities || []);
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch activities:', error);
@@ -106,8 +107,17 @@ export default function ActivityPage() {
           </div>
         ) : (
           activities.map((activity, index) => {
-            const Icon = getActivityIcon(activity.activity_type);
-            const colorClass = getActivityColor(activity.activity_type);
+            const Icon = getActivityIcon(activity.type);
+            const colorClass = getActivityColor(activity.type);
+            
+            // Build description based on activity type
+            const description = activity.eventName 
+              ? `Custom Event: ${activity.eventName}` 
+              : activity.type === 'pageview' 
+                ? `Viewed ${activity.url}` 
+                : activity.type === 'error'
+                  ? `Error: ${activity.message}`
+                  : activity.type;
             
             return (
               <div
@@ -122,12 +132,12 @@ export default function ActivityPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
-                        <p className="font-medium text-foreground mb-1">{activity.description}</p>
+                        <p className="font-medium text-foreground mb-1">{description}</p>
                         <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                          {activity.ip_address && (
+                          {activity.ip && (
                             <span className="flex items-center gap-1">
                               <Monitor className="w-3.5 h-3.5" />
-                              {activity.ip_address}
+                              {activity.ip}
                             </span>
                           )}
                           {activity.country && (
@@ -146,7 +156,7 @@ export default function ActivityPage() {
                       </div>
                       
                       <time className="text-xs text-muted-foreground whitespace-nowrap">
-                        {new Date(activity.created_at).toLocaleTimeString()}
+                        {new Date(activity.timestamp).toLocaleTimeString()}
                       </time>
                     </div>
                   </div>
