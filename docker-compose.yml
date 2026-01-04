@@ -5,85 +5,80 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "${PORT:-6060}:6060"
+    container_name: helm-backend
     environment:
       - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-community}
-      - LICENSE_KEY=${LICENSE_KEY:-}
-      - LICENSE_SECRET=${LICENSE_SECRET:-default-secret}
-      - DATABASE_URL=postgresql://helm:${DB_PASSWORD}@postgres:5432/helm
-      - CLICKHOUSE_URL=clickhouse://clickhouse:9000
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
-      - AI_RATE_LIMIT_FREE=5
-      - SESSION_SECRET=${SESSION_SECRET:-change-in-production}
+      - LICENSE_KEY=${LICENSE_KEY}
+      - DATABASE_URL=${DATABASE_URL:-postgresql://helm:changeme@postgres:5432/helm}
+      - CLICKHOUSE_URL=${CLICKHOUSE_URL:-http://clickhouse:9000}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SESSION_SECRET=${SESSION_SECRET:-change-this-in-production}
+      - JWT_SECRET=${JWT_SECRET:-change-this-in-production}
+      - PORT=8080
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
-    depends_on:
-      - postgres
-      - clickhouse
+    ports:
+      - "8080:8080"
     networks:
       - helm-network
+    restart: unless-stopped
     volumes:
       - ./backend/GeoLite2-Country.mmdb:/app/GeoLite2-Country.mmdb:ro
       - ./backend/GeoLite2-ASN.mmdb:/app/GeoLite2-ASN.mmdb:ro
+    depends_on:
+      - postgres
+      - clickhouse
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    restart: unless-stopped
-    ports:
-      - "${FRONTEND_PORT:-3000}:80"
+    container_name: helm-frontend
     environment:
-      - REACT_APP_API_URL=${API_URL:-http://localhost:6060}
-      - REACT_APP_DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-community}
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8080}
+    ports:
+      - "3000:80"
     networks:
       - helm-network
+    restart: unless-stopped
+    depends_on:
+      - backend
 
   postgres:
     image: postgres:16-alpine
-    restart: unless-stopped
+    container_name: helm-postgres
     environment:
-      - POSTGRES_DB=helm
       - POSTGRES_USER=helm
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-changeme}
+      - POSTGRES_DB=helm
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/migrations:/docker-entrypoint-initdb.d:ro
+      - ./backend/migrations:/docker-entrypoint-initdb.d
     networks:
       - helm-network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U helm"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    restart: unless-stopped
 
   clickhouse:
     image: clickhouse/clickhouse-server:latest
-    restart: unless-stopped
-    ports:
-      - "8123:8123"
-      - "9000:9000"
+    container_name: helm-clickhouse
     environment:
-      - CLICKHOUSE_DB=sentinel
+      - CLICKHOUSE_DB=helm
       - CLICKHOUSE_USER=default
       - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-}
+    ports:
+      - "9000:9000"
+      - "8123:8123"
     volumes:
       - clickhouse_data:/var/lib/clickhouse
-      - ./backend/clickhouse/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - helm-network
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
-
-volumes:
-  postgres_data:
-    driver: local
-  clickhouse_data:
-    driver: local
+    restart: unless-stopped
 
 networks:
   helm-network:
     driver: bridge
+
+volumes:
+  postgres_data:
+  clickhouse_data:
