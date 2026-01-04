@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { TrendingUp, Lightbulb, BrainCircuit, RefreshCcw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
@@ -7,6 +7,13 @@ import { useDashboardStore } from '../store/useDashboardStore';
 const InsightsCard = () => {
   const { selectedSite } = useOutletContext();
   const { aiInsights: insights, isLoadingAI: loading, fetchAiInsights } = useDashboardStore();
+  
+  // Fetch AI insights when site changes
+  useEffect(() => {
+    if (selectedSite?.id) {
+      fetchAiInsights(selectedSite.id);
+    }
+  }, [selectedSite?.id, fetchAiInsights]);
   
   const handleRefresh = () => {
     if (selectedSite?.id) {
