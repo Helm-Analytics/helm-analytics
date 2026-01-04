@@ -29,6 +29,8 @@ export default function CustomEventsPage() {
     }
   };
 
+  const [selectedExample, setSelectedExample] = useState('basic');
+
   const copyCode = (text) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -37,7 +39,7 @@ export default function CustomEventsPage() {
 
   const codeExamples = {
     basic: `// Track a custom event
-helm.track Event('button_clicked', {
+helm.trackEvent('button_clicked', {
   location: 'header',
   text: 'Get Started'
 });`,
@@ -82,34 +84,50 @@ helm.trackEvent('purchase', {
         {/* Implementation Guide */}
         {showCode && (
           <div className="mb-8 bg-card rounded-lg border border-border p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2 bg-accent/10 rounded-lg">
-                <Sparkles className="w-5 h-5 text-accent" />
-              </div>
-              <h2 className="text-2xl font-bold">Implementation Guide</h2>
-            </div>
+            <h2 className="text-2xl font-bold mb-6">Implementation Guide</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="p-4 rounded-lg border border-border hover:border-accent/50 transition-all">
+              <button
+                onClick={() => setSelectedExample('basic')}
+                className={`p-4 rounded-lg border transition-all text-left ${
+                  selectedExample === 'basic'
+                    ? 'border-accent bg-accent/10'
+                    : 'border-border hover:border-accent/50'
+                }`}
+              >
                 <h3 className="font-bold mb-2 text-accent">Basic</h3>
                 <p className="text-sm text-muted-foreground">Simple event tracking</p>
-              </div>
-              <div className="p-4 rounded-lg border border-border hover:border-accent/50 transition-all">
+              </button>
+              <button
+                onClick={() => setSelectedExample('react')}
+                className={`p-4 rounded-lg border transition-all text-left ${
+                  selectedExample === 'react'
+                    ? 'border-accent bg-accent/10'
+                    : 'border-border hover:border-accent/50'
+                }`}
+              >
                 <h3 className="font-bold mb-2 text-accent">React</h3>
                 <p className="text-sm text-muted-foreground">In React components</p>
-              </div>
-              <div className="p-4 rounded-lg border border-border hover:border-accent/50 transition-all">
+              </button>
+              <button
+                onClick={() => setSelectedExample('advanced')}
+                className={`p-4 rounded-lg border transition-all text-left ${
+                  selectedExample === 'advanced'
+                    ? 'border-accent bg-accent/10'
+                    : 'border-border hover:border-accent/50'
+                }`}
+              >
                 <h3 className="font-bold mb-2 text-accent">Advanced</h3>
                 <p className="text-sm text-muted-foreground">Complex event data</p>
-              </div>
+              </button>
             </div>
 
             <div className="relative">
               <pre className="bg-secondary text-foreground p-6 rounded-lg overflow-x-auto text-sm font-mono border border-border">
-                {codeExamples.basic}
+                {codeExamples[selectedExample]}
               </pre>
               <button
-                onClick={() => copyCode(codeExamples.basic)}
+                onClick={() => copyCode(codeExamples[selectedExample])}
                 className="absolute top-4 right-4 p-2 bg-card hover:bg-secondary rounded-lg transition-colors border border-border"
               >
                 {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4 text-muted-foreground" />}

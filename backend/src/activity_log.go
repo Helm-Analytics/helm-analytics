@@ -180,8 +180,7 @@ func GetActivityLogHandler(w http.ResponseWriter, r *http.Request) {
 func getErrorsActivity(w http.ResponseWriter, r *http.Request, siteID string, limit int) {
 	ctx := r.Context()
 	query := `
-		SELECT Timestamp, URL, Message, Source, LineNo, ClientIP, 
-		       Country, City, Browser, OS, Device
+		SELECT Timestamp, URL, Message, Source, LineNo, ClientIP
 		FROM errors
 		WHERE SiteID = ?
 		ORDER BY Timestamp DESC
@@ -204,11 +203,6 @@ func getErrorsActivity(w http.ResponseWriter, r *http.Request, siteID string, li
 		Source    string    `json:"source"`
 		LineNo    uint32    `json:"lineno"`
 		IP        string    `json:"ip"`
-		Country   string    `json:"country"`
-		City      string    `json:"city"`
-		Browser   string    `json:"browser"`
-		OS        string    `json:"os"`
-		Device    string    `json:"device"`
 	}
 
 	var activities []ErrorActivity
@@ -224,11 +218,6 @@ func getErrorsActivity(w http.ResponseWriter, r *http.Request, siteID string, li
 			&activity.Source,
 			&activity.LineNo,
 			&activity.IP,
-			&activity.Country,
-			&activity.City,
-			&activity.Browser,
-			&activity.OS,
-			&activity.Device,
 		)
 		if err != nil {
 			log.Printf("Error scanning error activity: %v", err)
