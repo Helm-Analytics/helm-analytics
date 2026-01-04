@@ -155,9 +155,9 @@ const Layout = () => {
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-muted-foreground text-[9px] font-bold uppercase tracking-[0.2em] px-1">Managed Sites</h3>
               <button 
-                onClick={() => navigate('/sites/new')} 
+                onClick={() => setIsAddSiteOpen(true)} 
                 className="p-1 hover:bg-secondary rounded-md text-muted-foreground transition-colors"
-                title="Manage Sites"
+                title="Add New Site"
               >
                 <Plus className="w-3.5 h-3.5" />
               </button>
