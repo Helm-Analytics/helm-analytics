@@ -1,66 +1,80 @@
-# Docker Hub Build & Push Script
-# Builds and pushes Helm Analytics images to Docker Hub
+# Sentinel Docker Hub Build and Push Script (PowerShell)
+# Usage: .\build-and-push.ps1 -Username <docker-hub-username> [-Version <version-tag>]
 
-Write-Host "Building Helm Analytics Docker Images..." -ForegroundColor Cyan
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$Username,
+    
+    [Parameter(Mandatory=$false)]
+    [string]$Version = "latest"
+)
 
-# Configuration
-$DOCKER_USERNAME = "danielowenllm"
-$REPO_NAME = "helm-analytics"
-$VERSION = "1.0.0"
+function Write-ColorOutput {
+    param(
+        [string]$Message,
+        [string]$Color = "White"
+    )
+    Write-Host $Message -ForegroundColor $Color
+}
 
+Write-ColorOutput "========================================" "Blue"
+Write-ColorOutput "Building Sentinel Docker Images" "Blue"
+Write-ColorOutput "========================================" "Blue"
 Write-Host ""
-Write-Host "Step 1: Building Backend Image..." -ForegroundColor Yellow
-docker build -t ${DOCKER_USERNAME}/${REPO_NAME}:backend-${VERSION} -t ${DOCKER_USERNAME}/${REPO_NAME}:backend-latest -f backend/Dockerfile backend/
+Write-ColorOutput "Docker Hub Username: $Username" "Cyan"
+Write-ColorOutput "Version Tag: $Version" "Cyan"
+Write-Host ""
+
+# Login to Docker Hub
+Write-ColorOutput "Logging in to Docker Hub..." "Green"
+docker login
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Backend build failed!" -ForegroundColor Red
+    Write-ColorOutput "Error: Docker login failed" "Red"
     exit 1
 }
 
-Write-Host "Backend image built successfully!" -ForegroundColor Green
-
-Write-Host ""
-Write-Host "Step 2: Building Frontend Image..." -ForegroundColor Yellow
-docker build -t ${DOCKER_USERNAME}/${REPO_NAME}:frontend-${VERSION} -t ${DOCKER_USERNAME}/${REPO_NAME}:frontend-latest -f frontend/Dockerfile frontend/
+# Build and push backend
+Write-ColorOutput "Building backend image..." "Green"
+docker build -t ${Username}/sentinel-backend:${Version} ./backend
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Frontend build failed!" -ForegroundColor Red
+    Write-ColorOutput "Error: Backend build failed" "Red"
     exit 1
 }
 
-Write-Host "Frontend image built successfully!" -ForegroundColor Green
+docker tag ${Username}/sentinel-backend:${Version} ${Username}/sentinel-backend:latest
 
-Write-Host ""
-Write-Host "Step 3: Pushing Backend to Docker Hub..." -ForegroundColor Yellow
-docker push ${DOCKER_USERNAME}/${REPO_NAME}:backend-${VERSION}
-docker push ${DOCKER_USERNAME}/${REPO_NAME}:backend-latest
+Write-ColorOutput "Pushing backend image..." "Green"
+docker push ${Username}/sentinel-backend:${Version}
+docker push ${Username}/sentinel-backend:latest
+
+# Build and push frontend
+Write-ColorOutput "Building frontend image..." "Green"
+docker build -t ${Username}/sentinel-frontend:${Version} ./frontend
 
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "Backend push failed!" -ForegroundColor Red
+    Write-ColorOutput "Error: Frontend build failed" "Red"
     exit 1
 }
 
-Write-Host "Backend pushed successfully!" -ForegroundColor Green
+docker tag ${Username}/sentinel-frontend:${Version} ${Username}/sentinel-frontend:latest
+
+Write-ColorOutput "Pushing frontend image..." "Green"
+docker push ${Username}/sentinel-frontend:${Version}
+docker push ${Username}/sentinel-frontend:latest
 
 Write-Host ""
-Write-Host "Step 4: Pushing Frontend to Docker Hub..." -ForegroundColor Yellow
-docker push ${DOCKER_USERNAME}/${REPO_NAME}:frontend-${VERSION}
-docker push ${DOCKER_USERNAME}/${REPO_NAME}:frontend-latest
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Frontend push failed!" -ForegroundColor Red
-    exit 1
-}
-
-Write-Host "Frontend pushed successfully!" -ForegroundColor Green
-
+Write-ColorOutput "========================================" "Green"
+Write-ColorOutput "✅ Build and Push Complete!" "Green"
+Write-ColorOutput "========================================" "Green"
 Write-Host ""
-Write-Host "All images pushed to Docker Hub!" -ForegroundColor Green
+Write-ColorOutput "Images pushed:" "Cyan"
+Write-Host "  - ${Username}/sentinel-backend:${Version}"
+Write-Host "  - ${Username}/sentinel-backend:latest"
+Write-Host "  - ${Username}/sentinel-frontend:${Version}"
+Write-Host "  - ${Username}/sentinel-frontend:latest"
 Write-Host ""
-Write-Host "Images available at:" -ForegroundColor Cyan
-Write-Host "  Backend:  docker pull ${DOCKER_USERNAME}/${REPO_NAME}:backend-latest"
-Write-Host "  Frontend: docker pull ${DOCKER_USERNAME}/${REPO_NAME}:frontend-latest"
-Write-Host ""
-Write-Host "View on Docker Hub:" -ForegroundColor Cyan
-Write-Host "  https://hub.docker.com/r/${DOCKER_USERNAME}/${REPO_NAME}/tags"
-Write-Host ""
+Write-ColorOutput "To pull these images:" "Cyan"
+Write-Host "  docker pull ${Username}/sentinel-backend:${Version}"
+Write-Host "  docker pull ${Username}/sentinel-frontend:${Version}"
