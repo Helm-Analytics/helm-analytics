@@ -87,7 +87,14 @@ func GetSessionEventsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := context.Background()
+	// Verify site ownership
+	if !verifySiteOwnership(r, siteID) {
+		http.Error(w, `{"error": "Unauthorized access to site"}`, http.StatusUnauthorized)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 	query := "SELECT Payload FROM session_events WHERE SiteID = ? AND SessionID = ? ORDER BY Timestamp ASC"
 	rows, err := chConn.Query(ctx, query, siteID, sessionID)
 	if err != nil {
@@ -132,7 +139,15 @@ func ListSessionsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := context.Background()
+	// Verify site ownership
+	if !verifySiteOwnership(r, siteID) {
+		http.Error(w, `{"error": "Unauthorized access to site"}`, http.StatusUnauthorized)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	
 	query := `
 		SELECT 
 			SessionID, 
@@ -141,7 +156,7 @@ func ListSessionsHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE SiteID = ? 
 		GROUP BY SessionID 
 		ORDER BY start_time DESC 
-		LIMIT 50`
+		LIMIT 20`
 	rows, err := chConn.Query(ctx, query, siteID)
 	if err != nil {
 		log.Printf("Error querying session IDs from ClickHouse: %v", err)
