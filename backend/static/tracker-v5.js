@@ -237,6 +237,10 @@
         if (typeof window.rrweb !== 'undefined' && window.rrweb.record) {
             window.rrweb.record({
                 emit(event) {
+                    // Debug: Log first few events to check for snapshot
+                    if (events.length < 5) {
+                        console.log('[Sentinel v5] Event type:', event.type, 'Total events:', events.length);
+                    }
                     events.push(event);
                     if (events.length > 2) {
                         sendEvents();
@@ -248,6 +252,7 @@
 
         function sendEvents() {
             if (events.length === 0) return;
+            console.log('[Sentinel v5] Sending', events.length, 'events. First event type:', events[0]?.type);
             const body = JSON.stringify({ 
                 siteId: siteId,
                 sessionId: sessionId, 
