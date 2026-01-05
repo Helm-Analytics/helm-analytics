@@ -12,16 +12,16 @@ func RequireFeature(feature string) func(http.Handler) http.Handler {
 			if !HasFeature(feature) {
 				license := GetLicense()
 
-				upgradeURL := "https://helm.io/pricing"
+				upgradeURL := "https://helm-analytics.com/pricing"
 				tierName := "Pro License"
 
 				switch license.Tier {
 				case TierCommunity:
-					upgradeURL = "https://helm.io/pricing#pro-license"
+					upgradeURL = "https://helm-analytics.com/pricing#pro-license"
 					tierName = GetRequiredTier(feature)
 				case TierCloud:
 					// Cloud users need to upgrade their plan
-					upgradeURL = "https://helm.io/account/upgrade"
+					upgradeURL = "https://helm-analytics.com/account/upgrade"
 					tierName = "Growth or Business plan"
 				}
 
