@@ -80,7 +80,7 @@ image.png
 *.log
 backend/events.log
 # Exclude GeoIP databases (should be downloaded during build/deployment)
-backend/GeoLite2-*.mmdb
+# backend/GeoLite2-*.mmdb
 
 # License Server & Internal Tools
 license-server/
