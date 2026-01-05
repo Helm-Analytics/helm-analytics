@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/lib/pq"
@@ -156,7 +157,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := creds.Email
+	email := strings.ToLower(strings.TrimSpace(creds.Email))
 	password := creds.Password
 
 	if email == "" || password == "" {
@@ -213,7 +214,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	email := creds.Email
+	email := strings.ToLower(strings.TrimSpace(creds.Email))
 	password := creds.Password
 
 	var storedHash string
