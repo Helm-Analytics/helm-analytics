@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useOutletContext } from "react-router-dom"
-import { ScanEye, Users, ArrowDownRight, Timer, Copy, Check, Fingerprint, Laptop } from "lucide-react"
+import { ScanEye, Users, ArrowDownRight, Timer, Copy, Check, Fingerprint, Laptop, MousePointer2 } from "lucide-react"
 import { useDashboardStore } from "../store/useDashboardStore"
 import StatCard from "../components/StatCard"
 import InsightsCard from "../components/InsightsCard"
