@@ -6,6 +6,7 @@ import Logo from "./Logo"
 import ChatWidget from "./ChatWidget"
 import Tutorial from "./Tutorial"
 import Toast from "./Toast"
+import ConfirmModal from "./ConfirmModal"
 
 
 const Layout = () => {
@@ -109,9 +110,18 @@ const Layout = () => {
   }
 
   const handleDeleteSite = async (siteId) => {
-    if (!window.confirm("Are you sure you want to delete this site? This action cannot be undone.")) {
-      return
-    }
+    const { confirm } = await import('./ConfirmModal')
+    const confirmed = await confirm.show(
+      'Delete Site',
+      'Are you sure you want to delete this site? This action cannot be undone and all data will be permanently removed.',
+      {
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'danger'
+      }
+    )
+    
+    if (!confirmed) return
 
     try {
       await api.deleteSite(siteId)
@@ -372,8 +382,12 @@ const Layout = () => {
       
       {/* Toast Notifications */}
       <Toast />
+      
+      {/* Confirmation Modal */}
+      <ConfirmModal />
     </div>
   )
 }
 
 export default Layout
+```
