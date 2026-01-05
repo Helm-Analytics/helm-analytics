@@ -43,6 +43,7 @@ vendor/
 # Docker
 .docker/
 docker-compose.override.yml
+docker-compose.cloud.yml
 # Exclude persistent data from local volumes
 *_data/
 # Specific DB data folders if they exist
@@ -81,5 +82,6 @@ backend/events.log
 # Exclude GeoIP databases (should be downloaded during build/deployment)
 backend/GeoLite2-*.mmdb
 
-# License Server (Private Component)
+# License Server & Internal Tools
 license-server/
+tools/

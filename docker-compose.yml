@@ -1,15 +1,13 @@
 # This is the master file for your local development environment.
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: dockerfile
+    image: danielowenllm/helm-analytics-backend:latest
     ports:
       - "6060:6060"
     environment:
-      - DATABASE_URL=postgres://sentinel:password@db:5432/sentinel?sslmode=disable
-      - GEMINI_API_KEY=AIzaSyCt26Utwx3zt2DvW-5c5th747D875dAGWE 
-      - DEPLOYMENT_MODE=cloud      
+      - DATABASE_URL=${DATABASE_URL:-postgres://sentinel:password@db:5432/sentinel?sslmode=disable}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-community}
     depends_on:
       - db
       - clickhouse
@@ -17,8 +15,7 @@ services:
       - sentinel-net
 
   frontend:
-    build:
-      context: ./frontend
+    image: danielowenllm/helm-analytics-frontend:latest
     ports:
       - "8012:80"
     networks:
