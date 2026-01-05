@@ -80,25 +80,9 @@ func GetLicense() *License {
 
 // HasFeature checks if a feature is available in current license
 func HasFeature(feature string) bool {
-	license := GetLicense()
-
-	// Cloud licenses check per-user plan
-	if license.Tier == TierCloud {
-		return true // Feature gating done at user/app level
-	}
-
-	// Community has no premium features by default
-	if license.Tier == TierCommunity {
-		return false
-	}
-
-	// Check feature list
-	for _, f := range license.Features {
-		if f == feature {
-			return true
-		}
-	}
-	return false
+	// For the current roadmap phase and public release, 
+	// all implemented features are available to the community.
+	return true
 }
 
 // GetRequiredTier returns the tier name required for a feature
