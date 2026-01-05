@@ -178,11 +178,11 @@ const Layout = () => {
     <div className="min-h-screen flex text-foreground font-sans helm-bg">
       {/* Sidebar - Integrated Modern Style */}
       <aside className="w-56 bg-white dark:bg-[#0b0f1a] border-r border-border/60 flex-shrink-0 flex flex-col h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
-        <div className="p-4 flex flex-col h-full">
-          <Logo className="mb-6 origin-left scale-90" />
+        <div className="p-3.5 flex flex-col h-full">
+          <Logo className="mb-4 origin-left scale-90" />
 
           {/* Site Switcher Section */}
-          <div className="mb-6 flex-shrink-0 relative">
+          <div className="mb-4 flex-shrink-0 relative">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-muted-foreground text-[9px] font-bold uppercase tracking-[0.2em] px-1">Managed Sites</h3>
               <button 
@@ -263,7 +263,7 @@ const Layout = () => {
           </div>
 
           {/* Primary Navigation */}
-          <nav className="space-y-0.5 flex-1 min-h-0 overflow-y-auto scrollbar-thin pr-1">
+          <nav className="space-y-0.5 flex-1 min-h-0">
              <h3 className="text-muted-foreground text-[9px] font-bold uppercase tracking-[0.2em] px-1 mb-2">Intelligence</h3>
              {navItems.map((item) => {
                const Icon = item.icon
@@ -273,7 +273,7 @@ const Layout = () => {
                    key={item.path}
                    id={`tut-nav-${item.label.toLowerCase().replace(/\s+/g, '-')}`}
                    to={item.path}
-                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-all duration-200 group ${
+                   className={`flex items-center space-x-3 px-3 py-1.5 rounded-lg transition-all duration-200 group ${
                      isActive 
                        ? "bg-accent/10 dark:bg-accent/20 text-accent border border-accent/20" 
                        : "text-muted-foreground hover:bg-secondary hover:text-foreground border border-transparent"
@@ -287,10 +287,10 @@ const Layout = () => {
           </nav>
 
           {/* User / Footer Section */}
-          <div className="mt-4 pt-4 border-t border-border/40 space-y-1.5 flex-shrink-0">
+          <div className="mt-2 pt-2 border-t border-border/40 space-y-1 flex-shrink-0">
                <button
                  onClick={() => setShowTutorial(true)}
-                 className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-accent transition-colors group"
+                 className="flex items-center space-x-3 px-2 py-1 w-full rounded-lg text-muted-foreground hover:text-accent transition-colors group"
                >
                  <div className="p-1.5 bg-white dark:bg-black/20 rounded-md shadow-sm border border-border/50 group-hover:border-accent/20 group-hover:bg-accent/5">
                    <GraduationCap className="w-3.5 h-3.5 text-accent/70 group-hover:text-accent" />
@@ -300,7 +300,7 @@ const Layout = () => {
 
                 <button
                  onClick={() => setDarkMode(!darkMode)}
-                 className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-foreground transition-colors group"
+                 className="flex items-center space-x-3 px-2 py-1 w-full rounded-lg text-muted-foreground hover:text-foreground transition-colors group"
                >
                  <div className="p-1.5 bg-white dark:bg-black/20 rounded-md shadow-sm border border-border/50 group-hover:border-accent/20 group-hover:bg-accent/5">
                    {darkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
@@ -310,7 +310,7 @@ const Layout = () => {
 
                <button
                  onClick={handleLogout}
-                 className="flex items-center space-x-3 px-2 py-1.5 w-full rounded-lg text-muted-foreground hover:text-rose-500 transition-colors group"
+                 className="flex items-center space-x-3 px-2 py-1 w-full rounded-lg text-muted-foreground hover:text-rose-500 transition-colors group"
                >
                  <div className="p-1.5 bg-white dark:bg-black/20 rounded-md shadow-sm border border-border/50 group-hover:border-rose-200 group-hover:bg-rose-50 dark:group-hover:bg-rose-950/20">
                    <LogOut className="w-3.5 h-3.5" />
