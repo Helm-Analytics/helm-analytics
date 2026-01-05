@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 import ReactFlow, { 
   Background, 
   Controls, 
