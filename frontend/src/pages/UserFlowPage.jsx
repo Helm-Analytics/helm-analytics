@@ -9,7 +9,7 @@ import ReactFlow, {
   MarkerType
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import api from '../api';
+import { api } from '../api';
 import { GitMerge, RefreshCw, Layers, Info } from 'lucide-react';
 
 const UserFlowPage = () => {

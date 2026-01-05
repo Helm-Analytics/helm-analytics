@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import api from '../api';
+import { api } from '../api';
 import { 
   BarChart3, 
   Target, 
