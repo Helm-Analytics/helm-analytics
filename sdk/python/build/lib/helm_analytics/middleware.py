@@ -15,14 +15,14 @@ class HelmAnalytics:
         if not self.site_id:
             logger.warning("HelmAnalytics: No Site ID provided. Tracking will be disabled.")
 
-    def _send_payload(self, payload):
+    def _send_payload(self, payload, path="/track"):
         if not self.site_id:
             return
             
         def _post():
             try:
                 requests.post(
-                    f"{self.api_url}/track", 
+                    f"{self.api_url}{path}", 
                     json=payload, 
                     headers={'Content-Type': 'application/json'},
                     timeout=5
@@ -100,14 +100,22 @@ class HelmAnalytics:
             user_agent = headers.get('user-agent') if hasattr(headers, 'get') else ''
             referrer = headers.get('referer') if hasattr(headers, 'get') else ''
             
+            # Session ID from header
+            session_id = headers.get('x-helm-session-id') if hasattr(headers, 'get') else ''
+            if not session_id and hasattr(request, 'session_id'):
+                session_id = request.session_id
+            
             # Fallback for dict-like headers
             if not user_agent and isinstance(headers, dict):
                  user_agent = headers.get('User-Agent', '')
             if not referrer and isinstance(headers, dict):
                  referrer = headers.get('Referer', '')
+            if not session_id and isinstance(headers, dict):
+                 session_id = headers.get('X-Helm-Session-Id', '')
 
             payload = {
                 "siteId": self.site_id,
+                "sessionId": session_id,
                 "url": url,
                 "clientIp": ip,
                 "userAgent": user_agent,
@@ -123,11 +131,53 @@ class HelmAnalytics:
             if shield:
                 allowed, reason = self.check_shield(payload)
                 if not allowed:
-                    logger.warning(f"Helm Shield Blocked: {ip} Reason: {reason}")
+                    logger.warning(f"[Helm Shield] Blocked IP: {ip} Reason: {reason}")
                     return False
 
-            self._send_payload(payload)
+            self._send_payload(payload, "/track")
             return True
+
+    def track_event(self, request, event_name, properties=None):
+        """
+        Custom event tracking.
+        """
+        try:
+            # URL
+            if hasattr(request, 'url'):
+                url = str(request.url)
+            else:
+                url = str(request)
+            
+            # Headers
+            headers = getattr(request, 'headers', {})
+            
+            # Referrer
+            referrer = headers.get('referer') if hasattr(headers, 'get') else ''
+            if not referrer and isinstance(headers, dict):
+                referrer = headers.get('Referer', '')
+
+            # Session ID from header
+            session_id = headers.get('x-helm-session-id') if hasattr(headers, 'get') else ''
+            if not session_id and hasattr(request, 'session_id'):
+                session_id = request.session_id
+            if not session_id and isinstance(headers, dict):
+                 session_id = headers.get('X-Helm-Session-Id', '')
+
+            payload = {
+                "siteId": self.site_id,
+                "sessionId": session_id,
+                "eventName": event_name,
+                "properties": properties or {},
+                "url": url,
+                "referrer": referrer,
+                "isServerSide": True
+            }
+            
+            self._send_payload(payload, "/track/event")
+            return True
+        except Exception as e:
+            logger.error(f"HelmAnalytics Event Tracking Failed: {e}")
+            return True # Fail open
             
         except Exception as e:
             logger.error(f"HelmAnalytics Tracking Failed: {e}")

@@ -40,11 +40,28 @@ app.before_request(helm.flask_middleware(shield=True))
 app.add_middleware(BaseHTTPMiddleware, dispatch=helm.fastapi_middleware(shield=True))
 ```
 
+## Custom Event Tracking
+
+Track meaningful milestones like signups, payments, or file exports:
+
+```python
+@app.post("/signup")
+def signup(request):
+    # ... logic ...
+    helm.track_event(request, "user_signup", {"plan": "premium"})
+    return {"status": "ok"}
+```
+
+## Session Stitching
+
+To link server-side events back to the browser session, pass the `sessionId` from your frontend (stored in `sessionStorage` as `helm_session_id`) in the `X-Helm-Session-Id` header of your API requests.
+
 ## Features
 
-- **Non-blocking**: Uses background threads to send data without slowing down your app (unless Shield Mode is on).
+- **Non-blocking**: Uses background threads to send data without slowing down your app.
 - **Shield Mode**: Synchronously queries Helm to block threats at the edge.
-- **Bot Detection**: Passes server context (IP, User-Agent) for deeper analysis.
+- **Custom Events**: Track business milestones beyond simple pageviews.
+- **Session Stitching**: Link server-side actions to web sessions via headers.
 - **Fail-safe**: Failures in tracking do not crash your application.
 
 ## Configuration

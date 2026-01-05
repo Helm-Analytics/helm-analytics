@@ -14,12 +14,16 @@ def test_sdk():
         url = "http://test-python-sdk.com/integration-test"
         remote_addr = "1.2.3.4"
         headers = {
-            "User-Agent": "Helm-Python-SDK-Test/1.0",
-            "Referer": "http://pypi.org"
+            "User-Agent": "Helm-Python-SDK-Test/5.0",
+            "Referer": "http://pypi.org",
+            "X-Helm-Session-Id": "py_test_session_123"
         }
 
     print("Sending test event: 'pageview'...")
     helm.track(MockRequest(), event_type="pageview", metadata={"status": "success"})
+    
+    print("Sending test custom event: 'python_test'...")
+    helm.track_event(MockRequest(), "python_test", {"source": "unit_test", "platform": "windows"})
     
     # Wait a bit for the background thread to fire
     time.sleep(2)
