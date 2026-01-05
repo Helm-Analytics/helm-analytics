@@ -1,7 +1,7 @@
 # This is the master file for your local development environment.
 services:
   backend:
-    image: danielowenllm/helm-analytics-backend:latest
+    image: ${BACKEND_IMAGE:-danielowenllm/helm-analytics-backend:latest}
     ports:
       - "6060:6060"
     environment:
@@ -15,7 +15,7 @@ services:
       - sentinel-net
 
   frontend:
-    image: danielowenllm/helm-analytics-frontend:latest
+    image: ${FRONTEND_IMAGE:-danielowenllm/helm-analytics-frontend:latest}
     ports:
       - "8012:80"
     environment:
