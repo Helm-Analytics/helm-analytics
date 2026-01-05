@@ -238,12 +238,11 @@
             window.rrweb.record({
                 emit(event) {
                     events.push(event);
-                    if (events.length > 100) {
+                    if (events.length > 2) {
                         sendEvents();
                     }
                 },
-                checkoutEveryNms: 10 * 1000,
-                checkoutEveryNth: 200
+                checkoutEveryNth: 100
             });
         }
 
@@ -263,7 +262,7 @@
             }).catch(err => console.error('Session replay error:', err));
         }
 
-        setInterval(sendEvents, 10000);
+        setInterval(sendEvents, 5000);
         window.addEventListener('beforeunload', sendEvents);
 
         // Click heatmap tracking
