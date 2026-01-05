@@ -250,7 +250,7 @@
             });
         }
 
-        function sendEvents() {
+        function sendEvents(isUnload = false) {
             if (events.length === 0) return;
             console.log('[Sentinel v5] Sending', events.length, 'events. First event type:', events[0]?.type);
             const body = JSON.stringify({ 
@@ -263,12 +263,20 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: body,
-                keepalive: true
+                keepalive: isUnload
             }).catch(err => console.error('Session replay error:', err));
         }
 
         setInterval(sendEvents, 5000);
-        window.addEventListener('beforeunload', sendEvents);
+        
+        // Flush on exit - match v4 exactly
+        const flushOnUnload = () => sendEvents(true);
+        window.addEventListener('pagehide', flushOnUnload);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                sendEvents(true);
+            }
+        });
 
         // Click heatmap tracking
         document.addEventListener('click', function(e) {
