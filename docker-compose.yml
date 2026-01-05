@@ -18,6 +18,8 @@ services:
     image: danielowenllm/helm-analytics-frontend:latest
     ports:
       - "8012:80"
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-https://api-sentinel.getmusterup.com}
     networks:
       - sentinel-net
 

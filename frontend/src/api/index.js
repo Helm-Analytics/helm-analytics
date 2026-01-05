@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://api-sentinel.getmusterup.com/";
+const API_URL = import.meta.env.VITE_API_URL || "https://api-sentinel.getmusterup.com/";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,
