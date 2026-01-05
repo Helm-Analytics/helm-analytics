@@ -13,8 +13,7 @@ import { api } from '../api';
 import { GitMerge, RefreshCw, Layers, Info } from 'lucide-react';
 
 const UserFlowPage = () => {
-  const [searchParams] = useSearchParams();
-  const siteId = searchParams.get('siteId');
+  const { selectedSite } = useOutletContext();
   const [days, setDays] = useState(7);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,10 +22,10 @@ const UserFlowPage = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   const fetchFlowData = async () => {
-    if (!siteId) return;
+    if (!selectedSite?.id) return;
     setLoading(true);
     try {
-      const data = await api.getUserFlow(siteId, days);
+      const data = await api.getUserFlow(selectedSite.id, days);
       const { nodes: rawNodes, edges: rawEdges } = data;
 
       // Simple Auto-Layout Logic
@@ -82,9 +81,9 @@ const UserFlowPage = () => {
 
   useEffect(() => {
     fetchFlowData();
-  }, [siteId, days]);
+  }, [selectedSite?.id, days]);
 
-  if (!siteId) {
+  if (!selectedSite) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
         <GitMerge size={48} className="mb-4 opacity-20" />

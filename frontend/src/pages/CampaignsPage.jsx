@@ -14,18 +14,17 @@ import {
 } from 'lucide-react';
 
 const CampaignsPage = () => {
-  const [searchParams] = useSearchParams();
-  const siteId = searchParams.get('siteId');
+  const { selectedSite } = useOutletContext();
   const [days, setDays] = useState(30);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [error, setError] = useState(null);
 
   const fetchStats = async () => {
-    if (!siteId) return;
+    if (!selectedSite?.id) return;
     setLoading(true);
     try {
-      const data = await api.getCampaignStats(siteId, days);
+      const data = await api.getCampaignStats(selectedSite.id, days);
       setStats(data);
       setError(null);
     } catch (err) {
@@ -38,9 +37,9 @@ const CampaignsPage = () => {
 
   useEffect(() => {
     fetchStats();
-  }, [siteId, days]);
+  }, [selectedSite?.id, days]);
 
-  if (!siteId) {
+  if (!selectedSite) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-slate-400">
         <Target size={48} className="mb-4 opacity-20" />
