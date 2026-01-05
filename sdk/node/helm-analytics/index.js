@@ -48,6 +48,7 @@ class HelmAnalytics {
     try {
       const payload = {
         siteId: this.siteId,
+        sessionId: req.headers['x-helm-session-id'] || req.sessionId || '', // Support session stitching
         url: req.originalUrl || req.url,
         userAgent: req.headers['user-agent'] || '',
         referrer: req.headers['referer'] || req.headers['referrer'] || '',
@@ -62,12 +63,12 @@ class HelmAnalytics {
       if (shield) {
         const { allowed, reason } = await this.checkShield(payload);
         if (!allowed) {
-            console.warn(`Helm Shield Blocked: ${payload.clientIp} Reason: ${reason}`);
+            console.warn(`[Helm Shield] Blocked IP: ${payload.clientIp} Reason: ${reason}`);
             return false;
         }
       }
 
-      // Fire and forget (don't await unless we want to ensure delivery, usually non-blocking is preferred for tracking)
+      // Fire and forget
       fetch(`${this.apiUrl}/track`, {
         method: 'POST',
         body: JSON.stringify(payload),
@@ -78,6 +79,33 @@ class HelmAnalytics {
 
     } catch (err) {
       return true; // Fail open
+    }
+  }
+
+  // Custom event tracking
+  async trackEvent(req, eventName, properties = {}) {
+    if (!this.siteId) return true;
+
+    try {
+      const payload = {
+        siteId: this.siteId,
+        sessionId: req.headers['x-helm-session-id'] || req.sessionId || '',
+        eventName: eventName,
+        properties: properties,
+        url: req.originalUrl || req.url,
+        referrer: req.headers['referer'] || req.headers['referrer'] || '',
+        isServerSide: true
+      };
+
+      fetch(`${this.apiUrl}/track/event`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(err => {});
+
+      return true;
+    } catch (err) {
+      return true;
     }
   }
 

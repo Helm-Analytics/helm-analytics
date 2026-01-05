@@ -1,10 +1,10 @@
-# Sentinel: Current Capabilities & Features
+# Helm Analytics: Current Capabilities & Features
 
 **Version:** MVP + Active Defense & AI Layer
-**Date:** November 23, 2025
+**Date:** January 5, 2026
 
 ## 🚀 Overview
-Sentinel is a privacy-first, self-hostable web analytics and security platform. It goes beyond passive tracking by actively defending websites against bots and providing AI-powered insights.
+Helm Analytics is a privacy-first, self-hostable web analytics and security platform. It goes beyond passive tracking by actively defending websites against bots and providing AI-powered insights.
 
 ## 📊 Core Analytics (The "What")
 *   **Privacy-First Tracking:** No cookies, GDPR compliant. Tracks page views, unique visitors, and sessions without invasive fingerprinting.

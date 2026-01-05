@@ -105,9 +105,13 @@ func (h *HelmAnalytics) Track(r *http.Request, eventType string, metadata map[st
 		ip = strings.TrimSpace(parts[0])
 	}
 
+	// Session ID from header or request context
+	sessionID := r.Header.Get("X-Helm-Session-Id")
+
 	// Prepare Payload
 	payload := map[string]interface{}{
 		"siteId":       h.siteID,
+		"sessionId":    sessionID,
 		"url":          h.getFullURL(r),
 		"clientIp":     ip,
 		"userAgent":    r.UserAgent(),
@@ -131,18 +135,39 @@ func (h *HelmAnalytics) Track(r *http.Request, eventType string, metadata map[st
 	}
 
 	// Fire and forget tracking
-	go h.send(payload)
+	go h.send(payload, "/track")
 	return true
 }
 
-func (h *HelmAnalytics) send(payload map[string]interface{}) {
+// TrackEvent sends a custom event to Helm Analytics
+func (h *HelmAnalytics) TrackEvent(r *http.Request, eventName string, properties map[string]interface{}) bool {
+	if h.siteID == "" {
+		return true
+	}
+
+	// Session ID from header
+	sessionID := r.Header.Get("X-Helm-Session-Id")
+
+	payload := map[string]interface{}{
+		"siteId":     h.siteID,
+		"sessionId":  sessionID,
+		"eventName":  eventName,
+		"properties": properties,
+		"url":        h.getFullURL(r),
+		"referrer":   r.Referer(),
+	}
+
+	go h.send(payload, "/track/event")
+	return true
+}
+
+func (h *HelmAnalytics) send(payload map[string]interface{}, path string) {
 	jsonBytes, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", h.apiURL+"/track", bytes.NewBuffer(jsonBytes))
+	req, _ := http.NewRequest("POST", h.apiURL+path, bytes.NewBuffer(jsonBytes))
 	req.Header.Set("Content-Type", "application/json")
 	
 	resp, err := h.client.Do(req)
 	if err != nil {
-		// Silent error
 		return
 	}
 	defer resp.Body.Close()

@@ -12,6 +12,7 @@ import (
 // CustomEventPayload represents a custom event from the client
 type CustomEventPayload struct {
 	SiteID     string                 `json:"siteId"`
+	SessionID  string                 `json:"sessionId"`
 	EventName  string                 `json:"eventName"`
 	Properties map[string]interface{} `json:"properties"`
 	URL        string                 `json:"url"`
@@ -59,8 +60,8 @@ func TrackCustomEventHandler(w http.ResponseWriter, r *http.Request) {
 		INSERT INTO events (
 			SiteID, EventType, EventName, Properties, 
 			URL, Referrer, ClientIP, Country, City, 
-			Browser, OS, Device, UserAgent, Timestamp
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			Browser, OS, Device, UserAgent, Timestamp, SessionID
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
 	ctx := context.Background()
@@ -79,6 +80,7 @@ func TrackCustomEventHandler(w http.ResponseWriter, r *http.Request) {
 		device,
 		userAgent,
 		time.Now(),
+		payload.SessionID,
 	)
 
 	if err != nil {

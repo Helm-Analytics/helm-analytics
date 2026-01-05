@@ -18,7 +18,7 @@ function Write-ColorOutput {
 }
 
 Write-ColorOutput "========================================" "Blue"
-Write-ColorOutput "Building Sentinel Docker Images" "Blue"
+Write-ColorOutput "Building Helm Analytics Docker Images" "Blue"
 Write-ColorOutput "========================================" "Blue"
 Write-Host ""
 Write-ColorOutput "Docker Hub Username: $Username" "Cyan"
@@ -36,33 +36,33 @@ if ($LASTEXITCODE -ne 0) {
 
 # Build and push backend
 Write-ColorOutput "Building backend image..." "Green"
-docker build -t ${Username}/sentinel-backend:${Version} ./backend
+docker build -t ${Username}/helm-analytics-backend:${Version} ./backend
 
 if ($LASTEXITCODE -ne 0) {
     Write-ColorOutput "Error: Backend build failed" "Red"
     exit 1
 }
 
-docker tag ${Username}/sentinel-backend:${Version} ${Username}/sentinel-backend:latest
+docker tag ${Username}/helm-analytics-backend:${Version} ${Username}/helm-analytics-backend:latest
 
 Write-ColorOutput "Pushing backend image..." "Green"
-docker push ${Username}/sentinel-backend:${Version}
-docker push ${Username}/sentinel-backend:latest
+docker push ${Username}/helm-analytics-backend:${Version}
+docker push ${Username}/helm-analytics-backend:latest
 
 # Build and push frontend
 Write-ColorOutput "Building frontend image..." "Green"
-docker build -t ${Username}/sentinel-frontend:${Version} ./frontend
+docker build -t ${Username}/helm-analytics-frontend:${Version} ./frontend
 
 if ($LASTEXITCODE -ne 0) {
     Write-ColorOutput "Error: Frontend build failed" "Red"
     exit 1
 }
 
-docker tag ${Username}/sentinel-frontend:${Version} ${Username}/sentinel-frontend:latest
+docker tag ${Username}/helm-analytics-frontend:${Version} ${Username}/helm-analytics-frontend:latest
 
 Write-ColorOutput "Pushing frontend image..." "Green"
-docker push ${Username}/sentinel-frontend:${Version}
-docker push ${Username}/sentinel-frontend:latest
+docker push ${Username}/helm-analytics-frontend:${Version}
+docker push ${Username}/helm-analytics-frontend:latest
 
 Write-Host ""
 Write-ColorOutput "========================================" "Green"
@@ -70,11 +70,11 @@ Write-ColorOutput "✅ Build and Push Complete!" "Green"
 Write-ColorOutput "========================================" "Green"
 Write-Host ""
 Write-ColorOutput "Images pushed:" "Cyan"
-Write-Host "  - ${Username}/sentinel-backend:${Version}"
-Write-Host "  - ${Username}/sentinel-backend:latest"
-Write-Host "  - ${Username}/sentinel-frontend:${Version}"
-Write-Host "  - ${Username}/sentinel-frontend:latest"
+Write-Host "  - ${Username}/helm-analytics-backend:${Version}"
+Write-Host "  - ${Username}/helm-analytics-backend:latest"
+Write-Host "  - ${Username}/helm-analytics-frontend:${Version}"
+Write-Host "  - ${Username}/helm-analytics-frontend:latest"
 Write-Host ""
 Write-ColorOutput "To pull these images:" "Cyan"
-Write-Host "  docker pull ${Username}/sentinel-backend:${Version}"
-Write-Host "  docker pull ${Username}/sentinel-frontend:${Version}"
+Write-Host "  docker pull ${Username}/helm-analytics-backend:${Version}"
+Write-Host "  docker pull ${Username}/helm-analytics-frontend:${Version}"

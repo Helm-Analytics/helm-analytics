@@ -36,3 +36,26 @@ app.post('/purchase', (req, res) => {
   res.json({ success: true });
 });
 ```
+
+## Custom Event Tracking (NEW v5)
+
+Track specific business events with custom properties:
+
+```javascript
+app.post('/signup', (req, res) => {
+  // ... logic ...
+  helm.trackEvent(req, 'signup_success', { plan: 'growth', method: 'google' });
+  res.json({ status: 'ok' });
+});
+```
+
+## Session Stitching
+
+To link server-side events back to the browser session, ensure you pass the `sessionId` (retrieved from `sessionStorage.getItem('helm_session_id')`) in the `X-Helm-Session-Id` header of your frontend API calls.
+
+## Features
+
+- **Non-blocking**: Uses non-blocking fetch calls for event ingestion.
+- **Shield Mode**: Active defense against bots and malicious traffic.
+- **Custom Events**: Track business milestones beyond pageviews.
+- **Session Stitching**: Maintain user journey continuity via headers.
