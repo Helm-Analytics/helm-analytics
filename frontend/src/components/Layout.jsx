@@ -5,6 +5,7 @@ import { api } from "../api"
 import Logo from "./Logo"
 import ChatWidget from "./ChatWidget"
 import Tutorial from "./Tutorial"
+import Toast from "./Toast"
 
 
 const Layout = () => {
@@ -95,8 +96,15 @@ const Layout = () => {
       if (newSite) {
         setSelectedSite(newSite)
       }
+      setIsAddSiteOpen(false)
+      // Show success toast
+      const { toast } = await import('./Toast')
+      toast.success('Site Added Successfully', `${newSiteName} is now ready for tracking`)
     } catch (error) {
       console.error("Failed to add site:", error)
+      // Show error toast
+      const { toast } = await import('./Toast')
+      toast.error('Failed to Add Site', 'Please try again or contact support')
     }
   }
 
@@ -113,8 +121,14 @@ const Layout = () => {
       if (selectedSite && selectedSite.id === siteId) {
         setSelectedSite(updatedSites && updatedSites.length > 0 ? updatedSites[0] : null)
       }
+      // Show success toast
+      const { toast } = await import('./Toast')
+      toast.success('Site Deleted', 'The site and all its data have been removed')
     } catch (error) {
       console.error("Failed to delete site:", error)
+      // Show error toast
+      const { toast } = await import('./Toast')
+      toast.error('Failed to Delete Site', 'Please try again later')
     }
   }
 
@@ -171,16 +185,31 @@ const Layout = () => {
             {/* Selected Site Button (Dropdown Trigger) */}
             {sites.length > 0 ? (
               <div className="relative">
-                <button
-                  onClick={() => setIsSiteDropdownOpen(!isSiteDropdownOpen)}
-                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs transition-all duration-200 border bg-primary text-white border-primary shadow-sm dark:bg-accent/10 dark:text-accent dark:border-accent/20 hover:shadow-md"
-                >
-                  <div className="flex items-center space-x-2.5 overflow-hidden flex-1">
-                    <Globe className="w-3.5 h-3.5 flex-shrink-0 text-accent" />
-                    <span className="truncate font-medium">{selectedSite?.name || 'Select site'}</span>
-                  </div>
-                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isSiteDropdownOpen ? 'rotate-90' : ''}`} />
-                </button>
+                <div className="w-full flex items-center gap-2">
+                  <button
+                    onClick={() => sites.length > 1 && setIsSiteDropdownOpen(!isSiteDropdownOpen)}
+                    className={`flex-1 flex items-center justify-between px-3 py-2.5 rounded-lg text-xs transition-all duration-200 border bg-primary text-white border-primary shadow-sm dark:bg-accent/10 dark:text-accent dark:border-accent/20 ${sites.length > 1 ? 'hover:shadow-md cursor-pointer' : 'cursor-default'}`}
+                  >
+                    <div className="flex items-center space-x-2.5 overflow-hidden flex-1">
+                      <Globe className="w-3.5 h-3.5 flex-shrink-0 text-accent" />
+                      <span className="truncate font-medium">{selectedSite?.name || 'Select site'}</span>
+                    </div>
+                    {sites.length > 1 && (
+                      <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isSiteDropdownOpen ? 'rotate-90' : ''}`} />
+                    )}
+                  </button>
+                  
+                  {/* Delete button for single site */}
+                  {sites.length === 1 && selectedSite && (
+                    <button
+                      onClick={() => handleDeleteSite(selectedSite.id)}
+                      className="p-2 hover:bg-red-500/10 rounded-lg transition-all border border-border hover:border-red-500/30"
+                      title="Delete site"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-500" />
+                    </button>
+                  )}
+                </div>
 
                 {/* Dropdown Menu */}
                 {isSiteDropdownOpen && sites.length > 1 && (
@@ -340,6 +369,9 @@ const Layout = () => {
           </div>
         </div>
       )}
+      
+      {/* Toast Notifications */}
+      <Toast />
     </div>
   )
 }
