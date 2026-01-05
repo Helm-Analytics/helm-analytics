@@ -336,30 +336,7 @@ helm.trackEvent('purchase', {
                             </ul>
                         </div>
 
-                        <div className="space-y-3">
-                            <h4 className="font-bold text-sm text-foreground flex items-center gap-2">
-                                <div className="w-1.5 h-3 bg-purple-500 rounded-full"></div>
-                                Filter & Export
-                            </h4>
-                            <ul className="space-y-2 text-xs text-muted-foreground">
-                                <li className="flex items-start gap-2">
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
-                                    <span><strong className="text-foreground">Filter by Type:</strong> Show only pageviews, events, or errors</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
-                                    <span><strong className="text-foreground">Filter by Name:</strong> Search for specific event names (e.g., "signup_clicked")</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
-                                    <span><strong className="text-foreground">Real-time Updates:</strong> New events appear instantly as they happen</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <CheckCircle2 className="w-3.5 h-3.5 text-accent mt-0.5 shrink-0" />
-                                    <span><strong className="text-foreground">Full Context:</strong> See IP, country, browser, device for each event</span>
-                                </li>
-                            </ul>
-                        </div>
+
                     </div>
 
                     <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
@@ -471,14 +448,23 @@ helm.trackEvent('purchase', {
                             <div className="p-5 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-sm">
                                 <h4 className="text-white font-bold mb-2 flex items-center gap-2">
                                     <Shield className="w-4 h-4 text-rose-400" />
-                                    Shield Mode (WAF)
+                                    Shield Mode (Data Integrity)
                                 </h4>
                                 <p className="text-xs text-slate-400 w-full mb-2 leading-relaxed">
-                                    Full spectrum protection against <strong className="text-slate-200">XSS, Brute Force, and SQL Injection</strong>.
+                                    Hardens your <strong className="text-slate-200">Tracking Endpoints</strong> against automated pollution and malicious bot traffic.
                                 </p>
-                                <p className="text-xs text-slate-500 leading-relaxed">
-                                    Automatically blocks traffic from known data centers (AWS/GCP), anonymous proxies, and malicious botnets.
+                                <p className="text-xs text-slate-500 leading-relaxed mb-3">
+                                    Automatically identifies and filters out non-human traffic from known data centers and scrapers. Helm protects your analytics data quality specifically; it is not a network-level firewall for your site contents.
                                 </p>
+                                <div className="p-3 bg-accent/10 rounded-xl border border-accent/20">
+                                    <h5 className="text-[10px] font-bold text-accent uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                                        <Zap className="w-3 h-3" />
+                                        Active Shielding
+                                    </h5>
+                                    <p className="text-[10px] text-slate-400 leading-relaxed">
+                                        While Helm is not a network-level WAF (like Cloudflare), your <strong>Official SDKs</strong> can actively block identified threats at the application level using the <code>shield: true</code> middleware option.
+                                    </p>
+                                </div>
                             </div>
                             <div className="p-5 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-sm">
                                 <h4 className="text-white font-bold mb-2 flex items-center gap-2">
