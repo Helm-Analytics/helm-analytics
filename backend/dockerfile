@@ -1,6 +1,6 @@
 # Use the official Golang image to create a build artifact.
 # This is a multi-stage build, so we'll use a temporary image for building.
-FROM golang:1.24-alpine AS builder
+FROM dhi.io/golang:1.24-alpine3.23 AS builder
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
@@ -11,6 +11,9 @@ RUN go mod download
 
 # Copy the source code into the container
 COPY . .
+
+# Fix permissions for swagger documentation generation
+RUN mkdir -p docs && chmod -R 777 docs
 
 # Install swag CLI
 RUN go install github.com/swaggo/swag/cmd/swag@latest
@@ -23,10 +26,10 @@ RUN /go/bin/swag init
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o sentinel-backend .
 
 # Use a minimal image to run the application.
-FROM alpine:latest
+FROM dhi.io/alpine-base:3.22
 
 # Add ca-certificates to make SSL calls
-RUN apk --no-cache add ca-certificates
+# (Removed apk add as hardened dhi.io images lack a package manager)
 
 # Set the Current Working Directory inside the container
 WORKDIR /app
