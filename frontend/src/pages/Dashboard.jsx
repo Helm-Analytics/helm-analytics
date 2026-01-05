@@ -189,32 +189,44 @@ const Dashboard = () => {
 
           {/* Sub Grid for Top Content & Geography */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="premium-card">
-              <h3 className="text-base font-heading font-extrabold mb-6 flex items-center border-b border-border/50 pb-4 -mx-6 px-6">
-                <Copy className="w-4 h-4 mr-2 text-accent" />
-                Top Content
-              </h3>
-              <BarChart
-                data={dashboardData?.topPages?.map(p => p.count) || []}
-                labels={dashboardData?.topPages?.map(p => p.value) || []}
-              />
+            <div id="tut-top-pages" className="premium-card !p-0 overflow-hidden shadow-xl">
+              <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between bg-accent/5">
+                <h3 className="text-base font-heading font-extrabold flex items-center">
+                  <Copy className="w-4 h-4 mr-2 text-accent" />
+                  Top Content
+                </h3>
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Views</span>
+              </div>
+              <div className="p-2">
+                <PlausibleStyleTable 
+                  data={dashboardData?.topPages || []} 
+                  total={dashboardData?.totalViews || 1}
+                  label="Page"
+                />
+              </div>
             </div>
-            <div className="premium-card">
-              <h3 className="text-base font-heading font-extrabold mb-6 flex items-center border-b border-border/50 pb-4 -mx-6 px-6">
-                <Users className="w-4 h-4 mr-2 text-accent" />
-                Geographic Reach
-              </h3>
-              <div className="pt-4">
-                <DoughnutChart
-                  data={dashboardData?.topCountries?.map(c => c.count) || []}
-                  labels={dashboardData?.topCountries?.map(c => c.value) || []}
+
+            <div id="tut-top-referrers" className="premium-card !p-0 overflow-hidden shadow-xl">
+              <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between bg-accent/5">
+                <h3 className="text-base font-heading font-extrabold flex items-center">
+                  <Users className="w-4 h-4 mr-2 text-accent" />
+                  Top Referrers
+                </h3>
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Visitors</span>
+              </div>
+              <div className="p-2">
+                <PlausibleStyleTable 
+                  data={dashboardData?.topReferrers || []} 
+                  total={dashboardData?.uniqueVisitors || 1}
+                  label="Referrer"
+                  isReferrer={true}
                 />
               </div>
             </div>
           </div>
 
           {/* Web Vitals Section */}
-          <div className="space-y-6">
+          <div id="tut-web-vitals" className="space-y-6">
             <h3 className="text-lg font-heading font-extrabold text-foreground flex items-center px-1 border-b border-border/50 pb-4">
               <Timer className="w-5 h-5 mr-3 text-accent" />
               Web Vitals
@@ -245,7 +257,7 @@ const Dashboard = () => {
           </div>
 
           {/* Content Engagement Section */}
-          <div className="space-y-6">
+          <div id="tut-engagement" className="space-y-6">
             <h3 className="text-lg font-heading font-extrabold text-foreground flex items-center px-1 border-b border-border/50 pb-4">
               <MousePointer2 className="w-5 h-5 mr-3 text-accent" />
               Content Engagement
@@ -283,7 +295,7 @@ const Dashboard = () => {
                                <div 
                                  className="h-full bg-accent transition-all duration-1000 ease-out"
                                  style={{ width: `${m.percentage}%`, opacity: 0.4 + (m.level / 100) * 0.6 }}
-                               ></div>
+                                ></div>
                             </div>
                          </div>
                        ))}
@@ -298,49 +310,124 @@ const Dashboard = () => {
         {/* Right Column: Setup & Technology */}
         <div className="lg:col-span-4 space-y-8">
           {/* AI Intelligence Insights */}
-          {/* Setup Guide - Sidebar Placement */}
-          <div id="tut-setup-guide" className="premium-card bg-card border shadow-xl relative overflow-hidden group mb-8">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Fingerprint className="w-12 h-12 text-accent rotate-12" />
-            </div>
-            <h3 className="text-lg font-heading font-extrabold mb-2 text-foreground flex items-center">
-              Setup Helm
-            </h3>
-            <p className="text-muted-foreground text-xs mb-6 font-medium leading-relaxed">
-              Integrate the tracking script to begin receiving nautical intelligence flow.
-            </p>
-            <div className="space-y-4">
-              <div className="bg-secondary rounded-xl p-4 font-mono text-[10px] break-all border border-border text-foreground">
-                {`<script src="${import.meta.env.VITE_API_URL || 'https://api-sentinel.getmusterup.com'}/static/tracker-v5.js" data-site-id="${selectedSite.id}"></script>`}
-              </div>
-              <button
-                onClick={copyTrackingScript}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-accent text-white hover:bg-accent/90 font-bold text-xs rounded-xl transition-all active:scale-95 shadow-lg shadow-accent/20"
-              >
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                <span>{copied ? "Copied" : "Copy Script"}</span>
-              </button>
-            </div>
-            <div className="mt-6 pt-6 border-t border-border">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Optional: Spider Trap</p>
-                <div className="bg-secondary p-3 rounded-lg border border-border">
-                    <code className="text-[9px] text-accent/80 font-mono italic">
-                        &lt;a href="/track/trap" style="display:none"&gt;Health Check&lt;/a&gt;
-                    </code>
-                </div>
-            </div>
-          </div>
-
-          {/* AI Intelligence Insights */}
           <div id="tut-insights-card">
               <InsightsCard />
           </div>
 
-
+          <div className="premium-card">
+              <h3 className="text-base font-heading font-extrabold mb-6 flex items-center border-b border-border/50 pb-4 -mx-6 px-6">
+                <Laptop className="w-4 h-4 mr-2 text-accent" />
+                Technology
+              </h3>
+              <div className="space-y-8">
+              <div>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 text-center">Top Browsers</p>
+                <DoughnutChart
+                  data={dashboardData?.topBrowsers?.map(b => b.count) || []}
+                  labels={dashboardData?.topBrowsers?.map(b => b.value) || []}
+                />
+              </div>
+              <div className="pt-8 border-t border-border/50">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4 text-center">Operating Systems</p>
+                <DoughnutChart
+                  data={dashboardData?.topOS?.map(os => os.count) || []}
+                  labels={dashboardData?.topOS?.map(os => os.value) || []}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   )
 }
+
+const PlausibleStyleTable = ({ data, total, label, isReferrer = false }) => {
+  const max = Math.max(...(data?.map(d => d.count) || [1]));
+  
+  return (
+    <div className="w-full">
+      <div className="flex items-center justify-between text-[10px] uppercase font-black text-muted-foreground tracking-widest px-4 py-3 border-b border-border/30">
+        <span>{label}</span>
+        <span>Count</span>
+      </div>
+      <div className="divide-y divide-border/20">
+        {(!data || data.length === 0) ? (
+          <div className="p-12 text-center text-xs text-muted-foreground italic">
+            No data available for this period
+          </div>
+        ) : (
+          data.map((item, idx) => {
+            const percentage = (item.count / max) * 100;
+            const Globe = (props) => (
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                {...props}
+              >
+                <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            );
+            const ArrowUpRight = (props) => (
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width="24" 
+                height="24" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                {...props}
+              >
+                <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
+              </svg>
+            );
+
+            return (
+              <div key={idx} className="relative group hover:bg-accent/5 transition-all">
+                {/* Background Progress Bar */}
+                <div 
+                  className="absolute inset-y-[2px] left-0 bg-accent/10 transition-all duration-1000 ease-out group-hover:bg-accent/20 rounded-r-md"
+                  style={{ width: `${percentage}%` }}
+                />
+                
+                <div className="relative px-4 py-3 flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    {isReferrer && (
+                      <div className="w-5 h-5 rounded bg-background/50 border border-border/50 flex items-center justify-center shrink-0">
+                         <Globe size={10} className="text-muted-foreground/60" />
+                      </div>
+                    )}
+                    <span className="text-sm font-semibold text-foreground truncate group-hover:text-accent transition-colors">
+                      {item.value || '(not set)'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-black text-foreground">
+                      {item.count?.toLocaleString()}
+                    </span>
+                    <ArrowUpRight size={14} className="text-emerald-500 opacity-0 group-hover:opacity-100 transition-all transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+      <button className="w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-accent border-t border-border/30 transition-colors bg-secondary/10">
+        View Detailed Analytics
+      </button>
+    </div>
+  );
+};
 
 export default Dashboard

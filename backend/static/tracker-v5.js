@@ -224,14 +224,29 @@
             track();
         }
 
-        // Track SPA navigation
-        let observer = new MutationObserver(() => {
+        // Track SPA navigation (History API)
+        const originalPushState = history.pushState;
+        const originalReplaceState = history.replaceState;
+
+        history.pushState = function() {
+            originalPushState.apply(this, arguments);
+            handleUrlChange();
+        };
+
+        history.replaceState = function() {
+            originalReplaceState.apply(this, arguments);
+            handleUrlChange();
+        };
+
+        window.addEventListener('popstate', handleUrlChange);
+
+        function handleUrlChange() {
             if (location.href !== lastUrl) {
                 lastUrl = location.href;
-                track();
+                // Defer slightly to allow page title to update
+                setTimeout(() => track(), 100);
             }
-        });
-        observer.observe(document, { subtree: true, childList: true });
+        }
 
         // Session replay recording
         if (typeof window.rrweb !== 'undefined' && window.rrweb.record) {

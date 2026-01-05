@@ -880,7 +880,29 @@ func calculateStats(siteID string, days int) (Stats, error) {
 }
 
 func queryTopStats(ctx context.Context, column, siteID string, days int) ([]CountStat, error) {
-	query := "SELECT " + column + ", count() AS c FROM events WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp >= now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%' GROUP BY " + column + " ORDER BY c DESC LIMIT 10"
+	var query string
+	if column == "URL" {
+		// For Top Pages, we want the most recent Title associated with each URL
+		query = `
+			SELECT 
+				URL, 
+				count() AS c, 
+				argMax(PageTitle, Timestamp) as title
+			FROM events 
+			WHERE SiteID = ? 
+			  AND EventType = 'pageview' 
+			  AND Timestamp >= now() - INTERVAL ? DAY 
+			  AND ClientIP NOT IN ('127.0.0.1', '::1') 
+			  AND URL NOT LIKE '%localhost:8090%' 
+			  AND Referrer NOT LIKE '%localhost:8090%' 
+			GROUP BY URL 
+			ORDER BY c DESC 
+			LIMIT 10
+		`
+	} else {
+		query = "SELECT " + column + ", count() AS c FROM events WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp >= now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%' GROUP BY " + column + " ORDER BY c DESC LIMIT 10"
+	}
+
 	rows, err := chConn.Query(ctx, query, siteID, days)
 	if err != nil {
 		return nil, err
@@ -890,8 +912,22 @@ func queryTopStats(ctx context.Context, column, siteID string, days int) ([]Coun
 	var result []CountStat
 	for rows.Next() {
 		var stat CountStat
-		if err := rows.Scan(&stat.Value, &stat.Count); err != nil {
-			return nil, err
+		if column == "URL" {
+			var url, title string
+			var count uint64
+			if err := rows.Scan(&url, &count, &title); err != nil {
+				return nil, err
+			}
+			// Use Title if available, else URL
+			displayValue := title
+			if displayValue == "" {
+				displayValue = url
+			}
+			stat = CountStat{Value: displayValue, Count: count}
+		} else {
+			if err := rows.Scan(&stat.Value, &stat.Count); err != nil {
+				return nil, err
+			}
 		}
 		result = append(result, stat)
 	}

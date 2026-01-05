@@ -329,7 +329,7 @@ const Layout = () => {
               <Logo className="scale-90 origin-left" />
            </div>
 
-           <Outlet context={{ sites, selectedSite }} />
+           <Outlet context={{ sites, selectedSite, darkMode }} />
         </div>
         
         {/* Subtle Decorative Gradient */}

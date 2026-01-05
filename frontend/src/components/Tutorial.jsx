@@ -12,52 +12,94 @@ const Tutorial = ({ onComplete }) => {
     const steps = [
         {
             title: "Welcome to Helm",
-            description: "Let's take a quick interactive tour of your new intelligence platform.",
-            targetId: null, // Center screen
+            description: "Helm provides deep intelligence and active defense for your web properties. Let's take a quick tour of your new control center.",
+            targetId: null,
             path: "/dashboard",
             position: "center"
         },
         {
-            title: "Live Statistics",
-            description: "Here you can see your real-time traffic, bounce rates, and quality scores at a glance.",
+            title: "Executive Summary",
+            description: "See your total traffic, unique visitors, and quality scores. We track everything without intrusive cookies.",
             targetId: "tut-stats-grid",
             path: "/dashboard",
             position: "bottom"
         },
         {
-            title: "Traffic Trends",
-            description: "Visualize your visitor growth over time. Hver points to see daily breakdowns.",
-            targetId: "tut-traffic-graph",
+            title: "Traffic Health Score",
+            description: "Our signature KPI. A real-time measure of traffic quality, filtering out bots and malicious scrapers.",
+            targetId: "tut-stats-grid",
+            path: "/dashboard",
+            position: "bottom"
+        },
+        {
+            title: "Plausible Content Insights",
+            description: "Understand your top performing pages with our new horizontal progress bars. We show page titles instead of messy URLs.",
+            targetId: "tut-top-pages",
             path: "/dashboard",
             position: "top"
         },
         {
-            title: "AI Insights",
-            description: "Our AI Engine analyzes your data to find anomalies and opportunities automatically.",
+            title: "Referrer Analysis",
+            description: "See exactly where your traffic is coming from. Click 'View All' for a deep dive into acquisition channels.",
+            targetId: "tut-top-referrers",
+            path: "/dashboard",
+            position: "top"
+        },
+        {
+            title: "AI Insights Engine",
+            description: "Helm's AI automatically analyzes traffic patterns and suggests mitigations for sudden anomalies.",
             targetId: "tut-insights-card",
             path: "/dashboard",
             position: "left"
         },
         {
+            title: "User Flow Mapping",
+            description: "Visualize how users move through your site. See the most common paths and where you're losing traffic.",
+            targetId: "tut-nav-user-flow",
+            path: "/dashboard",
+            position: "right"
+        },
+        {
+            title: "Interactive Map",
+            description: "Nodes represent pages, and edges show transitions. Thick lines indicate high-traffic corridors.",
+            targetId: "tut-user-flow-legend",
+            path: "/user-flow",
+            position: "right"
+        },
+        {
+            title: "Campaign Attribution",
+            description: "Helm automatically tracks UTM parameters from your marketing ads without any extra configuration.",
+            targetId: "tut-nav-campaigns",
+            path: "/user-flow", // Transitioning from user flow to campaigns
+            position: "right"
+        },
+        {
+            title: "Auto-Detected Campaigns",
+            description: "If you have data, it'll appear here. If not, this guide shows you how to tag your links right away.",
+            targetId: "tut-campaigns-empty",
+            path: "/campaigns",
+            position: "top"
+        },
+        {
+            title: "Web Vitals Monitor",
+            description: "Track LCP, CLS, and FID to ensure your site stays lightning fast and user friendly.",
+            targetId: "tut-web-vitals",
+            path: "/dashboard",
+            position: "top"
+        },
+        {
             title: "Active Defense",
-            description: "Navigate to the Security page to configure your firewall and bot protection.",
+            description: "Ready to protect your site? Configure 'Shield Mode' in the security settings to block threats automatically.",
             targetId: "tut-nav-security",
             path: "/dashboard",
             position: "right"
         },
         {
-            title: "Shield Mode",
-            description: "Enable Shield Mode to automatically block suspicious traffic based on our global threat intelligence.",
-            targetId: "tut-shield-toggle",
-            path: "/firewall",
-            position: "bottom"
-        },
-        {
-            title: "Docs & Help",
-            description: "Need integration guides? Check our comprehensive documentation for one-click code snippets and API references.",
-            targetId: "tut-nav-help-&-docs",
-            path: "/dashboard", // Sidebar is visible here
-            position: "right"
+            title: "Ready to Launch?",
+            description: "You're all set. Copy your tracking script, add it to your site, and watch the intelligence flow in.",
+            targetId: "tut-setup-guide",
+            path: "/dashboard",
+            position: "left"
         }
     ];
 
