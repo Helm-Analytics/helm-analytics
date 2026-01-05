@@ -249,7 +249,11 @@
 
         function sendEvents() {
             if (events.length === 0) return;
-            const body = JSON.stringify({ sessionId, events });
+            const body = JSON.stringify({ 
+                siteId: siteId,
+                sessionId: sessionId, 
+                events: events 
+            });
             events = [];
             fetch(sessionEndpoint, {
                 method: 'POST',
