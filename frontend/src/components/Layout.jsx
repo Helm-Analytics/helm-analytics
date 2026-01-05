@@ -167,7 +167,7 @@ const Layout = () => {
               </button>
             </div>
             
-            <div className="space-y-1 max-h-[140px] overflow-y-auto pr-1 scrollbar-thin">
+            <div className="space-y-1">
               {sites.length > 0 ? (
                 sites.map((site) => (
                   <div
