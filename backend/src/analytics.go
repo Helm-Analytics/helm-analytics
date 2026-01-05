@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
 	"math"
 	"net"
@@ -29,6 +30,14 @@ type Event struct {
 	LCP         *float64 `json:"LCP,omitempty"`
 	CLS         *float64 `json:"CLS,omitempty"`
 	FID         *float64 `json:"FID,omitempty"`
+	
+	// UTM Parameters
+	UtmSource   string `json:"utm_source,omitempty"`
+	UtmMedium   string `json:"utm_medium,omitempty"`
+	UtmCampaign string `json:"utm_campaign,omitempty"`
+	UtmTerm     string `json:"utm_term,omitempty"`
+	UtmContent  string `json:"utm_content,omitempty"`
+	Channel     string `json:"channel,omitempty"`
 }
 
 type EventData struct {
@@ -48,6 +57,14 @@ type EventData struct {
 	LCP         sql.NullFloat64
 	CLS         sql.NullFloat64
 	FID         sql.NullFloat64
+	
+	// UTM & Attribution
+	UtmSource   string
+	UtmMedium   string
+	UtmCampaign string
+	UtmTerm     string
+	UtmContent  string
+	Channel     string
 }
 
 // --- ANALYTICS ENGINE ---
@@ -83,11 +100,11 @@ type Stats struct {
 	TopPages            []CountStat `json:"topPages"`
 	TopReferrers        []CountStat `json:"topReferrers"`
 	TopBrowsers         []CountStat `json:"topBrowsers"`
-	TopOS               []CountStat `json:"topOS"`
+	TopOS               []CountStat `json:"topOs"`
 	TopCountries        []CountStat `json:"topCountries"`
 	DailyStats          []CountStat `json:"dailyStats"`
 
-	// Percentage changes
+	// Change indicators
 	TotalViewsChange          float64 `json:"totalViewsChange"`
 	UniqueVisitorsChange      float64 `json:"uniqueVisitorsChange"`
 	BounceRateChange          float64 `json:"bounceRateChange"`
@@ -96,6 +113,10 @@ type Stats struct {
 	AvgLCPChange              float64 `json:"avgLcpChange"`
 	AvgCLSChange              float64 `json:"avgClsChange"`
 	AvgFIDChange              float64 `json:"avgFidChange"`
+	
+	// New UTM & Engagement context for AI
+	Campaigns  *CampaignStat    `json:"campaigns,omitempty"`
+	Engagement []EngagementStat `json:"engagement,omitempty"`
 }
 
 type CoreStats struct {
@@ -109,6 +130,27 @@ type CoreStats struct {
 	AvgFID              float64
 	DailyStats          []CountStat
 }
+
+type CampaignStat struct {
+	TotalViews     uint64      `json:"totalViews"`
+	UniqueVisitors uint64      `json:"uniqueVisitors"`
+	TopSources     []CountStat `json:"topSources"`
+	TopMediums     []CountStat `json:"topMediums"`
+	TopCampaigns   []CountStat `json:"topCampaigns"`
+	TopChannels    []CountStat `json:"topChannels"`
+}
+
+type EngagementStat struct {
+	PageURL      string       `json:"pageUrl"`
+	Milestones   []Milestone  `json:"milestones"`
+	AvgMaxDepth  float64      `json:"avgMaxDepth"`
+}
+
+type Milestone struct {
+	Level      int     `json:"level"`
+	Percentage float64 `json:"percentage"`
+}
+
 
 type CountStat struct {
 	Value string `json:"value"`
@@ -303,6 +345,12 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 		LCP:         nullFloat64(event.LCP),
 		CLS:         nullFloat64(event.CLS),
 		FID:         nullFloat64(event.FID),
+		UtmSource:   event.UtmSource,
+		UtmMedium:   event.UtmMedium,
+		UtmCampaign: event.UtmCampaign,
+		UtmTerm:     event.UtmTerm,
+		UtmContent:  event.UtmContent,
+		Channel:     event.Channel,
 	}
 
 	if eventData.EventType == "" {
@@ -315,11 +363,12 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 
 	ctx := context.Background()
 	err := chConn.AsyncInsert(ctx, `INSERT INTO sentinel.events 
-		(Timestamp, SiteID, ClientIP, SessionID, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, LCP, CLS, FID, EventType, PageTitle) 
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, false,
+		(Timestamp, SiteID, ClientIP, SessionID, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, LCP, CLS, FID, EventType, PageTitle, UtmSource, UtmMedium, UtmCampaign, UtmTerm, UtmContent, Channel) 
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, false,
 		eventData.Timestamp, eventData.SiteID, eventData.ClientIP, eventData.SessionID, eventData.URL, eventData.Referrer,
 		eventData.ScreenWidth, eventData.Browser, eventData.OS, eventData.Country, eventData.TrustScore,
 		eventData.LCP, eventData.CLS, eventData.FID, eventData.EventType, eventData.PageTitle,
+		eventData.UtmSource, eventData.UtmMedium, eventData.UtmCampaign, eventData.UtmTerm, eventData.UtmContent, eventData.Channel,
 	)
 	if err != nil {
 		log.Printf("Error inserting event into ClickHouse: %v", err)
@@ -823,6 +872,10 @@ func calculateStats(siteID string, days int) (Stats, error) {
 	finalStats.TopOS, _ = queryTopStats(ctx, "OS", siteID, days)
 	finalStats.TopCountries, _ = queryTopStats(ctx, "Country", siteID, days)
 
+	// Fetch Campaign and Engagement data for context
+	finalStats.Campaigns = getCampaignStats(ctx, siteID, days)
+	finalStats.Engagement = getEngagementStats(ctx, siteID, days)
+
 	return finalStats, nil
 }
 
@@ -852,3 +905,150 @@ func nullFloat64(f *float64) sql.NullFloat64 {
 	return sql.NullFloat64{Float64: *f, Valid: true}
 }
 
+// GetCampaignStatsHandler returns attribution and campaign statistics
+func GetCampaignStatsHandler(w http.ResponseWriter, r *http.Request) {
+	siteID := r.URL.Query().Get("siteId")
+	days := parseIntOrDefault(r.URL.Query().Get("days"), 30)
+
+	if siteID == "" {
+		http.Error(w, "siteId is required", http.StatusBadRequest)
+		return
+	}
+
+	if !verifySiteOwnership(r, siteID) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	ctx := context.Background()
+	stats := getCampaignStats(ctx, siteID, days)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(stats)
+}
+
+func getCampaignStats(ctx context.Context, siteID string, days int) *CampaignStat {
+	var stats CampaignStat
+
+	// 1. Core Summary
+	query := `
+		SELECT count(), uniqExact(SessionID)
+		FROM sentinel.events
+		WHERE SiteID = ? 
+			AND Timestamp >= now() - INTERVAL ? DAY
+			AND UtmSource != ''
+	`
+	err := chConn.QueryRow(ctx, query, siteID, days).Scan(&stats.TotalViews, &stats.UniqueVisitors)
+	if err != nil {
+		log.Printf("Error querying campaign core stats: %v", err)
+	}
+
+	// 2. Top Sources
+	stats.TopSources = fetchTopStats(ctx, siteID, "UtmSource", days, 10, "UtmSource != ''")
+	
+	// 3. Top Mediums
+	stats.TopMediums = fetchTopStats(ctx, siteID, "UtmMedium", days, 10, "UtmMedium != ''")
+	
+	// 4. Top Campaigns
+	stats.TopCampaigns = fetchTopStats(ctx, siteID, "UtmCampaign", days, 10, "UtmCampaign != ''")
+	
+	// 5. Top Channels
+	stats.TopChannels = fetchTopStats(ctx, siteID, "Channel", days, 10, "Channel != ''")
+	
+	return &stats
+}
+
+// Helper for fetching top breakdown stats
+func fetchTopStats(ctx context.Context, siteID, column string, days, limit int, extraWhere string) []CountStat {
+	where := fmt.Sprintf("SiteID = ? AND Timestamp >= now() - INTERVAL ? DAY AND %s", extraWhere)
+	query := fmt.Sprintf("SELECT %s, count() as count FROM sentinel.events WHERE %s GROUP BY %s ORDER BY count DESC LIMIT ?", column, where, column)
+	
+	rows, err := chConn.Query(ctx, query, siteID, days, limit)
+	if err != nil {
+		log.Printf("Error fetching top %s: %v", column, err)
+		return []CountStat{}
+	}
+	defer rows.Close()
+
+	var results []CountStat
+	for rows.Next() {
+		var stat CountStat
+		if err := rows.Scan(&stat.Value, &stat.Count); err != nil {
+			continue
+		}
+		results = append(results, stat)
+	}
+	return results
+}
+
+
+// GetEngagementStatsHandler returns scroll depth and engagement metrics
+func GetEngagementStatsHandler(w http.ResponseWriter, r *http.Request) {
+	siteID := r.URL.Query().Get("siteId")
+	days := parseIntOrDefault(r.URL.Query().Get("days"), 30)
+
+	if siteID == "" {
+		http.Error(w, "siteId is required", http.StatusBadRequest)
+		return
+	}
+
+	if !verifySiteOwnership(r, siteID) {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	ctx := context.Background()
+	engagementData := getEngagementStats(ctx, siteID, days)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(engagementData)
+}
+
+func getEngagementStats(ctx context.Context, siteID string, days int) []EngagementStat {
+	// Get Top 5 Pages to analyze engagement
+	topPages, _ := queryTopStats(ctx, "URL", siteID, days)
+	
+	var engagementData []EngagementStat
+
+	for _, page := range topPages {
+		stat := EngagementStat{PageURL: page.Value}
+		
+		// Calculate milestones
+		milestones := []int{25, 50, 75, 100}
+		for _, m := range milestones {
+			query := `
+				SELECT count() 
+				FROM sentinel.events 
+				WHERE SiteID = ? AND EventType = 'custom' AND EventName = 'scroll_depth' 
+					AND URL = ? AND JSONExtractInt(Properties, 'depth') >= ?
+					AND Timestamp >= now() - INTERVAL ? DAY
+			`
+			var count uint64
+			err := chConn.QueryRow(ctx, query, siteID, page.Value, m, days).Scan(&count)
+			if err == nil {
+				// Normalize percentage against total pageviews for this URL
+				pvQuery := `SELECT count() FROM sentinel.events WHERE SiteID = ? AND EventType = 'pageview' AND URL = ? AND Timestamp >= now() - INTERVAL ? DAY`
+				var totalPV uint64
+				chConn.QueryRow(ctx, pvQuery, siteID, page.Value, days).Scan(&totalPV)
+				
+				percentage := 0.0
+				if totalPV > 0 {
+					percentage = (float64(count) / float64(totalPV)) * 100
+				}
+				stat.Milestones = append(stat.Milestones, Milestone{Level: m, Percentage: percentage})
+			}
+		}
+
+		// Calculate Avg Max Depth
+		maxDepthQuery := `
+			SELECT avg(JSONExtractInt(Properties, 'maxDepth'))
+			FROM sentinel.events
+			WHERE SiteID = ? AND EventType = 'custom' AND EventName = 'scroll_final'
+				AND URL = ? AND Timestamp >= now() - INTERVAL ? DAY
+		`
+		chConn.QueryRow(ctx, maxDepthQuery, siteID, page.Value, days).Scan(&stat.AvgMaxDepth)
+		
+		engagementData = append(engagementData, stat)
+	}
+	return engagementData
+}

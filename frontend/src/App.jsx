@@ -14,6 +14,8 @@ const ErrorsPage = lazy(() => import("./pages/ErrorsPage"))
 const CustomEventsPage = lazy(() => import("./pages/CustomEventsPage"))
 const DocsPage = lazy(() => import("./pages/DocsPage"))
 const ActivityPage = lazy(() => import("./pages/ActivityPage"))
+const CampaignsPage = lazy(() => import("./pages/CampaignsPage"))
+const UserFlowPage = lazy(() => import("./pages/UserFlowPage"))
 
 // Loading component
 const PageLoader = () => (
@@ -40,6 +42,8 @@ function App() {
             <Route path="/custom-events" element={<CustomEventsPage />} />
             <Route path="/activity" element={<ActivityPage />} />
             <Route path="/firewall" element={<FirewallPage />} />
+            <Route path="/campaigns" element={<CampaignsPage />} />
+            <Route path="/user-flow" element={<UserFlowPage />} />
             <Route path="/docs" element={<DocsPage />} />
           </Route>
 

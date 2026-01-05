@@ -144,4 +144,19 @@ export const api = {
     request({
       url: `/api/activity?siteId=${siteId}&filter=${filter}&limit=${limit}`,
     }),
+
+  getEngagementStats: (siteId, days = 30) =>
+    request({
+      url: `/api/engagement?siteId=${siteId}&days=${days}`,
+    }),
+
+  getUserFlow: (siteId, days = 7) => 
+    request({
+      url: `/api/user-flow?siteId=${siteId}&days=${days}`,
+    }),
+
+  getCampaignStats: (siteId, days = 30) =>
+    request({
+      url: `/api/campaigns?siteId=${siteId}&days=${days}`,
+    }),
 };

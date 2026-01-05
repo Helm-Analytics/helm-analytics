@@ -97,6 +97,15 @@ func main() {
 	
 	// Activity Log API
 	mux.Handle("/api/activity", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetActivityLogHandler)))
+
+	// Campaign & Attribution API
+	mux.Handle("/api/campaigns", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetCampaignStatsHandler)))
+
+	// User Flow API
+	mux.Handle("/api/user-flow", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetUserFlowHandler)))
+
+	// Engagement API (Scroll Depth)
+	mux.Handle("/api/engagement", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetEngagementStatsHandler)))
 	
 	// Admin API (Cloud only - for manual subscription management)
 	mux.HandleFunc("/api/admin/subscription", sentinel.AdminUpdateSubscriptionHandler)

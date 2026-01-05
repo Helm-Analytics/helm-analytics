@@ -16,7 +16,10 @@ const Dashboard = () => {
     dashboardData, 
     isLoadingStats, 
     fetchDashboardStats, 
-    fetchAiInsights 
+    fetchAiInsights,
+    fetchEngagementStats,
+    engagementData,
+    isLoadingEngagement
   } = useDashboardStore()
   
   const [copied, setCopied] = useState(false)
@@ -41,9 +44,11 @@ const Dashboard = () => {
     if (selectedSite) {
       fetchDashboardStats(selectedSite.id, dateRange)
       fetchAiInsights(selectedSite.id)
+      fetchEngagementStats(selectedSite.id, dateRange)
 
       const statsInterval = setInterval(() => {
         fetchDashboardStats(selectedSite.id, dateRange)
+        fetchEngagementStats(selectedSite.id, dateRange)
       }, 30000)
 
       const aiInterval = setInterval(() => {
@@ -236,6 +241,56 @@ const Dashboard = () => {
                 change={dashboardData?.avgFidChange}
                 inverse={true}
               />
+            </div>
+          </div>
+
+          {/* Content Engagement Section */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-heading font-extrabold text-foreground flex items-center px-1 border-b border-border/50 pb-4">
+              <MousePointer2 className="w-5 h-5 mr-3 text-accent" />
+              Content Engagement
+            </h3>
+            <div className="grid grid-cols-1 gap-6">
+              {!engagementData || engagementData.length === 0 ? (
+                <div className="premium-card text-center py-12">
+                   <p className="text-muted-foreground italic text-sm">No engagement data recorded for the selected period.</p>
+                </div>
+              ) : (
+                engagementData.slice(0, 3).map((page, idx) => (
+                  <div key={idx} className="premium-card hover:border-accent/40 transition-all group">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                       <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="p-2 bg-accent/10 rounded-lg text-accent">
+                             <Copy size={16} />
+                          </div>
+                          <span className="font-bold text-sm truncate text-foreground group-hover:text-accent transition-colors">{page.pageUrl}</span>
+                       </div>
+                       <div className="flex items-center gap-2 px-3 py-1 bg-secondary rounded-full border border-border">
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground items-center flex gap-1.5">
+                            <Timer size={10} /> Avg Max Scroll: <span className="text-foreground">{page.avgMaxDepth?.toFixed(0) || 0}%</span>
+                          </span>
+                       </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-4 gap-4">
+                       {page.milestones?.map((m, i) => (
+                         <div key={i} className="space-y-2">
+                            <div className="flex justify-between items-end">
+                               <span className="text-[9px] font-bold text-muted-foreground uppercase">{m.level}% Depth</span>
+                               <span className="text-xs font-extrabold text-foreground">{m.percentage?.toFixed(1)}%</span>
+                            </div>
+                            <div className="h-1.5 bg-secondary rounded-full overflow-hidden border border-border/50">
+                               <div 
+                                 className="h-full bg-accent transition-all duration-1000 ease-out"
+                                 style={{ width: `${m.percentage}%`, opacity: 0.4 + (m.level / 100) * 0.6 }}
+                               ></div>
+                            </div>
+                         </div>
+                       ))}
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

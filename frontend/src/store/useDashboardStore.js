@@ -10,6 +10,9 @@ export const useDashboardStore = create((set, get) => ({
   isLoadingAI: false,
   aiError: null,
 
+  engagementData: null,
+  isLoadingEngagement: false,
+
   // Actions
   fetchDashboardStats: async (siteId, days = 30) => {
     set({ isLoadingStats: true, statsError: null })
@@ -63,6 +66,17 @@ export const useDashboardStore = create((set, get) => ({
     } catch (error) {
         console.error("Failed to fetch AI insights:", error)
         set({ isLoadingAI: false, aiError: error.message || "Failed to fetch insights" })
+    }
+  },
+
+  fetchEngagementStats: async (siteId, days = 30) => {
+    set({ isLoadingEngagement: true })
+    try {
+        const data = await api.getEngagementStats(siteId, days)
+        set({ engagementData: data, isLoadingEngagement: false })
+    } catch (error) {
+        console.error("Failed to fetch engagement stats:", error)
+        set({ isLoadingEngagement: false })
     }
   },
   
