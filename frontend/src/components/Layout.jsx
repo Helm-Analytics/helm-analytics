@@ -14,6 +14,7 @@ const Layout = () => {
   const [authLoading, setAuthLoading] = useState(true)
   const [showTutorial, setShowTutorial] = useState(false)
   const [isAddSiteOpen, setIsAddSiteOpen] = useState(false)
+  const [isSiteDropdownOpen, setIsSiteDropdownOpen] = useState(false)
   
   const location = useLocation()
   const navigate = useNavigate()
@@ -155,7 +156,7 @@ const Layout = () => {
           <Logo className="mb-6 origin-left scale-90" />
 
           {/* Site Switcher Section */}
-          <div className="mb-6 flex-shrink-0">
+          <div className="mb-6 flex-shrink-0 relative">
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-muted-foreground text-[9px] font-bold uppercase tracking-[0.2em] px-1">Managed Sites</h3>
               <button 
@@ -167,40 +168,57 @@ const Layout = () => {
               </button>
             </div>
             
-            <div className="space-y-1">
-              {sites.length > 0 ? (
-                sites.map((site) => (
-                  <div
-                    key={site.id}
-                    className={`w-full flex items-center justify-between group px-2.5 py-2 rounded-lg text-xs transition-all duration-200 border ${
-                      selectedSite?.id === site.id 
-                        ? "bg-primary text-white border-primary shadow-sm dark:bg-accent/10 dark:text-accent dark:border-accent/20" 
-                        : "text-muted-foreground hover:bg-secondary hover:text-foreground border-transparent"
-                    }`}
-                  >
-                    <button
-                      onClick={() => setSelectedSite(site)}
-                      className="flex items-center space-x-2.5 overflow-hidden flex-1"
-                    >
-                      <Globe className={`w-3.5 h-3.5 flex-shrink-0 ${selectedSite?.id === site.id ? 'text-accent' : 'text-muted-foreground/50 group-hover:text-accent/50'}`} />
-                      <span className="truncate font-medium">{site.name}</span>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteSite(site.id);
-                      }}
-                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/10 rounded transition-all"
-                      title="Delete site"
-                    >
-                      <Trash2 className="w-3 h-3 text-red-500" />
-                    </button>
+            {/* Selected Site Button (Dropdown Trigger) */}
+            {sites.length > 0 ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsSiteDropdownOpen(!isSiteDropdownOpen)}
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs transition-all duration-200 border bg-primary text-white border-primary shadow-sm dark:bg-accent/10 dark:text-accent dark:border-accent/20 hover:shadow-md"
+                >
+                  <div className="flex items-center space-x-2.5 overflow-hidden flex-1">
+                    <Globe className="w-3.5 h-3.5 flex-shrink-0 text-accent" />
+                    <span className="truncate font-medium">{selectedSite?.name || 'Select site'}</span>
                   </div>
-                ))
-              ) : (
-                <div className="text-muted-foreground/50 text-[10px] italic px-2 py-1.5 border border-dashed border-border rounded-lg">Initialize site...</div>
-              )}
-            </div>
+                  <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isSiteDropdownOpen ? 'rotate-90' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {isSiteDropdownOpen && sites.length > 1 && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="max-h-64 overflow-y-auto">
+                      {sites.filter(site => site.id !== selectedSite?.id).map((site) => (
+                        <button
+                          key={site.id}
+                          onClick={() => {
+                            setSelectedSite(site);
+                            setIsSiteDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center justify-between group px-3 py-2 text-xs transition-all hover:bg-secondary border-b border-border/30 last:border-b-0"
+                        >
+                          <div className="flex items-center space-x-2.5 overflow-hidden flex-1">
+                            <Globe className="w-3.5 h-3.5 flex-shrink-0 text-muted-foreground/50 group-hover:text-accent/70" />
+                            <span className="truncate font-medium text-foreground">{site.name}</span>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSite(site.id);
+                              setIsSiteDropdownOpen(false);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-500/10 rounded transition-all"
+                            title="Delete site"
+                          >
+                            <Trash2 className="w-3 h-3 text-red-500" />
+                          </button>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="text-muted-foreground/50 text-[10px] italic px-2 py-1.5 border border-dashed border-border rounded-lg">Initialize site...</div>
+            )}
           </div>
 
           {/* Primary Navigation */}
