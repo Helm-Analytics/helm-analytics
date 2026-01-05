@@ -1047,6 +1047,9 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 				AND URL = ? AND Timestamp >= now() - INTERVAL ? DAY
 		`
 		chConn.QueryRow(ctx, maxDepthQuery, siteID, page.Value, days).Scan(&stat.AvgMaxDepth)
+		if math.IsNaN(stat.AvgMaxDepth) {
+			stat.AvgMaxDepth = 0
+		}
 		
 		engagementData = append(engagementData, stat)
 	}
