@@ -23,7 +23,16 @@ const Dashboard = () => {
   } = useDashboardStore()
   
   const [copied, setCopied] = useState(false)
-  const [dateRange, setDateRange] = useState("30")
+  const [dateRange, setDateRange] = useState(() => {
+    // Persist date range selection
+    const saved = localStorage.getItem('dashboard_dateRange')
+    return saved || "30"
+  })
+
+  // Save preference when changed
+  useEffect(() => {
+    localStorage.setItem('dashboard_dateRange', dateRange)
+  }, [dateRange])
 
   const copyTrackingScript = async () => {
     if (!selectedSite) return

@@ -1136,14 +1136,28 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 		titleQuery := `SELECT argMax(PageTitle, Timestamp) FROM sentinel.events WHERE SiteID = ? AND URL = ?`
 		chConn.QueryRow(ctx, titleQuery, siteID, url).Scan(&pageTitle)
 		
-		displayLabel := pageTitle
-		if displayLabel == "" {
-			displayLabel = url
+		// Extract path from URL for consistent display
+		parsedURL, _ := net_url.Parse(url)
+		path := url
+		if parsedURL != nil {
+			path = parsedURL.Path
+			if path == "" {
+				path = "/"
+			}
 		}
-		
-		// Simplify label if it's just the domain + slash
-		if displayLabel == "/" || displayLabel == "" {
-			displayLabel = "Home"
+
+		displayLabel := path
+		if pageTitle != "" && pageTitle != path {
+			// Truncate title if too long
+			if len(pageTitle) > 30 {
+				pageTitle = pageTitle[:27] + "..."
+			}
+			displayLabel = fmt.Sprintf("%s (%s)", pageTitle, path)
+		} else {
+			// If title is missing or same as path, treat as Home if path is /
+			if path == "/" {
+				displayLabel = "Home"
+			}
 		}
 
 		log.Printf("[ENGAGEMENT DEBUG] Processing URL: %s (Title: %s)", url, displayLabel)

@@ -126,7 +126,7 @@ const ChatWidget = ({ siteId }) => {
             {/* Toggle Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="pointer-events-auto bg-primary text-white p-5 rounded-2xl shadow-2xl transition-all hover:scale-105 hover:bg-primary/95 active:scale-90 flex items-center justify-center group relative overflow-hidden"
+                className="pointer-events-auto bg-primary text-primary-foreground p-5 rounded-2xl shadow-2xl transition-all hover:scale-105 hover:bg-primary/95 active:scale-90 flex items-center justify-center group relative overflow-hidden"
                 aria-label={isOpen ? "Close chat" : "Open chat assistant"}
             >
                 <div className="absolute inset-0 bg-accent/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>

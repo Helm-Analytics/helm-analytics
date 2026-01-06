@@ -218,42 +218,77 @@ const FunnelsPage = () => {
                                     
                                     return (
                                         <>
-                                            <div className="flex flex-col lg:flex-row items-center justify-between gap-6 relative">
-                                                {/* Connection Line */}
-                                                <div className="hidden lg:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-accent/30 via-border to-border -z-0"></div>
-
+                                            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 overflow-x-auto pb-8">
                                                 {funnel.steps.map((step, idx) => {
                                                     const count = funnel.stepCounts ? funnel.stepCounts[idx] : 0;
                                                     const prevCount = idx > 0 && funnel.stepCounts ? funnel.stepCounts[idx - 1] : 0;
-                                                    const conversion = prevCount > 0 ? ((count / prevCount) * 100).toFixed(1) : (idx === 0 ? "100" : "0.0");
                                                     
+                                                    // Conversion from PREVIOUS step
+                                                    const conversionRate = prevCount > 0 ? ((count / prevCount) * 100) : (idx === 0 ? 100 : 0);
+                                                    
+                                                    // Dropoff from THIS step to NEXT (calculated for all except last)
+                                                    const nextCount = (idx < funnel.steps.length - 1 && funnel.stepCounts) ? funnel.stepCounts[idx + 1] : 0;
+                                                    const dropoffCount = count - nextCount;
+                                                    const dropoffRate = count > 0 ? ((dropoffCount / count) * 100) : 0;
+                                                    
+                                                    const isLast = idx === funnel.steps.length - 1;
+
                                                     return (
-                                                        <div key={idx} className="relative z-10 flex flex-col items-center w-full lg:w-auto group/step">
-                                                            <div className={`w-12 h-12 rounded-2xl border-2 flex items-center justify-center font-extrabold shadow-xl mb-4 transition-all duration-300 ${hasData ? 'bg-primary text-primary-foreground border-accent scale-110' : 'bg-white dark:bg-primary border-accent text-accent group-hover/step:translate-y-[-4px]'}`}>
-                                                                {idx + 1}
-                                                            </div>
-                                                            <div className="bg-secondary/50 dark:bg-black/30 border border-border/60 rounded-xl px-4 py-2 text-xs text-foreground font-mono font-bold shadow-sm flex items-center gap-2 max-w-[180px] break-all mb-3">
-                                                                <ExternalLink className="w-3 h-3 text-accent" />
-                                                                {step}
-                                                            </div>
-                                                            
-                                                            {hasData && (
-                                                                <div className="text-center animate-in fade-in slide-in-from-bottom-2">
-                                                                    <div className="text-lg font-heading font-extrabold text-foreground">{count?.toLocaleString()}</div>
-                                                                    <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Visitors</div>
-                                                                    {idx > 0 && (
-                                                                        <div className={`mt-1 text-xs font-bold ${parseFloat(conversion) > 50 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                                                            {conversion}% Conv.
+                                                        <React.Fragment key={idx}>
+                                                            {/* Step Card */}
+                                                            <div className="relative flex flex-col items-center group/card w-full lg:w-64 flex-shrink-0">
+                                                                <div className="w-full bg-white dark:bg-black/20 border border-border/60 rounded-2xl p-5 shadow-sm transition-all hover:shadow-md hover:border-accent/40 relative overflow-hidden">
+                                                                    <div className="absolute top-0 right-0 p-3 opacity-10">
+                                                                        <div className="text-4xl font-extrabold text-foreground">{idx + 1}</div>
+                                                                    </div>
+                                                                    
+                                                                    <div className="flex items-center gap-3 mb-4">
+                                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${hasData ? 'bg-primary/10 text-primary dark:text-white' : 'bg-secondary text-muted-foreground'}`}>
+                                                                            {idx + 1}
+                                                                        </div>
+                                                                        <div className="text-xs font-mono text-muted-foreground truncate w-full" title={step}>
+                                                                            {step}
+                                                                        </div>
+                                                                    </div>
+                                                                    
+                                                                    <div className="text-center py-2">
+                                                                        <div className={`text-3xl font-heading font-extrabold ${hasData ? 'text-foreground' : 'text-muted-foreground/30'}`}>
+                                                                            {count?.toLocaleString()}
+                                                                        </div>
+                                                                        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Visitors</div>
+                                                                    </div>
+
+                                                                    {/* Conversion Badge */}
+                                                                    {idx > 0 && hasData && (
+                                                                        <div className={`mt-4 flex items-center justify-center gap-1.5 text-xs font-bold py-1.5 rounded-lg bg-secondary/50 ${conversionRate >= 50 ? 'text-emerald-500' : 'text-rose-500'}`}>
+                                                                             {conversionRate >= 50 ? '↑' : '↓'} {conversionRate.toFixed(1)}% Conv.
                                                                         </div>
                                                                     )}
                                                                 </div>
+
+                                                                {/* Dropoff Indicator (Only if not last step and has data) */}
+                                                                {hasData && !isLast && dropoffCount > 0 && (
+                                                                    <div className="mt-4 flex flex-col items-center text-rose-500/80 animate-in slide-in-from-top-2">
+                                                                        <ArrowDown className="w-4 h-4 mb-1" />
+                                                                        <div className="text-xs font-bold">-{dropoffCount} ({dropoffRate.toFixed(1)}%)</div>
+                                                                        <div className="text-[9px] uppercase tracking-wider opacity-70">Loss</div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+
+                                                            {/* Connector Arrow */}
+                                                            {!isLast && (
+                                                                <div className="hidden lg:flex items-center justify-center -mx-4 z-10 text-muted-foreground/30">
+                                                                    <ArrowDown className="lg:-rotate-90 w-6 h-6" />
+                                                                </div>
                                                             )}
-                                                            
-                                                            {/* Mobile Arrow */}
-                                                            {idx < funnel.steps.length - 1 && (
-                                                                <ArrowDown className="lg:hidden w-6 h-6 text-muted-foreground/30 my-4" />
+                                                            {/* Mobile Connector */}
+                                                            {!isLast && (
+                                                                <div className="lg:hidden my-2 text-muted-foreground/30">
+                                                                    <ArrowDown className="w-6 h-6" />
+                                                                </div>
                                                             )}
-                                                        </div>
+                                                        </React.Fragment>
                                                     );
                                                 })}
                                             </div>
