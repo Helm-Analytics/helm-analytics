@@ -11,7 +11,9 @@ import {
   RefreshCw,
   ExternalLink,
   Search,
-  Info
+  Info,
+  GraduationCap,
+  X
 } from 'lucide-react';
 
 const CampaignsPage = () => {

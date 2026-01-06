@@ -9,6 +9,7 @@ import (
 	"math"
 	"net"
 	"net/http"
+	net_url "net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -913,6 +914,27 @@ func queryTopStats(ctx context.Context, column, siteID string, days int) ([]Coun
 			ORDER BY c DESC 
 			LIMIT 10
 		`
+	} else if column == "Referrer" {
+		// For Referrers: Exclude empty and internal traffic (assuming internal ref starts with http/https)
+		// We make a best effort to exclude self-referrals by checking if Referrer contains part of the known URL structure if possible,
+		// but since we don't have the Domain here easily, we rely on the client to send valid data.
+		// However, we MUST exclude empty strings explicitly.
+		query = `
+			SELECT 
+				Referrer, 
+				count() AS c 
+			FROM events 
+			WHERE SiteID = ? 
+			  AND EventType = 'pageview' 
+			  AND Timestamp >= now() - INTERVAL ? DAY 
+			  AND ClientIP NOT IN ('127.0.0.1', '::1') 
+			  AND URL NOT LIKE '%localhost:8090%' 
+			  AND Referrer NOT LIKE '%localhost:8090%' 
+			  AND Referrer != ''
+			GROUP BY Referrer 
+			ORDER BY c DESC 
+			LIMIT 10
+		`
 	} else {
 		query = "SELECT " + column + ", count() AS c FROM events WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp >= now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%' GROUP BY " + column + " ORDER BY c DESC LIMIT 10"
 	}
@@ -932,11 +954,27 @@ func queryTopStats(ctx context.Context, column, siteID string, days int) ([]Coun
 			if err := rows.Scan(&url, &count, &title); err != nil {
 				return nil, err
 			}
-			// Use Title if available, else URL
-			displayValue := title
-			if displayValue == "" {
-				displayValue = url
+			
+			// Extract path from URL for display
+			parsedURL, _ := net_url.Parse(url)
+			path := url
+			if parsedURL != nil {
+				path = parsedURL.Path
+				if path == "" {
+					path = "/"
+				}
 			}
+
+			// Format: "Title (Path)" to handle identical titles
+			displayValue := path
+			if title != "" && title != path {
+				// Truncate title if too long
+				if len(title) > 30 {
+					title = title[:27] + "..."
+				}
+				displayValue = fmt.Sprintf("%s (%s)", title, path)
+			}
+			
 			stat = CountStat{Value: displayValue, Count: count}
 		} else {
 			if err := rows.Scan(&stat.Value, &stat.Count); err != nil {
