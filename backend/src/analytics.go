@@ -731,43 +731,57 @@ func getCoreStats(ctx context.Context, siteID string, startDaysAgo, endDaysAgo i
 		return stats, err
 	}
 
-	// Bounce Rate
+	// Bounce Rate - Calculate % of sessions with only 1 pageview using SessionID
 	queryBounceRate := `
-		SELECT (countIf(pageviews = 1) / count()) * 100
+		SELECT (countIf(pageviews = 1) * 100.0 / NULLIF(count(), 0))
 		FROM (
-			            SELECT ClientIP, count() AS pageviews
-			            FROM events
-			            WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY AND ClientIP NOT IN ('127.0.0.1', '::1') AND URL NOT LIKE '%localhost:8090%' AND Referrer NOT LIKE '%localhost:8090%' AND URL NOT LIKE '%Eng_Dub%' AND Referrer NOT LIKE '%Eng_Dub%'
-			            GROUP BY ClientIP
+			SELECT SessionID, count() AS pageviews
+			FROM events
+			WHERE SiteID = ? 
+				AND EventType = 'pageview' 
+				AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY 
+				AND ClientIP NOT IN ('127.0.0.1', '::1') 
+				AND URL NOT LIKE '%localhost:8090%' 
+				AND Referrer NOT LIKE '%localhost:8090%' 
+				AND URL NOT LIKE '%Eng_Dub%' 
+				AND Referrer NOT LIKE '%Eng_Dub%'
+				AND SessionID != ''
+			GROUP BY SessionID
 		)`
 	err = chConn.QueryRow(ctx, queryBounceRate, siteID, startDaysAgo, endDaysAgo).Scan(&stats.BounceRate)
 	if err != nil {
+		log.Printf("[BOUNCE RATE DEBUG] Query error: %v", err)
 		stats.BounceRate = 0
 	}
 	if math.IsNaN(stats.BounceRate) {
 		stats.BounceRate = 0
 	}
 
-	// Average Visit Duration - Simplified approach
-	// Each heartbeat = 15 seconds, so we count heartbeats per session
+	// Average Visit Duration - Based on heartbeat events (15 sec intervals)
 	queryAvgVisitTime := `
 		SELECT
 			avg(visit_duration)
 		FROM (
 			SELECT
-				ClientIP,
+				SessionID,
 				count(*) * 15 AS visit_duration
 			FROM sentinel.events
 			WHERE SiteID = ?
 			  AND EventType = 'heartbeat'
 			  AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY
 			  AND ClientIP NOT IN ('127.0.0.1', '::1')
-			GROUP BY ClientIP
+			  AND SessionID != ''
+			GROUP BY SessionID
 			HAVING count(*) > 0
 		)
 	`
+	var heartbeatCount uint64
+	chConn.QueryRow(ctx, "SELECT count() FROM sentinel.events WHERE SiteID = ? AND EventType = 'heartbeat' AND Timestamp BETWEEN now() - INTERVAL ? DAY AND now() - INTERVAL ? DAY", siteID, startDaysAgo, endDaysAgo).Scan(&heartbeatCount)
+	log.Printf("[VISIT TIME DEBUG] Heartbeat events found: %d", heartbeatCount)
+	
 	err = chConn.QueryRow(ctx, queryAvgVisitTime, siteID, startDaysAgo, endDaysAgo).Scan(&stats.AvgVisitTime)
 	if err != nil {
+		log.Printf("[VISIT TIME DEBUG] Query error: %v", err)
 		stats.AvgVisitTime = 0
 	}
 	if math.IsNaN(stats.AvgVisitTime) {

@@ -46,6 +46,14 @@
             sessionStorage.setItem('helm_session_id', sessionId);
         }
 
+        // Track initial page view
+        track();
+
+        // Heartbeat - send every 15 seconds to track visit duration
+        setInterval(function() {
+            track({ eventType: 'heartbeat' });
+        }, 15000);
+
         // Core tracking function
         function track(payload = {}, options = {}) {
             const data = {
@@ -59,6 +67,8 @@
                 ...payload
             };
 
+            console.log('[Helm Tracker] Sending event:', data.eventType, data);
+
             fetch(apiEndpoint, {
                 method: 'POST',
                 body: JSON.stringify(data),
@@ -66,7 +76,11 @@
                     'Content-Type': 'application/json'
                 },
                 keepalive: true
-            }).catch(err => console.error('Helm tracking error:', err));
+            }).then(response => {
+                if (!response.ok) {
+                    console.error('[Helm Tracker] Server error:', response.status, response.statusText);
+                }
+            }).catch(err => console.error('[Helm Tracker] Network error:', err));
         }
 
         // Custom event tracking - PUBLIC API
@@ -85,6 +99,8 @@
                 referrer: document.referrer || ''
             };
 
+            console.log('[Helm Tracker] Custom event:', eventName, properties);
+
             fetch(customEventEndpoint, {
                 method: 'POST',
                 body: JSON.stringify(data),
@@ -92,6 +108,10 @@
                     'Content-Type': 'application/json'
                 },
                 keepalive: true
+            }).then(response => {
+                if (!response.ok) {
+                    console.error('[Helm Tracker] Custom event server error:', response.status, response.statusText);
+                }
             }).catch(err => console.error('Helm event tracking error:', err));
         };
 
@@ -332,18 +352,27 @@
             }).catch(err => console.error('Error tracking failed:', err));
         });
 
-        // Web Vitals tracking
-        if (typeof window.webVitals !== 'undefined') {
-            ['LCP', 'FID', 'CLS'].forEach(metric => {
-                window.webVitals[`on${metric}`](function(data) {
-                    track({
-                        eventType: 'web_vital',
-                        metricName: metric,
-                        metricValue: data.value
-                    });
-                });
-            });
-        }
+        // Web Vitals tracking - wait for script to load
+        webVitalsScript.onload = function() {
+            if (window.webVitals) {
+                const { onCLS, onFID, onLCP } = window.webVitals;
+                
+                // Track web vitals with metric name as key (matching backend schema)
+                const trackVital = (vital) => {
+                    if (vital && vital.name && vital.value !== undefined) {
+                        console.log(`[Helm Tracker] Web Vital ${vital.name}:`, vital.value);
+                        track({ 
+                            [vital.name]: vital.value,
+                            eventType: 'web-vital'
+                        });
+                    }
+                };
+                
+                onCLS(trackVital);
+                onFID(trackVital);
+                onLCP(trackVital);
+            }
+        };
     };
 
     // Console branding
