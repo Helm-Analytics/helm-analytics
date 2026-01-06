@@ -1211,9 +1211,10 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 			}
 		}
 
-		// Calculate Avg Max Depth
-		maxDepthQuery := `
-			SELECT avg(JSONExtractInt(Properties, 'maxDepth'))
+		// Calculate Avg Max Depth (Audience-wide)
+		// We sum the max depths of engaged users and divide by TOTAL pageviews to get the true average for the page
+		sumMaxDepthQuery := `
+			SELECT sum(JSONExtractInt(Properties, 'maxDepth'))
 			FROM sentinel.events
 			WHERE SiteID = ? 
 				AND EventType = 'custom' 
@@ -1221,17 +1222,21 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 				AND URL = ? 
 				AND Timestamp >= now() - INTERVAL ? DAY
 		`
-		err := chConn.QueryRow(ctx, maxDepthQuery, siteID, url, days).Scan(&stat.AvgMaxDepth)
-		if err != nil {
-			// Ensure it's 0 if no data
+		var sumMaxDepth float64
+		chConn.QueryRow(ctx, sumMaxDepthQuery, siteID, url, days).Scan(&sumMaxDepth)
+		
+		// Get TotalPV for this URL (already calculated inside the loop if using milestones logic, but let's be safe)
+		pvQuery := `SELECT count() FROM sentinel.events WHERE SiteID = ? AND EventType = 'pageview' AND URL = ? AND Timestamp >= now() - INTERVAL ? DAY`
+		var totalPV uint64
+		chConn.QueryRow(ctx, pvQuery, siteID, url, days).Scan(&totalPV)
+
+		if totalPV > 0 {
+			stat.AvgMaxDepth = sumMaxDepth / float64(totalPV)
+		} else {
 			stat.AvgMaxDepth = 0
 		}
 		
-		if math.IsNaN(stat.AvgMaxDepth) {
-			stat.AvgMaxDepth = 0
-		} else {
-			log.Printf("[ENGAGEMENT DEBUG] %s - Avg Max Depth: %.2f", url, stat.AvgMaxDepth)
-		}
+		log.Printf("[ENGAGEMENT DEBUG] %s - Avg Max Depth (Audience-wide): %.2f (Sum: %.0f, PV: %d)", url, stat.AvgMaxDepth, sumMaxDepth, totalPV)
 		
 		engagementData = append(engagementData, stat)
 	}

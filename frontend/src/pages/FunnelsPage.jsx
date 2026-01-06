@@ -218,7 +218,7 @@ const FunnelsPage = () => {
                                     
                                     return (
                                         <>
-                                            <div className="flex flex-col lg:flex-row items-center justify-between gap-4 overflow-x-auto pb-8">
+                                            <div className="flex flex-col lg:flex-row items-center justify-start gap-8 overflow-x-auto pb-8">
                                                 {funnel.steps.map((step, idx) => {
                                                     const count = funnel.stepCounts ? funnel.stepCounts[idx] : 0;
                                                     const prevCount = idx > 0 && funnel.stepCounts ? funnel.stepCounts[idx - 1] : 0;
