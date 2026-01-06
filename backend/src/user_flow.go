@@ -47,6 +47,7 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE SiteID = ? 
 			AND EventType = 'pageview'
 			AND Timestamp >= now() - INTERVAL ? DAY
+			AND SessionID != ''
 		ORDER BY SessionID, Timestamp ASC
 		LIMIT 10000
 	`
@@ -60,12 +61,8 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 	defer rows.Close()
 
 	// Aggregate transitions
-	type sessionStep struct {
-		URL       string
-		Timestamp int64
-	}
-	
 	sessionPaths := make(map[string][]string)
+	rowCount := 0
 	for rows.Next() {
 		var sessionID, url string
 		var timestamp interface{}
@@ -73,7 +70,9 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 		sessionPaths[sessionID] = append(sessionPaths[sessionID], url)
+		rowCount++
 	}
+	log.Printf("[USER FLOW] Processed %d rows across %d sessions for Site %s", rowCount, len(sessionPaths), siteID)
 
 	// Count transitions
 	transitionCounts := make(map[string]map[string]int)
@@ -88,6 +87,10 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 				continue // Ignore refreshes
 			}
 
+			// Sanitize/Simplify URLs for better visualization (optional, maybe just path)
+			// source = getPath(source)
+			// target = getPath(target)
+
 			nodeSet[source] = true
 			nodeSet[target] = true
 
@@ -96,14 +99,18 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			transitionCounts[source][target]++
 		}
-		// Ensure last node is in set
+		// Ensure last node is in set if path exists
 		if len(path) > 0 {
 			nodeSet[path[len(path)-1]] = true
 		}
 	}
 
 	// Convert to response format
-	var response UserFlowResponse
+	// Initialize as empty slices to ensure [] JSON output instead of null
+	response := UserFlowResponse{
+		Nodes: []FlowNode{},
+		Edges: []FlowEdge{},
+	}
 	
 	// Sort nodes for consistent output
 	var sortedNodes []string
@@ -125,6 +132,8 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 	}
+	
+	log.Printf("[USER FLOW] Returning %d nodes and %d edges", len(response.Nodes), len(response.Edges))
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
