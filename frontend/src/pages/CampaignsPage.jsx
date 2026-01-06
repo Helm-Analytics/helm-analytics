@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { 
-  BarChart3, 
-  Target, 
-  Share2, 
-  Link as LinkIcon, 
+import {
+  BarChart3,
+  Target,
+  Share2,
+  Link as LinkIcon,
   Layers,
   ArrowUpRight,
   RefreshCw,
   ExternalLink,
-  Search
+  Search,
+  Info
 } from 'lucide-react';
 
 const CampaignsPage = () => {

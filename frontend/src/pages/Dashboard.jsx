@@ -163,29 +163,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-            <div className="premium-card">
-              <h3 className="text-base font-heading font-extrabold mb-6 flex items-center border-b border-border/50 pb-4 -mx-6 px-6">
-                <Laptop className="w-4 h-4 mr-2 text-accent" />
-                Technology Distribution
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div>
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Top Browsers</p>
-                <DoughnutChart
-                  data={dashboardData?.topBrowsers?.map(b => b.count) || []}
-                  labels={dashboardData?.topBrowsers?.map(b => b.value) || []}
-                />
-              </div>
-              <div className="md:border-l md:border-border/50 md:pl-8">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-4">Operating Systems</p>
-                <DoughnutChart
-                  data={dashboardData?.topOS?.map(os => os.count) || []}
-                  labels={dashboardData?.topOS?.map(os => os.value) || []}
-                />
-              </div>
-            </div>
-          </div>
-
 
           {/* Sub Grid for Top Content & Geography */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -309,6 +286,39 @@ const Dashboard = () => {
 
         {/* Right Column: Setup & Technology */}
         <div className="lg:col-span-4 space-y-8">
+          {/* Setup Guide - Top Position */}
+          <div id="tut-setup-guide" className="premium-card bg-card border shadow-xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10">
+              <Fingerprint className="w-12 h-12 text-accent rotate-12" />
+            </div>
+            <h3 className="text-lg font-heading font-extrabold mb-2 text-foreground flex items-center">
+              Setup Helm
+            </h3>
+            <p className="text-muted-foreground text-xs mb-6 font-medium leading-relaxed">
+              Integrate the tracking script to begin receiving nautical intelligence flow.
+            </p>
+            <div className="space-y-4">
+              <div className="bg-secondary rounded-xl p-4 font-mono text-[10px] break-all border border-border text-foreground">
+                {`<script src="${import.meta.env.VITE_API_URL || 'https://api-sentinel.getmusterup.com'}/static/tracker-v5.js" data-site-id="${selectedSite.id}"></script>`}
+              </div>
+              <button
+                onClick={copyTrackingScript}
+                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-accent text-white hover:bg-accent/90 font-bold text-xs rounded-xl transition-all active:scale-95 shadow-lg shadow-accent/20"
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                <span>{copied ? "Copied" : "Copy Script"}</span>
+              </button>
+            </div>
+            <div className="mt-6 pt-6 border-t border-border">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">Optional: Spider Trap</p>
+                <div className="bg-secondary p-3 rounded-lg border border-border">
+                    <code className="text-[9px] text-accent/80 font-mono italic">
+                        &lt;a href="/track/trap" style="display:none"&gt;Health Check&lt;/a&gt;
+                    </code>
+                </div>
+            </div>
+          </div>
+
           {/* AI Intelligence Insights */}
           <div id="tut-insights-card">
               <InsightsCard />
@@ -423,9 +433,6 @@ const PlausibleStyleTable = ({ data, total, label, isReferrer = false }) => {
           })
         )}
       </div>
-      <button className="w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-accent border-t border-border/30 transition-colors bg-secondary/10">
-        View Detailed Analytics
-      </button>
     </div>
   );
 };

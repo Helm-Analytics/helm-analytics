@@ -1044,9 +1044,12 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 	// Get Top 5 Pages to analyze engagement
 	topPages, _ := queryTopStats(ctx, "URL", siteID, days)
 	
+	log.Printf("[ENGAGEMENT DEBUG] SiteID: %s, Days: %d, TopPages count: %d", siteID, days, len(topPages))
+	
 	var engagementData []EngagementStat
 
-	for _, page := range topPages {
+	for i, page := range topPages {
+		log.Printf("[ENGAGEMENT DEBUG] Processing page %d: %s", i, page.Value)
 		stat := EngagementStat{PageURL: page.Value}
 		
 		// Calculate milestones
@@ -1061,11 +1064,16 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 			`
 			var count uint64
 			err := chConn.QueryRow(ctx, query, siteID, page.Value, m, days).Scan(&count)
-			if err == nil {
+			if err != nil {
+				log.Printf("[ENGAGEMENT ERROR] Milestone query failed for %s at %d%%: %v", page.Value, m, err)
+			} else {
+				log.Printf("[ENGAGEMENT DEBUG] Milestone %d%% for %s: count=%d", m, page.Value, count)
 				// Normalize percentage against total pageviews for this URL
 				pvQuery := `SELECT count() FROM sentinel.events WHERE SiteID = ? AND EventType = 'pageview' AND URL = ? AND Timestamp >= now() - INTERVAL ? DAY`
 				var totalPV uint64
 				chConn.QueryRow(ctx, pvQuery, siteID, page.Value, days).Scan(&totalPV)
+				
+				log.Printf("[ENGAGEMENT DEBUG] Total pageviews for %s: %d", page.Value, totalPV)
 				
 				percentage := 0.0
 				if totalPV > 0 {
@@ -1082,12 +1090,20 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 			WHERE SiteID = ? AND EventType = 'custom' AND EventName = 'scroll_final'
 				AND URL = ? AND Timestamp >= now() - INTERVAL ? DAY
 		`
-		chConn.QueryRow(ctx, maxDepthQuery, siteID, page.Value, days).Scan(&stat.AvgMaxDepth)
+		err := chConn.QueryRow(ctx, maxDepthQuery, siteID, page.Value, days).Scan(&stat.AvgMaxDepth)
+		if err != nil {
+			log.Printf("[ENGAGEMENT ERROR] Max depth query failed for %s: %v", page.Value, err)
+		} else {
+			log.Printf("[ENGAGEMENT DEBUG] Avg max depth for %s: %.2f", page.Value, stat.AvgMaxDepth)
+		}
+		
 		if math.IsNaN(stat.AvgMaxDepth) {
 			stat.AvgMaxDepth = 0
 		}
 		
 		engagementData = append(engagementData, stat)
 	}
+	
+	log.Printf("[ENGAGEMENT DEBUG] Returning %d engagement stats", len(engagementData))
 	return engagementData
 }
