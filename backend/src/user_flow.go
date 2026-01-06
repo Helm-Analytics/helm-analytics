@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"time"
 )
 
 type FlowNode struct {
@@ -65,7 +66,7 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 	rowCount := 0
 	for rows.Next() {
 		var sessionID, url string
-		var timestamp interface{}
+		var timestamp time.Time
 		if err := rows.Scan(&sessionID, &url, &timestamp); err != nil {
 			log.Printf("[USER FLOW ERROR] Scan failed: %v", err)
 			continue
