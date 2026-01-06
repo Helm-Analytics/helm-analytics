@@ -1055,43 +1055,98 @@ func GetEngagementStatsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getEngagementStats(ctx context.Context, siteID string, days int) []EngagementStat {
-	// Get Top 5 Pages to analyze engagement
-	topPages, _ := queryTopStats(ctx, "URL", siteID, days)
+	// 1. Get Top 5 URLs directly (not Titles) to ensure precise matching
+	queryTopParams := `
+		SELECT 
+			URL, 
+			count() as c
+		FROM sentinel.events 
+		WHERE SiteID = ? 
+		  AND EventType = 'pageview' 
+		  AND Timestamp >= now() - INTERVAL ? DAY 
+		  AND ClientIP NOT IN ('127.0.0.1', '::1') 
+		  AND URL NOT LIKE '%localhost:8090%' 
+		  AND Referrer NOT LIKE '%localhost:8090%' 
+		GROUP BY URL 
+		ORDER BY c DESC 
+		LIMIT 5
+	`
 	
-	log.Printf("[ENGAGEMENT DEBUG] SiteID: %s, Days: %d, TopPages count: %d", siteID, days, len(topPages))
+	rows, err := chConn.Query(ctx, queryTopParams, siteID, days)
+	if err != nil {
+		log.Printf("[ENGAGEMENT ERROR] Failed to query top pages: %v", err)
+		return []EngagementStat{}
+	}
+	defer rows.Close()
+
+	var topURLs []string
+	for rows.Next() {
+		var url string
+		var count uint64
+		if err := rows.Scan(&url, &count); err == nil {
+			topURLs = append(topURLs, url)
+		}
+	}
+	
+	log.Printf("[ENGAGEMENT DEBUG] Found %d top URLs for engagement analysis", len(topURLs))
 	
 	var engagementData []EngagementStat
 
-	for i, page := range topPages {
-		log.Printf("[ENGAGEMENT DEBUG] Processing page %d: %s", i, page.Value)
-		stat := EngagementStat{PageURL: page.Value}
+	for _, url := range topURLs {
+		// Get Page Title for display if possible, otherwise use URL
+		var pageTitle string
+		titleQuery := `SELECT argMax(PageTitle, Timestamp) FROM sentinel.events WHERE SiteID = ? AND URL = ?`
+		chConn.QueryRow(ctx, titleQuery, siteID, url).Scan(&pageTitle)
+		
+		displayLabel := pageTitle
+		if displayLabel == "" {
+			displayLabel = url
+		}
+		
+		// Simplify label if it's just the domain + slash
+		if displayLabel == "/" || displayLabel == "" {
+			displayLabel = "Home"
+		}
+
+		log.Printf("[ENGAGEMENT DEBUG] Processing URL: %s (Title: %s)", url, displayLabel)
+		stat := EngagementStat{PageURL: displayLabel}
 		
 		// Calculate milestones
 		milestones := []int{25, 50, 75, 100}
 		for _, m := range milestones {
+			// Query specifically checks for scroll_depth events on this URL
 			query := `
 				SELECT count() 
 				FROM sentinel.events 
-				WHERE SiteID = ? AND EventType = 'custom' AND EventName = 'scroll_depth' 
-					AND URL = ? AND JSONExtractInt(Properties, 'depth') >= ?
+				WHERE SiteID = ? 
+					AND EventType = 'custom' 
+					AND EventName = 'scroll_depth' 
+					AND URL = ? 
+					AND JSONExtractInt(Properties, 'depth') >= ?
 					AND Timestamp >= now() - INTERVAL ? DAY
 			`
 			var count uint64
-			err := chConn.QueryRow(ctx, query, siteID, page.Value, m, days).Scan(&count)
+			// Use the actual URL for querying interactions
+			err := chConn.QueryRow(ctx, query, siteID, url, m, days).Scan(&count)
 			if err != nil {
-				log.Printf("[ENGAGEMENT ERROR] Milestone query failed for %s at %d%%: %v", page.Value, m, err)
+				log.Printf("[ENGAGEMENT ERROR] Milestone %d%% query failed for %s: %v", m, url, err)
 			} else {
-				log.Printf("[ENGAGEMENT DEBUG] Milestone %d%% for %s: count=%d", m, page.Value, count)
-				// Normalize percentage against total pageviews for this URL
+				// Normalize against total pageviews for this SPECIFIC URL
 				pvQuery := `SELECT count() FROM sentinel.events WHERE SiteID = ? AND EventType = 'pageview' AND URL = ? AND Timestamp >= now() - INTERVAL ? DAY`
 				var totalPV uint64
-				chConn.QueryRow(ctx, pvQuery, siteID, page.Value, days).Scan(&totalPV)
+				chConn.QueryRow(ctx, pvQuery, siteID, url, days).Scan(&totalPV)
 				
-				log.Printf("[ENGAGEMENT DEBUG] Total pageviews for %s: %d", page.Value, totalPV)
+				if count > 0 {
+					log.Printf("[ENGAGEMENT DEBUG] %s - Milestone %d%%: %d events vs %d pageviews", url, m, count, totalPV)
+				}
 				
 				percentage := 0.0
 				if totalPV > 0 {
 					percentage = (float64(count) / float64(totalPV)) * 100
+					// Cap at 100% just in case
+					if percentage > 100 {
+						percentage = 100
+					}
 				}
 				stat.Milestones = append(stat.Milestones, Milestone{Level: m, Percentage: percentage})
 			}
@@ -1101,23 +1156,26 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 		maxDepthQuery := `
 			SELECT avg(JSONExtractInt(Properties, 'maxDepth'))
 			FROM sentinel.events
-			WHERE SiteID = ? AND EventType = 'custom' AND EventName = 'scroll_final'
-				AND URL = ? AND Timestamp >= now() - INTERVAL ? DAY
+			WHERE SiteID = ? 
+				AND EventType = 'custom' 
+				AND EventName = 'scroll_final'
+				AND URL = ? 
+				AND Timestamp >= now() - INTERVAL ? DAY
 		`
-		err := chConn.QueryRow(ctx, maxDepthQuery, siteID, page.Value, days).Scan(&stat.AvgMaxDepth)
+		err := chConn.QueryRow(ctx, maxDepthQuery, siteID, url, days).Scan(&stat.AvgMaxDepth)
 		if err != nil {
-			log.Printf("[ENGAGEMENT ERROR] Max depth query failed for %s: %v", page.Value, err)
-		} else {
-			log.Printf("[ENGAGEMENT DEBUG] Avg max depth for %s: %.2f", page.Value, stat.AvgMaxDepth)
+			// Ensure it's 0 if no data
+			stat.AvgMaxDepth = 0
 		}
 		
 		if math.IsNaN(stat.AvgMaxDepth) {
 			stat.AvgMaxDepth = 0
+		} else {
+			log.Printf("[ENGAGEMENT DEBUG] %s - Avg Max Depth: %.2f", url, stat.AvgMaxDepth)
 		}
 		
 		engagementData = append(engagementData, stat)
 	}
 	
-	log.Printf("[ENGAGEMENT DEBUG] Returning %d engagement stats", len(engagementData))
 	return engagementData
 }

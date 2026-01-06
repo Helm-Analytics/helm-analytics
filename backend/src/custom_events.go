@@ -41,6 +41,10 @@ func TrackCustomEventHandler(w http.ResponseWriter, r *http.Request) {
 	// Get client info
 	clientIP := getClientIP(r)
 	userAgent := r.UserAgent()
+
+	// Log received custom event
+	log.Printf("[Custom Event] Received '%s' event for Site %s from %s (URL: %s, Properties: %v)", 
+		payload.EventName, payload.SiteID, clientIP, payload.URL, payload.Properties)
 	
 	// Enrich event data
 	country := getCountry(clientIP)
@@ -52,6 +56,7 @@ func TrackCustomEventHandler(w http.ResponseWriter, r *http.Request) {
 	// Serialize properties to JSON
 	propsJSON, err := json.Marshal(payload.Properties)
 	if err != nil {
+		log.Printf("[Custom Event ERROR] Failed to marshal properties: %v", err)
 		propsJSON = []byte("{}")
 	}
 
@@ -84,10 +89,12 @@ func TrackCustomEventHandler(w http.ResponseWriter, r *http.Request) {
 	)
 
 	if err != nil {
-		log.Printf("Error storing custom event: %v", err)
+		log.Printf("[Custom Event ERROR] Failed to store '%s' event: %v", payload.EventName, err)
 		http.Error(w, "Failed to store event", http.StatusInternalServerError)
 		return
 	}
+
+	log.Printf("[Custom Event SUCCESS] Stored '%s' event for Site %s", payload.EventName, payload.SiteID)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
