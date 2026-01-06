@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	net_url "net/url"
 	"sort"
 	"time"
 )
@@ -48,7 +49,7 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE SiteID = ? 
 			AND EventType = 'pageview'
 			AND Timestamp >= now() - INTERVAL ? DAY
-			-- AND SessionID != ''  <-- Temporarily commented out to debug
+			AND SessionID != ''
 		ORDER BY SessionID, Timestamp ASC
 		LIMIT 10000
 	`
@@ -71,6 +72,8 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 			log.Printf("[USER FLOW ERROR] Scan failed: %v", err)
 			continue
 		}
+		// Normalize URL immediately
+		url = normalizeFlowURL(url)
 		sessionPaths[sessionID] = append(sessionPaths[sessionID], url)
 		rowCount++
 	}
@@ -88,10 +91,6 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 			if source == target {
 				continue // Ignore refreshes
 			}
-
-			// Sanitize/Simplify URLs for better visualization (optional, maybe just path)
-			// source = getPath(source)
-			// target = getPath(target)
 
 			nodeSet[source] = true
 			nodeSet[target] = true
@@ -139,4 +138,17 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
+}
+
+func normalizeFlowURL(rawURL string) string {
+	u, err := net_url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	// Return path only (e.g. /dashboard)
+	// If path is empty, return /
+	if u.Path == "" {
+		return "/"
+	}
+	return u.Path
 }
