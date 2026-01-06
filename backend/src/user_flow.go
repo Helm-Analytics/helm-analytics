@@ -77,7 +77,7 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 		sessionPaths[sessionID] = append(sessionPaths[sessionID], url)
 		rowCount++
 	}
-	log.Printf("[USER FLOW] Processed %d rows across %d sessions for Site %s", rowCount, len(sessionPaths), siteID)
+
 
 	// Count transitions
 	transitionCounts := make(map[string]map[string]int)
@@ -134,7 +134,7 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	
-	log.Printf("[USER FLOW] Returning %d nodes and %d edges", len(response.Nodes), len(response.Edges))
+
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)

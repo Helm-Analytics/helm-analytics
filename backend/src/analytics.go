@@ -1126,7 +1126,7 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 		}
 	}
 	
-	log.Printf("[ENGAGEMENT DEBUG] Found %d top URLs for engagement analysis", len(topURLs))
+
 	
 	var engagementData []EngagementStat
 
@@ -1160,7 +1160,7 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 			}
 		}
 
-		log.Printf("[ENGAGEMENT DEBUG] Processing URL: %s (Title: %s)", url, displayLabel)
+
 		stat := EngagementStat{PageURL: displayLabel}
 		
 		// Calculate milestones
@@ -1190,13 +1190,11 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 				
 				if count == 0 {
 					// Debug why count is 0 if we expect data
-					log.Printf("[ENGAGEMENT DEBUG] %s - Milestone %d%%: 0 events (TotalPV: %d). Checking raw count without depth...", url, m, totalPV)
+
 					checkQuery := `SELECT count() FROM sentinel.events WHERE SiteID = ? AND EventType = 'custom' AND EventName = 'scroll_depth' AND URL = ? AND Timestamp >= now() - INTERVAL ? DAY`
 					var checkCount uint64
 					chConn.QueryRow(ctx, checkQuery, siteID, url, days).Scan(&checkCount)
-					log.Printf("[ENGAGEMENT DEBUG] %s - Total scroll_depth events found (ignoring depth): %d", url, checkCount)
-				} else {
-					log.Printf("[ENGAGEMENT DEBUG] %s - Milestone %d%%: %d events vs %d pageviews", url, m, count, totalPV)
+
 				}
 				
 				percentage := 0.0
@@ -1236,7 +1234,7 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 			stat.AvgMaxDepth = 0
 		}
 		
-		log.Printf("[ENGAGEMENT DEBUG] %s - Avg Max Depth (Audience-wide): %.2f (Sum: %.0f, PV: %d)", url, stat.AvgMaxDepth, sumMaxDepth, totalPV)
+
 		
 		engagementData = append(engagementData, stat)
 	}

@@ -67,7 +67,7 @@
                 ...payload
             };
 
-            console.log('[Helm Tracker] Sending event:', data.eventType, data);
+            // console.log('[Helm Tracker] Sending event:', data.eventType, data);
 
             fetch(apiEndpoint, {
                 method: 'POST',
@@ -99,7 +99,7 @@
                 referrer: document.referrer || ''
             };
 
-            console.log('[Helm Tracker] Custom event:', eventName, properties);
+            // console.log('[Helm Tracker] Custom event:', eventName, properties);
 
             fetch(customEventEndpoint, {
                 method: 'POST',
@@ -360,7 +360,7 @@
                 // Track web vitals with metric name as key (matching backend schema)
                 const trackVital = (vital) => {
                     if (vital && vital.name && vital.value !== undefined) {
-                        console.log(`[Helm Tracker] Web Vital ${vital.name}:`, vital.value);
+                        // console.log(`[Helm Tracker] Web Vital ${vital.name}:`, vital.value);
                         track({ 
                             [vital.name]: vital.value,
                             eventType: 'web-vital'
