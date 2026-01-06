@@ -47,7 +47,7 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 		WHERE SiteID = ? 
 			AND EventType = 'pageview'
 			AND Timestamp >= now() - INTERVAL ? DAY
-			AND SessionID != ''
+			-- AND SessionID != ''  <-- Temporarily commented out to debug
 		ORDER BY SessionID, Timestamp ASC
 		LIMIT 10000
 	`
