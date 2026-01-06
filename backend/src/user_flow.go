@@ -67,6 +67,7 @@ func GetUserFlowHandler(w http.ResponseWriter, r *http.Request) {
 		var sessionID, url string
 		var timestamp interface{}
 		if err := rows.Scan(&sessionID, &url, &timestamp); err != nil {
+			log.Printf("[USER FLOW ERROR] Scan failed: %v", err)
 			continue
 		}
 		sessionPaths[sessionID] = append(sessionPaths[sessionID], url)
