@@ -169,10 +169,18 @@ func GetActivityLogHandler(w http.ResponseWriter, r *http.Request) {
 		activities = append(activities, activity)
 	}
 
+	// Calculate Total Usage for Month
+	var usageCount uint64
+	usageQuery := `SELECT count() FROM events WHERE SiteID = ? AND Timestamp >= toStartOfMonth(now())`
+	if err := chConn.QueryRow(ctx, usageQuery, siteID).Scan(&usageCount); err != nil {
+		log.Printf("Failed to count usage: %v", err)
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"activities": activities,
-		"count":      len(activities),
+		"activities":      activities,
+		"count":           len(activities),
+		"totalUsageMonth": usageCount,
 	})
 }
 

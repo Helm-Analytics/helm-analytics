@@ -6,6 +6,7 @@ import { api } from '../api';
 export default function ActivityPage() {
   const { selectedSite } = useOutletContext();
   const [activities, setActivities] = useState([]);
+  const [totalUsage, setTotalUsage] = useState(0);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
 
@@ -21,6 +22,7 @@ export default function ActivityPage() {
     try {
       const response = await api.getActivityLog(selectedSite.id, filter);
       setActivities(response?.activities || []);
+      setTotalUsage(response?.totalUsageMonth || 0);
       setLoading(false);
     } catch (error) {
       console.error('Failed to fetch activities:', error);
@@ -62,9 +64,17 @@ export default function ActivityPage() {
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold">
-            Activity <span className="text-accent">Feed</span>
-          </h1>
+          <div className="flex items-center gap-4">
+            <h1 className="text-2xl font-bold">
+              Activity <span className="text-accent">Feed</span>
+            </h1>
+            {!loading && (
+              <div className="px-3 py-1 bg-accent/10 border border-accent/20 rounded-full text-xs font-medium text-accent flex items-center gap-2">
+                <Activity className="w-3 h-3" />
+                <span>Usage: {totalUsage.toLocaleString()} Events (Month)</span>
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Clock className="w-3.5 h-3.5" />
             <span>Real-time updates</span>
