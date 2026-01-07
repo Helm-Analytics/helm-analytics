@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useOutletContext } from "react-router-dom"
-import { ScanEye, Users, ArrowDownRight, Timer, Copy, Check, Fingerprint, Laptop, MousePointer2 } from "lucide-react"
+import { ScanEye, Users, ArrowDownRight, Timer, Copy, Check, Fingerprint, Laptop, MousePointer2, Activity } from "lucide-react"
 import { useDashboardStore } from "../store/useDashboardStore"
 import StatCard from "../components/StatCard"
 import InsightsCard from "../components/InsightsCard"
@@ -94,6 +94,13 @@ const Dashboard = () => {
             <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
             <span>Live Intelligence</span>
           </div>
+          {dashboardData?.totalUsageMonth !== undefined && (
+              <div className="inline-flex mx-4 px-3 py-1 bg-accent/10 border border-accent/20 rounded-full text-xs font-medium text-accent items-center gap-2 mb-2 translate-y-[-2px]">
+                <Activity className="w-3 h-3" />
+                <span>Usage: {dashboardData.totalUsageMonth.toLocaleString()} Events (Month)</span>
+              </div>
+          )}
+
           <h1 className="text-4xl font-heading font-extrabold text-foreground tracking-tight">
             {selectedSite.name}
           </h1>

@@ -2,7 +2,9 @@ package sentinel
 
 import (
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -118,6 +120,9 @@ type Stats struct {
 	// New UTM & Engagement context for AI
 	Campaigns  *CampaignStat    `json:"campaigns,omitempty"`
 	Engagement []EngagementStat `json:"engagement,omitempty"`
+
+	// Account Usage
+	TotalUsageMonth uint64 `json:"totalUsageMonth"`
 }
 
 type CoreStats struct {
@@ -287,7 +292,10 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 	ipStr := getClientIP(r)
 	ip := net.ParseIP(ipStr)
 
-	log.Printf("[Track] Received %s event for Site %s from %s (URL: %s, SessionID: %s)", event.EventType, event.SiteID, ipStr, event.URL, event.SessionID)
+	// Anonymize IP immediately for storage (keep raw only for local logic like rate limiting if needed, but here we hash)
+	anonymizedIP := hashIP(ipStr)
+
+	log.Printf("[Track] Received %s event for Site %s from %s (URL: %s, SessionID: %s)", event.EventType, event.SiteID, anonymizedIP, event.URL, event.SessionID)
 
 	country := "Unknown"
 	if geoipDb != nil && ip != nil {
@@ -333,7 +341,7 @@ func TrackHandler(w http.ResponseWriter, r *http.Request) {
 		Timestamp:   time.Now().UTC(),
 		SiteID:      event.SiteID,
 		SessionID:   event.SessionID,
-		ClientIP:    ipStr,
+		ClientIP:    anonymizedIP,
 		URL:         event.URL,
 		Referrer:    event.Referrer,
 		PageTitle:   event.PageTitle,
@@ -424,8 +432,11 @@ func ClickHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := context.Background()
+	// Anonymize IP
+	anonymizedIP := hashIP(ipStr)
+
 	err := chConn.AsyncInsert(ctx, "INSERT INTO sentinel.clicks VALUES (?, ?, ?, ?, ?, ?, ?, ?)", false,
-		time.Now().UTC(), click.SiteID, ipStr, click.URL, uint16(click.X), uint16(click.Y), click.Selector, country,
+		time.Now().UTC(), click.SiteID, anonymizedIP, click.URL, uint16(click.X), uint16(click.Y), click.Selector, country,
 	)
 	if err != nil {
 		log.Printf("Error inserting click: %v", err)
@@ -448,10 +459,11 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("DEBUG: Received JS Error: %s from %s (SiteID: %s)", jsErr.Message, jsErr.URL, jsErr.SiteID)
 
 	ipStr := getClientIP(r)
+	anonymizedIP := hashIP(ipStr)
 
 	ctx := context.Background()
 	err := chConn.AsyncInsert(ctx, "INSERT INTO sentinel.errors VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", true,
-		time.Now().UTC(), jsErr.SiteID, ipStr, jsErr.URL, jsErr.Message, jsErr.Source, uint32(jsErr.LineNo), uint32(jsErr.ColNo), jsErr.ErrorObj, "", "",
+		time.Now().UTC(), jsErr.SiteID, anonymizedIP, jsErr.URL, jsErr.Message, jsErr.Source, uint32(jsErr.LineNo), uint32(jsErr.ColNo), jsErr.ErrorObj, "", "",
 	)
 	if err != nil {
 		log.Printf("Error inserting JS error: %v", err)
@@ -663,11 +675,14 @@ func SpiderTrapHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Log this as a high-confidence bot event
 	log.Printf("SPIDER TRAP HIT: IP=%s, UA=%s", ipStr, userAgent)
+
+	anonymizedIP := hashIP(ipStr)
+
 	ctx := context.Background()
 	err := chConn.AsyncInsert(ctx, `INSERT INTO sentinel.events 
 		(Timestamp, SiteID, ClientIP, URL, Referrer, ScreenWidth, Browser, OS, Country, TrustScore, EventType, PageTitle) 
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, false,
-		time.Now().UTC(), siteID, ipStr, "/track/spider-trap", "Spider Trap",
+		time.Now().UTC(), siteID, anonymizedIP, "/track/spider-trap", "Spider Trap",
 		0, "Bot", "Robot", "XX", 0, "bot-trap", "Spider Trap Detected",
 	)
 	if err != nil {
@@ -890,6 +905,14 @@ func calculateStats(siteID string, days int) (Stats, error) {
 	// Fetch Campaign and Engagement data for context
 	finalStats.Campaigns = getCampaignStats(ctx, siteID, days)
 	finalStats.Engagement = getEngagementStats(ctx, siteID, days)
+
+	// Calculate Total Usage for Month (for Badge)
+	var usageCount uint64
+	usageQuery := `SELECT count() FROM sentinel.events WHERE SiteID = ? AND Timestamp >= toStartOfMonth(now())`
+	if err := chConn.QueryRow(ctx, usageQuery, siteID).Scan(&usageCount); err != nil {
+		log.Printf("Failed to count usage for dashboard: %v", err)
+	}
+	finalStats.TotalUsageMonth = usageCount
 
 	return finalStats, nil
 }
@@ -1240,4 +1263,13 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 	}
 	
 	return engagementData
+}
+
+// hashIP creates a SHA256 hash of the IP to ensure anonymity
+// We use a fixed salt to allow unique visitor counting across sessions while keeping the IP hidden.
+func hashIP(ip string) string {
+	salt := "helm_analytics_secret_salt_v1" // In production, get this from env
+	hasher := sha256.New()
+	hasher.Write([]byte(ip + salt))
+	return hex.EncodeToString(hasher.Sum(nil))
 }
