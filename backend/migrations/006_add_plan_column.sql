@@ -1,0 +1,1 @@
+ALTER TABLE sentinel.users ADD COLUMN IF NOT EXISTS plan VARCHAR(50) DEFAULT 'free';

@@ -85,3 +85,4 @@ backend/events.log
 # License Server & Internal Tools
 license-server/
 tools/
+cloud-scaffold/

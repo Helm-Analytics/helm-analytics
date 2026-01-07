@@ -170,13 +170,16 @@
         // Send final scroll depth on page exit
         window.addEventListener('beforeunload', function() {
             if (maxScrollDepth > 0) {
-                navigator.sendBeacon(customEventEndpoint, JSON.stringify({
+            if (maxScrollDepth > 0) {
+                const blob = new Blob([JSON.stringify({
                     siteId,
                     eventName: 'scroll_final',
                     properties: { maxDepth: maxScrollDepth },
                     url: window.location.href,
                     referrer: document.referrer || ''
-                }));
+                })], { type: 'application/json' });
+                navigator.sendBeacon(customEventEndpoint, blob);
+            }
             }
         });
 

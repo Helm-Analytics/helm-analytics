@@ -59,6 +59,8 @@ func createTables() {
 	if _, err := db.Exec(createUsersTable); err != nil {
 		log.Fatalf("Could not create users table: %v", err)
 	}
+	// Migration for plan
+	db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'free';`)
 	createSitesTable := `
     CREATE TABLE IF NOT EXISTS sites (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
