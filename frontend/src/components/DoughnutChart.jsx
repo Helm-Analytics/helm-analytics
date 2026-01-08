@@ -57,7 +57,7 @@ const DoughnutChart = ({ title, data, labels }) => {
   }
 
   return (
-    <div className="h-64">
+    <div className="h-48">
       <Doughnut data={chartData} options={options} />
     </div>
   )
