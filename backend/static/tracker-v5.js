@@ -49,9 +49,15 @@
         // Track initial page view
         track();
 
-        // Heartbeat - send every 15 seconds to track visit duration
-        setInterval(function() {
-            track({ eventType: 'heartbeat' });
+        // Heartbeat - send every 15 seconds to track visit duration (only when tab is active)
+        let heartbeatInterval = setInterval(function() {
+            // Only send heartbeat if page is visible (tab is active)
+            if (document.visibilityState === 'visible') {
+                track({ 
+                    eventType: 'heartbeat',
+                    scrollDepth: maxScrollDepth  // Include current scroll depth
+                });
+            }
         }, 15000);
 
         // Core tracking function
@@ -272,8 +278,9 @@
         }
 
         // Session replay recording
+        let stopRecording = null;
         if (typeof window.rrweb !== 'undefined' && window.rrweb.record) {
-            window.rrweb.record({
+            stopRecording = window.rrweb.record({
                 emit(event) {
                     // Debug: Log first few events to check for snapshot
                     if (events.length < 5) {
@@ -287,6 +294,31 @@
                 checkoutEveryNth: 100
             });
         }
+
+        // Pause/resume recording when tab visibility changes
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') {
+                // Pause recording by stopping and flushing events
+                if (stopRecording) {
+                    stopRecording();
+                    stopRecording = null;
+                }
+                sendEvents(true);
+            } else if (document.visibilityState === 'visible') {
+                // Resume recording when tab becomes active again
+                if (!stopRecording && typeof window.rrweb !== 'undefined' && window.rrweb.record) {
+                    stopRecording = window.rrweb.record({
+                        emit(event) {
+                            events.push(event);
+                            if (events.length > 2) {
+                                sendEvents();
+                            }
+                        },
+                        checkoutEveryNth: 100
+                    });
+                }
+            }
+        });
 
         function sendEvents(isUnload = false) {
             if (events.length === 0) return;
