@@ -1233,18 +1233,28 @@ func getEngagementStats(ctx context.Context, siteID string, days int) []Engageme
 		}
 
 		// Calculate Avg Max Depth (Audience-wide)
-		// We sum the max depths of engaged users and divide by TOTAL pageviews to get the true average for the page
+		// Query from both scroll_final events and heartbeat events with scrollDepth
 		sumMaxDepthQuery := `
-			SELECT sum(JSONExtractInt(Properties, 'maxDepth'))
-			FROM sentinel.events
-			WHERE SiteID = ? 
-				AND EventType = 'custom' 
-				AND EventName = 'scroll_final'
-				AND URL = ? 
-				AND Timestamp >= now() - INTERVAL ? DAY
+			SELECT sum(depth) FROM (
+				SELECT JSONExtractInt(Properties, 'maxDepth') as depth
+				FROM sentinel.events
+				WHERE SiteID = ? 
+					AND EventType = 'custom' 
+					AND EventName = 'scroll_final'
+					AND URL = ? 
+					AND Timestamp >= now() - INTERVAL ? DAY
+				UNION ALL
+				SELECT max(JSONExtractInt(Properties, 'scrollDepth')) as depth
+				FROM sentinel.events
+				WHERE SiteID = ? 
+					AND EventType = 'heartbeat'
+					AND URL = ? 
+					AND Timestamp >= now() - INTERVAL ? DAY
+				GROUP BY SessionID
+			)
 		`
 		var sumMaxDepth float64
-		chConn.QueryRow(ctx, sumMaxDepthQuery, siteID, url, days).Scan(&sumMaxDepth)
+		chConn.QueryRow(ctx, sumMaxDepthQuery, siteID, url, days, siteID, url, days).Scan(&sumMaxDepth)
 		
 		// Get TotalPV for this URL (already calculated inside the loop if using milestones logic, but let's be safe)
 		pvQuery := `SELECT count() FROM sentinel.events WHERE SiteID = ? AND EventType = 'pageview' AND URL = ? AND Timestamp >= now() - INTERVAL ? DAY`
