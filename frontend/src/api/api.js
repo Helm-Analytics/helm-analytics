@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://api-sentinel.getmusterup.com";
+const API_URL = window.HELM_CONFIG?.API_URL || "http://localhost:6060";
 
 const axiosInstance = axios.create({
   baseURL: API_URL,

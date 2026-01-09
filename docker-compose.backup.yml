@@ -1,0 +1,50 @@
+# Docker Compose for Backup Service
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.backup.yml up -d
+
+version: '3.8'
+
+services:
+  backup:
+    build:
+      context: ./backup
+    container_name: helm-analytics-backup
+    restart: unless-stopped
+    environment:
+      # PostgreSQL credentials
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=sentinel
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=sentinel
+      
+      # ClickHouse credentials
+      - CLICKHOUSE_HOST=clickhouse
+      - CLICKHOUSE_USER=sentinel
+      - CLICKHOUSE_PASSWORD=password
+      
+      # S3 Configuration (optional - uncomment and configure for cloud backups)
+      # - S3_BUCKET=your-backup-bucket
+      # - AWS_ACCESS_KEY_ID=your-access-key
+      # - AWS_SECRET_ACCESS_KEY=your-secret-key
+      # - AWS_DEFAULT_REGION=us-east-1
+      
+      # Backup retention
+      - RETENTION_DAYS=30
+    volumes:
+      # Local backup storage
+      - backup_data:/backups
+      
+      # Optional: Mount external storage
+      # - /mnt/backups:/backups
+    networks:
+      - sentinel-net
+    depends_on:
+      - db
+      - clickhouse
+
+volumes:
+  backup_data:
+    driver: local
+
+networks:
+  sentinel-net:
+    external: true

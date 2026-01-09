@@ -21,6 +21,8 @@ services:
       context: ./frontend
     ports:
       - "8012:80"
+    environment:
+      - API_URL=http://localhost:6060
     networks:
       - sentinel-net
 

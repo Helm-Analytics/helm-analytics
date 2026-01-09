@@ -86,3 +86,4 @@ backend/events.log
 license-server/
 tools/
 cloud-scaffold/
+backup/

@@ -6,7 +6,10 @@ param(
     [string]$Username,
     
     [Parameter(Mandatory=$false)]
-    [string]$Version = "latest"
+    [string]$Version = "latest",
+    
+    [Parameter(Mandatory=$false)]
+    [string]$ApiUrl = ""
 )
 
 function Write-ColorOutput {
@@ -47,11 +50,25 @@ docker tag ${Username}/helm-analytics-backend:${Version} ${Username}/helm-analyt
 
 Write-ColorOutput "Pushing backend image..." "Green"
 docker push ${Username}/helm-analytics-backend:${Version}
+if ($LASTEXITCODE -ne 0) {
+    Write-ColorOutput "Error: Backend push failed - check Docker Hub credentials" "Red"
+    exit 1
+}
+
 docker push ${Username}/helm-analytics-backend:latest
+if ($LASTEXITCODE -ne 0) {
+    Write-ColorOutput "Error: Backend latest tag push failed" "Red"
+    exit 1
+}
 
 # Build and push frontend
 Write-ColorOutput "Building frontend image..." "Green"
-docker build -t ${Username}/helm-analytics-frontend:${Version} ./frontend
+if ($ApiUrl -ne "") {
+    Write-ColorOutput "Using API URL: $ApiUrl" "Cyan"
+    docker build --build-arg VITE_API_URL=$ApiUrl -t ${Username}/helm-analytics-frontend:${Version} ./frontend
+} else {
+    docker build -t ${Username}/helm-analytics-frontend:${Version} ./frontend
+}
 
 if ($LASTEXITCODE -ne 0) {
     Write-ColorOutput "Error: Frontend build failed" "Red"
@@ -62,7 +79,16 @@ docker tag ${Username}/helm-analytics-frontend:${Version} ${Username}/helm-analy
 
 Write-ColorOutput "Pushing frontend image..." "Green"
 docker push ${Username}/helm-analytics-frontend:${Version}
+if ($LASTEXITCODE -ne 0) {
+    Write-ColorOutput "Error: Frontend push failed - check Docker Hub credentials" "Red"
+    exit 1
+}
+
 docker push ${Username}/helm-analytics-frontend:latest
+if ($LASTEXITCODE -ne 0) {
+    Write-ColorOutput "Error: Frontend latest tag push failed" "Red"
+    exit 1
+}
 
 Write-Host ""
 Write-ColorOutput "========================================" "Green"

@@ -181,7 +181,7 @@ const Dashboard = () => {
 
 
           {/* Sub Grid for Top Content & Geography */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             <div id="tut-top-pages" className="premium-card !p-0 overflow-hidden shadow-xl">
               <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between bg-accent/5">
                 <h3 className="text-base font-heading font-extrabold flex items-center">
@@ -213,6 +213,23 @@ const Dashboard = () => {
                   total={dashboardData?.uniqueVisitors || 1}
                   label="Referrer"
                   isReferrer={true}
+                />
+              </div>
+            </div>
+
+            <div id="tut-top-countries" className="premium-card !p-0 overflow-hidden shadow-xl">
+              <div className="px-6 py-5 border-b border-border/50 flex items-center justify-between bg-accent/5">
+                <h3 className="text-base font-heading font-extrabold flex items-center">
+                  <ScanEye className="w-4 h-4 mr-2 text-accent" />
+                  Top Countries
+                </h3>
+                <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Visitors</span>
+              </div>
+              <div className="p-2">
+                <PlausibleStyleTable 
+                  data={dashboardData?.topCountries || []} 
+                  total={dashboardData?.uniqueVisitors || 1}
+                  label="Country"
                 />
               </div>
             </div>
