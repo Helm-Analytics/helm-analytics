@@ -22,7 +22,7 @@ services:
     ports:
       - "8012:80"
     environment:
-      - API_URL=http://localhost:6060
+      - API_URL=https://api-sentinel.getmusterup.com
     networks:
       - sentinel-net
 
