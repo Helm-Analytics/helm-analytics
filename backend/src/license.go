@@ -84,15 +84,3 @@ func HasFeature(feature string) bool {
 	// all implemented features are available to the community.
 	return true
 }
-
-// GetRequiredTier returns the tier name required for a feature
-func GetRequiredTier(feature string) string {
-	switch feature {
-	case FeatureSSO, FeatureCustomBranding:
-		return "Enterprise License"
-	case FeatureAIConsultant, FeatureShieldAuto, FeatureWhiteLabel:
-		return "Pro License or Growth Cloud"
-	default:
-		return "Pro License or Cloud"
-	}
-}
