@@ -193,7 +193,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   true, // Important for cross-domain
 		SameSite: http.SameSiteNoneMode,
-		Domain:   ".getmusterup.com", // Set to the parent domain
+		Domain:   ".helm-analytics.com", // Set to the parent domain
 	})
 
 	w.WriteHeader(http.StatusCreated)
@@ -242,7 +242,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   true, // Important for cross-domain
 		SameSite: http.SameSiteNoneMode,
-		Domain:   ".getmusterup.com", // Set to the parent domain
+		Domain:   ".helm-analytics.com", // Set to the parent domain
 	})
 
 	w.WriteHeader(http.StatusOK)
@@ -258,7 +258,7 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   true,
 		SameSite: http.SameSiteNoneMode,
-		Domain:   ".getmusterup.com",
+		Domain:   ".helm-analytics.com",
 	})
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Logged out"})

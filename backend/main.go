@@ -53,7 +53,7 @@ func main() {
 
 	// Strict CORS for the dashboard and API
 	apiCors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://sentinel-mvp.getmusterup.com", "https://sentinel.getmusterup.com", "http://localhost:5173"},
+		AllowedOrigins:   []string{"https://app.helm-analytics.com", "https://helm-analytics.com", "http://localhost:5173"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
