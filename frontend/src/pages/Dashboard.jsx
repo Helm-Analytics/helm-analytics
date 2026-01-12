@@ -37,7 +37,7 @@ const Dashboard = () => {
   const copyTrackingScript = async () => {
     if (!selectedSite) return
 
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://api-sentinel.getmusterup.com'
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://api.helm-analytics.com'
     const trackingScript = `<script src="${apiUrl}/static/tracker-v5.js" data-site-id="${selectedSite.id}"></script>`
 
     try {
@@ -332,7 +332,7 @@ const Dashboard = () => {
             </p>
             <div className="space-y-4">
               <div className="bg-secondary rounded-xl p-4 font-mono text-[10px] break-all border border-border text-foreground">
-                {`<script src="${import.meta.env.VITE_API_URL || 'https://api-sentinel.getmusterup.com'}/static/tracker-v5.js" data-site-id="${selectedSite.id}"></script>`}
+                {`<script src="${import.meta.env.VITE_API_URL || 'https://api.helm-analytics.com'}/static/tracker-v5.js" data-site-id="${selectedSite.id}"></script>`}
               </div>
               <button
                 onClick={copyTrackingScript}

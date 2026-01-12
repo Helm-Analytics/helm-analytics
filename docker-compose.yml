@@ -22,7 +22,7 @@ services:
     ports:
       - "8012:80"
     environment:
-      - API_URL=https://api-sentinel.getmusterup.com
+      - API_URL=https://api.helm-analytics.com
     networks:
       - sentinel-net
 

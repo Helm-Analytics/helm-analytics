@@ -350,10 +350,10 @@ const FirewallPage = () => {
               </p>
               <div className="relative group mb-4">
                   <div className="bg-secondary/50 border border-border/50 rounded-xl p-4 font-mono text-[10px] text-accent/80 break-all select-all">
-                    {`<a href="https://api-sentinel.getmusterup.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
+                    {`<a href="https://api.helm-analytics.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
                   </div>
                   <button 
-                        onClick={() => copyToClipboard(`<a href="https://api-sentinel.getmusterup.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`)}
+                        onClick={() => copyToClipboard(`<a href="https://api.helm-analytics.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`)}
                         className="absolute top-2 right-2 p-2 bg-background/80 hover:bg-background rounded-lg transition-all border border-border/50 backdrop-blur-sm opacity-0 group-hover:opacity-100"
                         title="Copy Snippet"
                     >
