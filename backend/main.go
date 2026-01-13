@@ -67,6 +67,9 @@ func main() {
 		allowOriginFunc = func(origin string) bool { return true }
 	} else {
 		allowedOrigins = strings.Split(allowedOriginsEnv, ",")
+		for i := range allowedOrigins {
+			allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
+		}
 	}
 
 	apiCors := cors.New(cors.Options{
