@@ -7,7 +7,7 @@ import logging
 logger = logging.getLogger("helm-analytics")
 
 class HelmAnalytics:
-    def __init__(self, site_id=None, api_url="https://api-sentinel.getmusterup.com"):
+    def __init__(self, site_id=None, api_url="https://api.helm-analytics.com"):
         self.site_id = site_id or os.getenv('HELM_SITE_ID')
         # Remove trailing slash and /track if present to get base URL
         self.api_url = api_url.rstrip('/').replace('/track', '')

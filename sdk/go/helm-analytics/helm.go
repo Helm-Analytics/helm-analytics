@@ -30,7 +30,7 @@ func New(cfg Config) *HelmAnalytics {
 		cfg.SiteID = os.Getenv("HELM_SITE_ID")
 	}
 	if cfg.APIURL == "" {
-		cfg.APIURL = "https://api-sentinel.getmusterup.com"
+		cfg.APIURL = "https://api.helm-analytics.com"
 	}
 
 	// Clean URL

@@ -14,10 +14,9 @@
             const scriptUrl = new URL(scriptTag.src);
             apiBase = `${scriptUrl.protocol}//${scriptUrl.host}`;
         } catch (e) {
-            apiBase = 'https://api-sentinel.getmusterup.com';
+            // No fallback - must be specified or auto-detected
+            console.error('Helm: Unable to detect API URL from script source');
         }
-    } else if (!apiBase) {
-        apiBase = 'https://api-sentinel.getmusterup.com';
     }
     
     const apiEndpoint = `${apiBase}/track`;

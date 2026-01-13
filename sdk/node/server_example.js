@@ -6,7 +6,7 @@ const app = express();
 // 1. Initialize Helm
 const helm = new HelmAnalytics({ 
     siteId: 'e3d3d060-dc0d-4301-894a-5994f65e2216', // User's Site ID
-    apiUrl: 'https://api-sentinel.getmusterup.com/track' // Optional: defaults to prod
+    apiUrl: 'https://api.helm-analytics.com/track' // Optional: defaults to prod
 });
 
 // 2. USE THE MIDDLEWARE (This is the magic line)

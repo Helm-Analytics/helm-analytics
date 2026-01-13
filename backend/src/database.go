@@ -21,8 +21,7 @@ var db *sql.DB
 func InitDB() {
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
-		connStr = "postgres://sentinel:password@db:5432/sentinel?sslmode=disable"
-		log.Println("DATABASE_URL not found, using default Docker connection string.")
+		log.Fatal("DATABASE_URL environment variable is required")
 	}
 	var err error
 	db, err = sql.Open("postgres", connStr)

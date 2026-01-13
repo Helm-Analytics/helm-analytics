@@ -5,7 +5,7 @@
         return;
     }
     const siteId = scriptTag.getAttribute('data-site-id');
-    const apiEndpoint = 'https://api-sentinel.getmusterup.com/track';
+    const apiEndpoint = 'https://api.helm-analytics.com/track';
 
     let lastUrl = location.href;
 

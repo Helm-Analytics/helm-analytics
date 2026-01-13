@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="helm_analytics",
-    version="5.0.0",
+    version="5.0.1",
     description="Official Python SDK for Helm Analytics",
     long_description=open("README.md").read() if open("README.md").read() else "",
     long_description_content_type="text/markdown",

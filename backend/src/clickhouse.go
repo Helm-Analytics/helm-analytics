@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
@@ -11,18 +12,33 @@ import (
 )
 
 var chConn driver.Conn
+var dbName string
 
 func InitClickHouse() {
 	var err error
 	var conn driver.Conn
 
+
 	for i := 0; i < 5; i++ {
+		dbName = os.Getenv("CLICKHOUSE_DB")
+		if dbName == "" {
+			dbName = "sentinel"
+		}
+		dbUser := os.Getenv("CLICKHOUSE_USER")
+		if dbUser == "" {
+			dbUser = "sentinel"
+		}
+		dbPass := os.Getenv("CLICKHOUSE_PASSWORD")
+		if dbPass == "" {
+			dbPass = "password"
+		}
+		
 		conn, err = clickhouse.Open(&clickhouse.Options{
 			Addr: []string{"clickhouse:9000"},
 			Auth: clickhouse.Auth{
-				Database: "sentinel",
-				Username: "sentinel",
-				Password: "password",
+				Database: dbName,
+				Username: dbUser,
+				Password: dbPass,
 			},
 			Settings: clickhouse.Settings{
 				"max_execution_time": 60,
@@ -55,11 +71,12 @@ func InitClickHouse() {
 }
 
 func runMigrations(ctx context.Context) {
+	fmt.Printf("Running migrations for database: %s\n", dbName)
 	queries := []string{
-		"CREATE DATABASE IF NOT EXISTS sentinel",
+		fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", dbName),
 		
 		// Events Table (Retention: 30 Days)
-		`CREATE TABLE IF NOT EXISTS sentinel.events (
+		fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s.events (
 			Timestamp DateTime,
 			SiteID String,
 			ClientIP String,
@@ -75,36 +92,36 @@ func runMigrations(ctx context.Context) {
 			FID Nullable(Float64)
 		) ENGINE = MergeTree()
 		ORDER BY (SiteID, Timestamp)
-		TTL Timestamp + INTERVAL 30 DAY`,
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS TrustScore UInt8",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS PageTitle String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS EventType String DEFAULT 'pageview'",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS SessionID String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS EventName String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS Properties String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS City String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS Device String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS UtmSource String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS UtmMedium String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS UtmCampaign String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS UtmTerm String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS UtmContent String DEFAULT ''",
-		"ALTER TABLE sentinel.events ADD COLUMN IF NOT EXISTS Channel String DEFAULT ''",
-		"ALTER TABLE sentinel.events MODIFY TTL Timestamp + INTERVAL 30 DAY",
+		TTL Timestamp + INTERVAL 30 DAY`, dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS TrustScore UInt8", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS PageTitle String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS EventType String DEFAULT 'pageview'", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS SessionID String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS EventName String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS Properties String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS City String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS Device String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS UtmSource String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS UtmMedium String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS UtmCampaign String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS UtmTerm String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS UtmContent String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS Channel String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events MODIFY TTL Timestamp + INTERVAL 30 DAY", dbName),
 
 		// Session Events Table (Retention: 2 Days - Aggressive cleanup)
-		`CREATE TABLE IF NOT EXISTS sentinel.session_events (
+		fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s.session_events (
 			Timestamp DateTime,
 			SiteID String,
 			SessionID String,
 			Payload String
 		) ENGINE = MergeTree()
 		ORDER BY (SiteID, SessionID, Timestamp)
-		TTL Timestamp + INTERVAL 2 DAY`,
-		"ALTER TABLE sentinel.session_events MODIFY TTL Timestamp + INTERVAL 2 DAY",
+		TTL Timestamp + INTERVAL 2 DAY`, dbName),
+		fmt.Sprintf("ALTER TABLE %s.session_events MODIFY TTL Timestamp + INTERVAL 2 DAY", dbName),
 
 		// Clicks/Heatmaps Table (Retention: 7 Days)
-		`CREATE TABLE IF NOT EXISTS sentinel.clicks (
+		fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s.clicks (
 			Timestamp DateTime,
 			SiteID String,
 			ClientIP String,
@@ -115,11 +132,11 @@ func runMigrations(ctx context.Context) {
 			Country String
 		) ENGINE = MergeTree()
 		ORDER BY (SiteID, Timestamp)
-		TTL Timestamp + INTERVAL 7 DAY`,
-		"ALTER TABLE sentinel.clicks MODIFY TTL Timestamp + INTERVAL 7 DAY",
+		TTL Timestamp + INTERVAL 7 DAY`, dbName),
+		fmt.Sprintf("ALTER TABLE %s.clicks MODIFY TTL Timestamp + INTERVAL 7 DAY", dbName),
 
 		// Errors Table (Retention: 7 Days)
-		`CREATE TABLE IF NOT EXISTS sentinel.errors (
+		fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s.errors (
 			Timestamp DateTime,
 			SiteID String,
 			ClientIP String,
@@ -131,10 +148,10 @@ func runMigrations(ctx context.Context) {
 			ErrorObj String
 		) ENGINE = MergeTree()
 		ORDER BY (SiteID, Timestamp)
-		TTL Timestamp + INTERVAL 7 DAY`,
-		"ALTER TABLE sentinel.errors ADD COLUMN IF NOT EXISTS Severity String DEFAULT 'Error'",
-		"ALTER TABLE sentinel.errors ADD COLUMN IF NOT EXISTS Mitigation String DEFAULT ''",
-		"ALTER TABLE sentinel.errors MODIFY TTL Timestamp + INTERVAL 7 DAY",
+		TTL Timestamp + INTERVAL 7 DAY`, dbName),
+		fmt.Sprintf("ALTER TABLE %s.errors ADD COLUMN IF NOT EXISTS Severity String DEFAULT 'Error'", dbName),
+		fmt.Sprintf("ALTER TABLE %s.errors ADD COLUMN IF NOT EXISTS Mitigation String DEFAULT ''", dbName),
+		fmt.Sprintf("ALTER TABLE %s.errors MODIFY TTL Timestamp + INTERVAL 7 DAY", dbName),
 	}
 
 	for _, query := range queries {

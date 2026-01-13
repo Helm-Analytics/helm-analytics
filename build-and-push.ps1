@@ -63,12 +63,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # Build and push frontend
 Write-ColorOutput "Building frontend image..." "Green"
-if ($ApiUrl -ne "") {
-    Write-ColorOutput "Using API URL: $ApiUrl" "Cyan"
-    docker build --build-arg VITE_API_URL=$ApiUrl -t ${Username}/helm-analytics-frontend:${Version} ./frontend
-} else {
     docker build -t ${Username}/helm-analytics-frontend:${Version} ./frontend
-}
 
 if ($LASTEXITCODE -ne 0) {
     Write-ColorOutput "Error: Frontend build failed" "Red"

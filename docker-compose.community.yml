@@ -8,6 +8,7 @@ services:
       - DATABASE_URL=${DATABASE_URL:-postgres://helm:password@db:5432/helm?sslmode=disable}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - DEPLOYMENT_MODE=${DEPLOYMENT_MODE:-community}
+      - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:8012
     depends_on:
       - db
       - clickhouse
@@ -19,7 +20,7 @@ services:
     ports:
       - "8012:80"
     environment:
-      - VITE_API_URL=${VITE_API_URL:-https://api-helm.getmusterup.com}
+      - VITE_API_URL=${VITE_API_URL}
     networks:
       - helm-net
 

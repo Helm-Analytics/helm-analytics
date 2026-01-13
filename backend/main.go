@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
+	"strings"
 
 	//	_ "sentinel-backend/docs"
 	sentinel "sentinel-backend/src"
@@ -52,8 +54,14 @@ func main() {
 	})
 
 	// Strict CORS for the dashboard and API
+	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
+	if allowedOrigins == "" {
+		allowedOrigins = "http://localhost:5173,https://app.helm-analytics.com,https://helm-analytics.com" // Default for safety/dev
+		log.Println("⚠️ ALLOWED_ORIGINS not set, using defaults")
+	}
+
 	apiCors := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://app.helm-analytics.com", "https://helm-analytics.com", "http://localhost:5173"},
+		AllowedOrigins:   strings.Split(allowedOrigins, ","),
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,

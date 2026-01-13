@@ -3,7 +3,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 class HelmAnalytics {
   constructor(options = {}) {
     this.siteId = options.siteId || process.env.HELM_SITE_ID;
-    this.apiUrl = (options.apiUrl || 'https://api-sentinel.getmusterup.com').replace(/\/$/, '').replace(/\/track$/, '');
+    this.apiUrl = (options.apiUrl || 'https://api.helm-analytics.com').replace(/\/$/, '').replace(/\/track$/, '');
     
     if (!this.siteId) {
       console.warn('HelmAnalytics: No Site ID provided. Tracking will be disabled.');
