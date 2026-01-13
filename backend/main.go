@@ -45,105 +45,102 @@ func main() {
 	fs := http.FileServer(http.Dir("./static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	// --- CORS Policies ---
-	// Permissive CORS for the tracking endpoint
-	trackCors := cors.New(cors.Options{
-		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"POST", "OPTIONS"},
-		AllowedHeaders: []string{"Content-Type"},
-	})
-
-	// Strict CORS for the dashboard and API
-	// Strict CORS for the dashboard and API
+	// --- CORS Policies (Global) ---
+	// We are moving to a GLOBAL middleware to prevent "missing header" errors on prelights/errors.
 	allowedOriginsEnv := os.Getenv("ALLOWED_ORIGINS")
+	log.Printf("🔥 CORS CONFIG: Loaded ALLOWED_ORIGINS: '%s'", allowedOriginsEnv)
+
 	var allowedOrigins []string
 	var allowOriginFunc func(origin string) bool
 
 	if allowedOriginsEnv == "" {
-		allowedOrigins = []string{"http://localhost:5173", "https://app.helm-analytics.com", "https://helm-analytics.com"} // Default for safety/dev
-		log.Println("⚠️ ALLOWED_ORIGINS not set, using defaults")
+		// Default dev/fallback
+		allowedOrigins = []string{"http://localhost:5173", "https://app.helm-analytics.com", "https://helm-analytics.com"}
+		log.Println("⚠️ CORS: ALLOWED_ORIGINS not set, using defaults.")
 	} else if allowedOriginsEnv == "*" {
-		log.Println("🌍 CORS: Allowing ALL origins (Wildcard Mode)")
+		// Explicit Wildcard Mode
+		log.Println("🌍 CORS: Wildcard Mode Enabled (Authorizing ALL origins)")
 		allowOriginFunc = func(origin string) bool { return true }
 	} else {
+		// Explicit List Mode
 		allowedOrigins = strings.Split(allowedOriginsEnv, ",")
 		for i := range allowedOrigins {
 			allowedOrigins[i] = strings.TrimSpace(allowedOrigins[i])
 		}
+		log.Printf("🔒 CORS: Strict Mode Enabled. Allowed: %v", allowedOrigins)
 	}
 
-	apiCors := cors.New(cors.Options{
+	// Create the Global CORS handler
+	globalCors := cors.New(cors.Options{
 		AllowedOrigins:   allowedOrigins,
 		AllowOriginFunc:  allowOriginFunc,
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"},
+		AllowedHeaders:   []string{"Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"},
 		AllowCredentials: true,
+		// Debug: true, // Uncomment for verbose CORS logs if needed
 	})
 
-	// --- Public API Routes ---
-	mux.Handle("/auth/signup", apiCors.Handler(http.HandlerFunc(sentinel.SignupHandler)))
-	mux.Handle("/auth/login", apiCors.Handler(http.HandlerFunc(sentinel.LoginHandler)))
-	// Public tracking endpoints (no auth required)
-	mux.Handle("/track", trackCors.Handler(http.HandlerFunc(sentinel.TrackHandler)))
-	mux.Handle("/track/event", trackCors.Handler(http.HandlerFunc(sentinel.TrackCustomEventHandler))) // Custom events
-	mux.Handle("/api/debug/latest", trackCors.Handler(http.HandlerFunc(sentinel.DebugLatestEventsHandler)))
-	mux.Handle("/api/debug/visit-time", trackCors.Handler(http.HandlerFunc(sentinel.DebugAvgVisitTimeHandler)))
-	mux.Handle("/api/debug/session", trackCors.Handler(http.HandlerFunc(sentinel.DebugSessionEventsHandler)))
-	mux.Handle("/api/debug/errors", trackCors.Handler(http.HandlerFunc(sentinel.DebugErrorsHandler)))
-	mux.Handle("/track/click", trackCors.Handler(http.HandlerFunc(sentinel.ClickHandler)))
-	mux.Handle("/track/error", trackCors.Handler(http.HandlerFunc(sentinel.ErrorHandler)))
-	mux.Handle("/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
-	mux.Handle("/track/trap", trackCors.Handler(http.HandlerFunc(sentinel.SpiderTrapHandler))) // Advanced Bot Trap
-	mux.Handle("/api/shield/decision", trackCors.Handler(http.HandlerFunc(sentinel.CheckAccessHandler))) // Shield Decision Endpoint
-
-	mux.Handle("/api/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
-	mux.Handle("/api/users", apiCors.Handler(http.HandlerFunc(sentinel.GetAllUsersHandler)))
-
-	// --- Protected API Routes ---
-	mux.Handle("/logout", apiCors.Handler(sentinel.AuthMiddleware(sentinel.LogoutHandler)))
-	mux.Handle("/api/sites/", apiCors.Handler(sentinel.AuthMiddleware(sentinel.SitesApiHandler)))
-		// Analytics API (Protected)
-	mux.Handle("/api/dashboard", apiCors.Handler(sentinel.AuthMiddleware(sentinel.DashboardApiHandler)))
-	mux.Handle("/api/heatmap", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetHeatmapDataHandler)))
-	mux.Handle("/api/errors", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetErrorsStatsHandler)))
-	mux.Handle("/api/firewall", apiCors.Handler(sentinel.AuthMiddleware(sentinel.FirewallApiHandler)))
-	mux.Handle("/api/session/events", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetSessionEventsHandler)))
-	mux.Handle("/api/sessions", apiCors.Handler(sentinel.AuthMiddleware(sentinel.ListSessionsHandler)))
-	mux.Handle("/api/funnels/", apiCors.Handler(sentinel.AuthMiddleware(sentinel.FunnelsApiHandler)))
+	// --- Routes (No local CORS wrappers anymore) ---
 	
-	// Custom Events API
-	mux.Handle("/api/custom-events", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler)))
-	mux.Handle("/api/events/stats", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler)))
-	mux.Handle("/api/events/properties", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetEventPropertiesHandler)))
+	// Auth
+	mux.HandleFunc("/auth/signup", sentinel.SignupHandler)
+	mux.HandleFunc("/auth/login", sentinel.LoginHandler)
+	mux.Handle("/logout", sentinel.AuthMiddleware(sentinel.LogoutHandler))
+
+	// Tracking (Public)
+	mux.HandleFunc("/track", sentinel.TrackHandler)
+	mux.HandleFunc("/track/event", sentinel.TrackCustomEventHandler)
+	mux.HandleFunc("/track/click", sentinel.ClickHandler)
+	mux.HandleFunc("/track/error", sentinel.ErrorHandler)
+	mux.HandleFunc("/track/trap", sentinel.SpiderTrapHandler) 
+	mux.HandleFunc("/session", sentinel.SessionHandler)
 	
-	// Activity Log API
-	mux.Handle("/api/activity", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetActivityLogHandler)))
+	// API Debug
+	mux.HandleFunc("/api/debug/latest", sentinel.DebugLatestEventsHandler)
+	mux.HandleFunc("/api/debug/visit-time", sentinel.DebugAvgVisitTimeHandler)
+	mux.HandleFunc("/api/debug/session", sentinel.DebugSessionEventsHandler)
+	mux.HandleFunc("/api/debug/errors", sentinel.DebugErrorsHandler)
 
-	// Campaign & Attribution API
-	mux.Handle("/api/campaigns", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetCampaignStatsHandler)))
-
-	// User Flow API
-	mux.Handle("/api/user-flow", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetUserFlowHandler)))
-
-	// Engagement API (Scroll Depth)
-	mux.Handle("/api/engagement", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetEngagementStatsHandler)))
+	// API Protected
+	mux.HandleFunc("/api/shield/decision", sentinel.CheckAccessHandler) 
+	mux.HandleFunc("/api/session", sentinel.SessionHandler)
+	mux.Handle("/api/users", sentinel.AuthMiddleware(sentinel.GetAllUsersHandler))
 	
-	// Admin API (Cloud only - for manual subscription management)
+	mux.Handle("/api/sites/", sentinel.AuthMiddleware(sentinel.SitesApiHandler))
+	mux.Handle("/api/dashboard", sentinel.AuthMiddleware(sentinel.DashboardApiHandler))
+	mux.Handle("/api/heatmap", sentinel.AuthMiddleware(sentinel.GetHeatmapDataHandler))
+	mux.Handle("/api/errors", sentinel.AuthMiddleware(sentinel.GetErrorsStatsHandler))
+	mux.Handle("/api/firewall", sentinel.AuthMiddleware(sentinel.FirewallApiHandler))
+	mux.Handle("/api/session/events", sentinel.AuthMiddleware(sentinel.GetSessionEventsHandler))
+	mux.Handle("/api/sessions", sentinel.AuthMiddleware(sentinel.ListSessionsHandler))
+	mux.Handle("/api/funnels/", sentinel.AuthMiddleware(sentinel.FunnelsApiHandler))
+	
+	mux.Handle("/api/custom-events", sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler))
+	mux.Handle("/api/events/stats", sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler))
+	mux.Handle("/api/events/properties", sentinel.AuthMiddleware(sentinel.GetEventPropertiesHandler))
+	mux.Handle("/api/activity", sentinel.AuthMiddleware(sentinel.GetActivityLogHandler))
+	mux.Handle("/api/campaigns", sentinel.AuthMiddleware(sentinel.GetCampaignStatsHandler))
+	mux.Handle("/api/user-flow", sentinel.AuthMiddleware(sentinel.GetUserFlowHandler))
+	mux.Handle("/api/engagement", sentinel.AuthMiddleware(sentinel.GetEngagementStatsHandler))
+	
 	mux.HandleFunc("/api/admin/subscription", sentinel.AdminUpdateSubscriptionHandler)
 	mux.HandleFunc("/api/admin/subscription/get", sentinel.AdminGetUserSubscriptionHandler)
 	
-	// AI Features
-	mux.Handle("/api/ai/insights", apiCors.Handler(sentinel.AuthMiddleware(sentinel.GetInsightsHandler)))
-	mux.Handle("/api/ai/chat", apiCors.Handler(sentinel.AuthMiddleware(sentinel.ChatHandler)))
-	mux.Handle("/api/ai/analyze-error", apiCors.Handler(sentinel.AuthMiddleware(sentinel.AnalyzeErrorHandler)))
+	mux.Handle("/api/ai/insights", sentinel.AuthMiddleware(sentinel.GetInsightsHandler))
+	mux.Handle("/api/ai/chat", sentinel.AuthMiddleware(sentinel.ChatHandler))
+	mux.Handle("/api/ai/analyze-error", sentinel.AuthMiddleware(sentinel.AnalyzeErrorHandler))
 
-	// Swagger documentation
+	// Documentation
 	mux.Handle("/docs/", httpSwagger.Handler(
-		httpSwagger.URL("/static/swagger.yaml"), // The url pointing to API definition
+		httpSwagger.URL("/static/swagger.yaml"),
 	))
 
-	log.Println("HELM BACKEND: Analytics Fixes Applied (v2.1) - Starting server on :6060")
-	if err := http.ListenAndServe(":6060", mux); err != nil {
+	log.Println("HELM BACKEND: Global CORS Middleware Applied (v1.6) - Starting server on :6060")
+	
+	// Wrap the entire mux with the global CORS handler
+	handler := globalCors.Handler(mux)
+	
+	if err := http.ListenAndServe(":6060", handler); err != nil {
 		log.Fatalf("Could not start server: %s\n", err)
 	}
 }
