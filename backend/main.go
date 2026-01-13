@@ -54,14 +54,24 @@ func main() {
 	})
 
 	// Strict CORS for the dashboard and API
-	allowedOrigins := os.Getenv("ALLOWED_ORIGINS")
-	if allowedOrigins == "" {
-		allowedOrigins = "http://localhost:5173,https://app.helm-analytics.com,https://helm-analytics.com" // Default for safety/dev
+	// Strict CORS for the dashboard and API
+	allowedOriginsEnv := os.Getenv("ALLOWED_ORIGINS")
+	var allowedOrigins []string
+	var allowOriginFunc func(origin string) bool
+
+	if allowedOriginsEnv == "" {
+		allowedOrigins = []string{"http://localhost:5173", "https://app.helm-analytics.com", "https://helm-analytics.com"} // Default for safety/dev
 		log.Println("⚠️ ALLOWED_ORIGINS not set, using defaults")
+	} else if allowedOriginsEnv == "*" {
+		log.Println("🌍 CORS: Allowing ALL origins (Wildcard Mode)")
+		allowOriginFunc = func(origin string) bool { return true }
+	} else {
+		allowedOrigins = strings.Split(allowedOriginsEnv, ",")
 	}
 
 	apiCors := cors.New(cors.Options{
-		AllowedOrigins:   strings.Split(allowedOrigins, ","),
+		AllowedOrigins:   allowedOrigins,
+		AllowOriginFunc:  allowOriginFunc,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Content-Type", "Authorization"},
 		AllowCredentials: true,
