@@ -50,11 +50,7 @@ const Layout = () => {
       }
     }
     checkAuth()
-    
-    const hasSeenTutorial = localStorage.getItem("helm_seen_tutorial")
-    if (!hasSeenTutorial) {
-      setShowTutorial(true)
-    }
+    // Tutorial now triggers after first site is created, not on initial load
   }, [navigate])
 
   const fetchSites = async () => {
@@ -98,9 +94,18 @@ const Layout = () => {
         setSelectedSite(newSite)
       }
       setIsAddSiteOpen(false)
+      
       // Show success toast
       const { toast } = await import('./Toast')
       toast.success('Site Added Successfully', `${newSiteName} is now ready for tracking`)
+      
+      // Trigger tutorial on first site creation
+      const hasSeenTutorial = localStorage.getItem("helm_seen_tutorial")
+      const isFirstSite = sites.length === 0
+      if (!hasSeenTutorial && isFirstSite) {
+        // Small delay to let the UI update first
+        setTimeout(() => setShowTutorial(true), 500)
+      }
     } catch (error) {
       console.error("Failed to add site:", error)
       // Show error toast
