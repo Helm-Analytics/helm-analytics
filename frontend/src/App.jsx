@@ -16,6 +16,7 @@ const DocsPage = lazy(() => import("./pages/DocsPage"))
 const ActivityPage = lazy(() => import("./pages/ActivityPage"))
 const CampaignsPage = lazy(() => import("./pages/CampaignsPage"))
 const UserFlowPage = lazy(() => import("./pages/UserFlowPage"))
+const SubscriptionPage = lazy(() => import("./pages/SubscriptionPage"))
 
 // Loading component
 const PageLoader = () => (
@@ -44,6 +45,7 @@ function App() {
             <Route path="/firewall" element={<FirewallPage />} />
             <Route path="/campaigns" element={<CampaignsPage />} />
             <Route path="/user-flow" element={<UserFlowPage />} />
+            <Route path="/subscription" element={<SubscriptionPage />} />
             <Route path="/docs" element={<DocsPage />} />
           </Route>
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Outlet,useLocation, Link, useNavigate } from "react-router-dom"
-import { LayoutDashboard, PlayCircle, MousePointer2, GitMerge, AlertOctagon, Activity, Shield, Book, Globe, Plus, ChevronRight, Trash2, List, GraduationCap, LogOut, Moon, Sun, Menu, X, Target } from "lucide-react"
+import { LayoutDashboard, PlayCircle, MousePointer2, GitMerge, AlertOctagon, Activity, Shield, Book, Globe, Plus, ChevronRight, Trash2, List, GraduationCap, LogOut, Moon, Sun, Menu, X, Target, CreditCard } from "lucide-react"
 import { api } from "../api"
 import Logo from "./Logo"
 import ChatWidget from "./ChatWidget"
@@ -176,6 +176,7 @@ const Layout = () => {
     { path: "/activity", label: "Activity Log", icon: List },
     { path: "/firewall", label: "Security", icon: Shield },
     { path: "/errors", label: "Issues", icon: AlertOctagon },
+    { path: "/subscription", label: "Subscription", icon: CreditCard },
     { path: "/docs", label: "Help & Docs", icon: Book },
   ]
 
