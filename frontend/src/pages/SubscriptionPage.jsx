@@ -8,7 +8,7 @@ const plans = [
   { id: 'free', name: 'Hobby', price: '$0', monthly: '/month', eventLimit: '10,000', features: ['10,000 events/month', '30-day data retention', '3 Websites', 'Community support'] },
   { id: 'pro', name: 'Pro', price: '$12', monthly: '/month', eventLimit: '100,000', features: ['100,000 events/month', '12-month data retention', 'Unlimited Websites', 'Priority email support', 'Session Replays', 'Custom Events'], popular: true },
   { id: 'growth', name: 'Growth', price: '$25', monthly: '/month', eventLimit: '500,000', features: ['500,000 events/month', '12-month data retention', 'Unlimited Websites', 'Dedicated support', 'Everything in Pro', 'Bot Detection'] },
-  { id: 'business', name: 'Business', price: '$50', monthly: '/month', eventLimit: '1,000,000', features: ['1,000,000 events/month', '12-month data retention', 'Unlimited Websites', 'Dedicated account manager', 'Everything in Growth', 'SLA guarantee'] },
+  { id: 'enterprise', name: 'Enterprise', price: 'Custom', monthly: '', eventLimit: 'Unlimited', features: ['Unlimited events', '12-month data retention', 'Unlimited Websites', 'Dedicated account manager', 'Everything in Growth', 'SLA guarantee'] },
 ];
 
 const SubscriptionPage = () => {
@@ -44,6 +44,11 @@ const SubscriptionPage = () => {
   };
 
   const handleUpgrade = async (planId) => {
+    if (planId === 'enterprise') {
+      window.location.href = 'mailto:hello@helm-analytics.com?subject=Enterprise%20Inquiry';
+      return;
+    }
+
     setUpgrading(true);
     try {
       const email = localStorage.getItem('userEmail');
@@ -94,7 +99,7 @@ const SubscriptionPage = () => {
             <h2 className="text-2xl font-bold">{userPlan?.plan_name || 'Hobby'}</h2>
             <p className="text-muted-foreground">{userPlan?.plan_price || '$0/month'}</p>
           </div>
-          {userPlan?.plan !== 'business' && (
+          {userPlan?.plan !== 'enterprise' && (
             <button
               onClick={() => setShowUpgradeModal(true)}
               className="px-4 py-2 bg-accent text-white rounded-lg font-medium hover:bg-accent/90 transition-colors flex items-center gap-2"
@@ -142,7 +147,8 @@ const SubscriptionPage = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {plans.map((plan, index) => {
             const isCurrent = plan.id === (userPlan?.plan || 'free');
-            const isUpgrade = index > currentPlanIndex;
+            const isEnterprise = plan.id === 'enterprise';
+            const isUpgrade = index > currentPlanIndex || isEnterprise;
             
             return (
               <div 
@@ -167,7 +173,7 @@ const SubscriptionPage = () => {
                   <span className="text-2xl font-bold">{plan.price}</span>
                   <span className="text-muted-foreground text-sm">{plan.monthly}</span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">{plan.eventLimit} events/mo</p>
+                <p className="text-sm text-muted-foreground mt-1">{plan.eventLimit === 'Unlimited' ? 'Unlimited events' : `${plan.eventLimit} events/mo`}</p>
                 
                 <ul className="mt-4 space-y-2">
                   {plan.features.slice(0, 4).map((feature, i) => (
@@ -179,17 +185,19 @@ const SubscriptionPage = () => {
                 </ul>
 
                 <button
-                  onClick={() => isUpgrade && handleUpgrade(plan.id)}
-                  disabled={isCurrent || !isUpgrade || upgrading}
+                  onClick={() => handleUpgrade(plan.id)}
+                  disabled={isCurrent || (!isUpgrade && !isEnterprise) || upgrading}
                   className={`w-full mt-4 py-2 rounded-lg font-medium text-sm transition-all ${
                     isCurrent 
                       ? 'bg-secondary text-muted-foreground cursor-default'
-                      : isUpgrade
-                        ? 'bg-accent text-white hover:bg-accent/90'
-                        : 'bg-secondary text-muted-foreground cursor-not-allowed'
+                      : isEnterprise
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        : isUpgrade
+                          ? 'bg-accent text-white hover:bg-accent/90'
+                          : 'bg-secondary text-muted-foreground cursor-not-allowed'
                   }`}
                 >
-                  {isCurrent ? 'Current Plan' : isUpgrade ? 'Upgrade' : 'Downgrade'}
+                  {isCurrent ? 'Current Plan' : isEnterprise ? 'Contact Us' : isUpgrade ? 'Upgrade' : 'Downgrade'}
                 </button>
               </div>
             );

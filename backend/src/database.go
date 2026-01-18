@@ -60,6 +60,8 @@ func createTables() {
 	}
 	// Migration for plan
 	db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS plan TEXT DEFAULT 'free';`)
+	// Migration for full_name
+	db.Exec(`ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name TEXT;`)
 	createSitesTable := `
     CREATE TABLE IF NOT EXISTS sites (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -152,6 +154,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 	var creds struct {
 		Email    string `json:"email"`
 		Password string `json:"password"`
+		Name     string `json:"name"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&creds); err != nil {
 		http.Error(w, `{"error": "Invalid request body"}`, http.StatusBadRequest)
@@ -172,7 +175,7 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var userID int
-	err = db.QueryRow("INSERT INTO users (email, password_hash) VALUES ($1, $2) RETURNING id", email, hashedPassword).Scan(&userID)
+	err = db.QueryRow("INSERT INTO users (email, password_hash, full_name) VALUES ($1, $2, $3) RETURNING id", email, hashedPassword, creds.Name).Scan(&userID)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok && pqErr.Code == "23505" {
 			http.Error(w, `{"error": "Could not create user (email might be taken)"}`, http.StatusBadRequest)
