@@ -275,129 +275,135 @@ const FirewallPage = () => {
           </div>
         </div>
 
-        {/* Info Column */}
+          {/* Info Column */}
         <div className="space-y-8">
 
            {/* AI Suggestions */}
-           <div className="premium-card bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border-indigo-500/20">
-              <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-indigo-500/20 rounded-xl">
-                      <Cpu className="w-6 h-6 text-indigo-400" />
+           <div className="relative group overflow-hidden rounded-2xl border border-indigo-500/20 bg-gradient-to-br from-indigo-950/30 to-purple-950/30 backdrop-blur-xl p-6 shadow-2xl">
+              <div className="absolute inset-0 bg-indigo-500/5 group-hover:bg-indigo-500/10 transition-colors" />
+              <div className="relative z-10">
+                  <div className="flex items-center gap-4 mb-6">
+                      <div className="p-3 bg-indigo-500/20 rounded-xl shadow-lg ring-1 ring-indigo-500/50">
+                          <Cpu className="w-6 h-6 text-indigo-400" />
+                      </div>
+                      <div>
+                          <h2 className="text-xl font-heading font-extrabold text-white tracking-tight">Helm Intelligence</h2>
+                          <p className="text-[10px] text-indigo-200/70 font-bold uppercase tracking-widest mt-1">Automated Threat Detection</p>
+                      </div>
                   </div>
-                  <div>
-                      <h2 className="text-lg font-heading font-extrabold text-foreground">Helm Intelligence</h2>
-                      <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Automated Threat Detection</p>
-                  </div>
-              </div>
-              
-              {suggestions.length > 0 ? (
-                  <div className="space-y-3">
-                      {suggestions.map((suggestion, idx) => (
-                          <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-3">
-                              <div className="flex justify-between items-start mb-2">
-                                  <div>
-                                      <div className="flex items-center gap-2">
-                                          <span className="font-mono text-xs font-bold text-foreground">{suggestion.ip}</span>
-                                          <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${suggestion.confidence === 'High' ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'}`}>
-                                              {suggestion.confidence} Conf.
-                                          </span>
+                  
+                  {suggestions.length > 0 ? (
+                      <div className="space-y-3">
+                          {suggestions.map((suggestion, idx) => (
+                              <div key={idx} className="bg-white/5 border border-white/10 rounded-xl p-3 backdrop-blur-md">
+                                  <div className="flex justify-between items-start mb-2">
+                                      <div>
+                                          <div className="flex items-center gap-2">
+                                              <span className="font-mono text-xs font-bold text-indigo-200">{suggestion.ip}</span>
+                                              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${suggestion.confidence === 'High' ? 'bg-rose-500/20 text-rose-400 box-shadow-glow' : 'bg-amber-500/20 text-amber-400'}`}>
+                                                  {suggestion.confidence} Conf.
+                                              </span>
+                                          </div>
+                                          <p className="text-[10px] text-muted-foreground mt-1">{suggestion.reason} • {suggestion.country}</p>
                                       </div>
-                                      <p className="text-[10px] text-muted-foreground mt-1">{suggestion.reason} • {suggestion.country}</p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                      <button 
+                                          onClick={() => handleAcceptSuggestion(suggestion)}
+                                          className="flex-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-wide py-2 rounded-lg transition-colors border border-rose-500/20 hover:shadow-[0_0_15px_-3px_rgba(244,63,94,0.4)]"
+                                      >
+                                          Block IP
+                                      </button>
+                                      <button 
+                                          onClick={() => setSuggestions(prev => prev.filter(s => s.ip !== suggestion.ip))}
+                                          className="flex-1 bg-white/5 hover:bg-white/10 text-muted-foreground text-[10px] font-bold uppercase tracking-wide py-2 rounded-lg transition-colors"
+                                      >
+                                          Ignore
+                                      </button>
                                   </div>
                               </div>
-                              <div className="flex gap-2">
-                                  <button 
-                                      onClick={() => handleAcceptSuggestion(suggestion)}
-                                      className="flex-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 text-[10px] font-bold uppercase tracking-wide py-2 rounded-lg transition-colors border border-rose-500/20"
-                                  >
-                                      Block IP
-                                  </button>
-                                  <button 
-                                      onClick={() => setSuggestions(prev => prev.filter(s => s.ip !== suggestion.ip))}
-                                      className="flex-1 bg-white/5 hover:bg-white/10 text-muted-foreground text-[10px] font-bold uppercase tracking-wide py-2 rounded-lg transition-colors"
-                                  >
-                                      Ignore
-                                  </button>
-                              </div>
+                          ))}
+                      </div>
+                  ) : (
+                      <div className="text-center py-8">
+                          <div className="w-16 h-16 bg-gradient-to-tr from-emerald-500/20 to-teal-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)]">
+                              <Check className="w-8 h-8 text-emerald-400" />
                           </div>
-                      ))}
-                  </div>
-              ) : (
-                  <div className="text-center py-6">
-                      <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <Check className="w-5 h-5 text-emerald-500" />
+                          <p className="text-sm font-bold text-white mb-1">Defense Systems Active</p>
+                          <p className="text-xs text-indigo-200/60 leading-relaxed max-w-[200px] mx-auto">No abnormal behavior patterns detected in the last 24h cycle.</p>
                       </div>
-                      <p className="text-sm font-bold text-foreground">All Clear</p>
-                      <p className="text-xs text-muted-foreground">No suspicious activity detected in the last 24h.</p>
-                  </div>
-              )}
-          </div>
+                  )}
+              </div>
+           </div>
 
-          {/* Honey Pot Sidebar */}
-          <div className="premium-card bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/20 overflow-hidden">
-              <div className="flex items-center gap-3 mb-4">
-                 <div className="p-2 bg-amber-500/20 rounded-xl">
-                    <Hexagon className="w-6 h-6 text-amber-500" />
-                 </div>
-                 <div>
-                    <h2 className="text-lg font-heading font-extrabold text-foreground">Spider Trap</h2>
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Honeypot Implementation</p>
-                 </div>
-              </div>
-              <p className="text-muted-foreground text-xs leading-relaxed mb-6">
-                  Catch automated crawlers by adding this invisible gateway to your site's header or footer. 
-                  Bots that interact with this link will be identified and mitigated instantly.
-              </p>
-              <div className="relative group mb-4">
-                  <div className="bg-secondary/50 border border-border/50 rounded-xl p-4 font-mono text-[10px] text-accent/80 break-all select-all">
-                    {`<a href="https://api.helm-analytics.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
+           {/* Honey Pot Sidebar */}
+           <div className="relative overflow-hidden rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-950/30 to-orange-950/30 backdrop-blur-xl p-6 shadow-2xl">
+              <div className="absolute inset-0 bg-amber-500/5 hover:bg-amber-500/10 transition-colors" />
+              <div className="relative z-10">
+                  <div className="flex items-center gap-4 mb-6">
+                     <div className="p-3 bg-amber-500/20 rounded-xl shadow-lg ring-1 ring-amber-500/50">
+                        <Hexagon className="w-6 h-6 text-amber-500" />
+                     </div>
+                     <div>
+                        <h2 className="text-xl font-heading font-extrabold text-white tracking-tight">Spider Trap</h2>
+                        <p className="text-[10px] text-amber-200/70 font-bold uppercase tracking-widest mt-1">Honeypot Implementation</p>
+                     </div>
                   </div>
-                  <button 
-                        onClick={() => copyToClipboard(`<a href="https://api.helm-analytics.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`)}
-                        className="absolute top-2 right-2 p-2 bg-background/80 hover:bg-background rounded-lg transition-all border border-border/50 backdrop-blur-sm opacity-0 group-hover:opacity-100"
-                        title="Copy Snippet"
-                    >
-                        {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3 text-foreground" />}
-                  </button>
+                  <p className="text-amber-100/60 text-xs leading-relaxed mb-6 font-medium">
+                      Catch automated crawlers by adding this invisible gateway to your site's header. 
+                      Bots that interact with this link will be identified and mitigated instantly.
+                  </p>
+                  <div className="relative group mb-4">
+                      <div className="bg-black/40 border border-amber-500/30 rounded-xl p-4 font-mono text-[10px] text-amber-400 break-all select-all shadow-inner">
+                        {`<a href="https://api.helm-analytics.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
+                      </div>
+                      <button 
+                            onClick={() => copyToClipboard(`<a href="https://api.helm-analytics.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`)}
+                            className="absolute top-2 right-2 p-2 bg-amber-950/80 hover:bg-amber-900 rounded-lg transition-all border border-amber-500/50 text-amber-400 opacity-0 group-hover:opacity-100"
+                            title="Copy Snippet"
+                        >
+                            {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                  </div>
+                  <div className="flex items-center gap-2 text-emerald-400/80 text-[10px] uppercase font-bold tracking-widest bg-emerald-950/30 w-fit px-3 py-1 rounded-full border border-emerald-500/20">
+                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 box-shadow-glow"></div>
+                     <span>Module Ready</span>
+                  </div>
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground/60 text-[10px] uppercase font-bold tracking-widest">
-                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                 <span>Module Ready</span>
-              </div>
-          </div>
+           </div>
 
-          <div className="premium-card">
-              <h3 className="text-base font-heading font-extrabold mb-4">Firewall Intelligence</h3>
-              <div className="space-y-4">
-                  <div className="flex gap-4 p-3 rounded-xl bg-secondary/30">
-                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                         <Hash className="w-4 h-4 text-accent" />
-                      </div>
-                      <div>
-                         <p className="text-xs font-bold text-foreground mb-0.5">IP Filtering</p>
-                         <p className="text-[10px] text-muted-foreground">Block specific IP addresses from accessing your site.</p>
-                      </div>
-                  </div>
-                  <div className="flex gap-4 p-3 rounded-xl bg-secondary/30">
-                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                         <Globe className="w-4 h-4 text-accent" />
-                      </div>
-                      <div>
-                         <p className="text-xs font-bold text-foreground mb-0.5">Geo Blocking</p>
-                         <p className="text-[10px] text-muted-foreground">Block traffic originating from specific ISO country codes.</p>
-                      </div>
-                  </div>
-                  <div className="flex gap-4 p-3 rounded-xl bg-secondary/30">
-                      <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                         <Server className="w-4 h-4 text-accent" />
-                      </div>
-                      <div>
-                         <p className="text-xs font-bold text-foreground mb-0.5">ASN Blocking</p>
-                         <p className="text-[10px] text-muted-foreground">Blacklist entire data centers or hosting providers.</p>
-                      </div>
-                  </div>
-              </div>
-          </div>
+           <div className="premium-card">
+               <h3 className="text-base font-heading font-extrabold mb-4 text-foreground">Firewall Intelligence</h3>
+               <div className="space-y-4">
+                   <div className="flex gap-4 p-3 rounded-xl bg-secondary/30 border border-border/50 hover:bg-secondary/50 transition-colors">
+                       <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                          <Hash className="w-4 h-4 text-accent" />
+                       </div>
+                       <div>
+                          <p className="text-xs font-bold text-foreground mb-0.5">IP Filtering</p>
+                          <p className="text-[10px] text-muted-foreground">Block specific IP addresses from accessing your site.</p>
+                       </div>
+                   </div>
+                   <div className="flex gap-4 p-3 rounded-xl bg-secondary/30 border border-border/50 hover:bg-secondary/50 transition-colors">
+                       <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                          <Globe className="w-4 h-4 text-accent" />
+                       </div>
+                       <div>
+                          <p className="text-xs font-bold text-foreground mb-0.5">Geo Blocking</p>
+                          <p className="text-[10px] text-muted-foreground">Block traffic originating from specific ISO country codes.</p>
+                       </div>
+                   </div>
+                   <div className="flex gap-4 p-3 rounded-xl bg-secondary/30 border border-border/50 hover:bg-secondary/50 transition-colors">
+                       <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                          <Server className="w-4 h-4 text-accent" />
+                       </div>
+                       <div>
+                          <p className="text-xs font-bold text-foreground mb-0.5">ASN Blocking</p>
+                          <p className="text-[10px] text-muted-foreground">Blacklist entire data centers or hosting providers.</p>
+                       </div>
+                   </div>
+               </div>
+           </div>
         </div>
       </div>
     </div>

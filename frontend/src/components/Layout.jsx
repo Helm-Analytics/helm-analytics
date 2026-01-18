@@ -185,6 +185,13 @@ const Layout = () => {
       {/* Sidebar - Integrated Modern Style */}
       <aside className="w-56 bg-white dark:bg-[#0b0f1a] border-r border-border/60 flex-shrink-0 flex flex-col h-screen sticky top-0 z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div className="p-3.5 flex flex-col h-full">
+          {localStorage.getItem("isDemo") === "true" && (
+            <div className="mb-4 px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+              <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider text-center">
+                Live Demo Mode
+              </p>
+            </div>
+          )}
           <Logo className="mb-4 origin-left scale-90" />
 
           {/* Site Switcher Section */}

@@ -17,6 +17,7 @@ const ActivityPage = lazy(() => import("./pages/ActivityPage"))
 const CampaignsPage = lazy(() => import("./pages/CampaignsPage"))
 const UserFlowPage = lazy(() => import("./pages/UserFlowPage"))
 const SubscriptionPage = lazy(() => import("./pages/SubscriptionPage"))
+const DemoLogin = lazy(() => import("./pages/DemoLogin"))
 
 // Loading component
 const PageLoader = () => (
@@ -31,7 +32,9 @@ function App() {
       <Suspense fallback={<PageLoader />}>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/demo" element={<DemoLogin />} />
           
           {/* Protected Routes wrapped in Layout */}
           <Route element={<Layout />}>
