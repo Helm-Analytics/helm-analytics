@@ -69,6 +69,10 @@ const SubscriptionPage = () => {
     }
   };
 
+  // Detect if running on Cloud
+  // We check if the hostname ends with helm-analytics.com or is one of our cloud domains
+  const isCloud = window.location.hostname.includes('helm-analytics.com') || window.location.hostname.includes('getmusterup.com');
+
   const currentPlanIndex = plans.findIndex(p => p.id === (userPlan?.plan || 'free'));
   const usagePercent = userPlan ? Math.min((userPlan.events_used / userPlan.events_limit) * 100, 100) : 0;
 
@@ -80,6 +84,58 @@ const SubscriptionPage = () => {
     );
   }
 
+  // SELF-HOSTED VIEW
+  if (!isCloud) {
+    return (
+      <div className="space-y-8">
+        <div>
+            <h1 className="text-3xl font-bold">Subscription</h1>
+            <p className="text-muted-foreground mt-1">Manage your instance</p>
+        </div>
+
+        <div className="bg-card border border-border rounded-2xl p-8 shadow-lg max-w-3xl">
+            <div className="flex items-start justify-between mb-6">
+                <div>
+                    <div className="flex items-center gap-2 mb-2">
+                        <Crown className="w-5 h-5 text-amber-500" />
+                        <span className="text-sm font-medium text-muted-foreground">Edition</span>
+                    </div>
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-amber-500 to-orange-600 bg-clip-text text-transparent">
+                        Self-Hosted Enterprise
+                    </h2>
+                    <p className="text-muted-foreground mt-1">You are running the full version of Helm Analytics.</p>
+                </div>
+                <div className="px-4 py-1.5 bg-green-500/10 text-green-500 rounded-full text-sm font-bold border border-green-500/20 flex items-center gap-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    Active
+                </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-secondary/30 rounded-xl p-5 border border-border/50">
+                    <h3 className="font-semibold mb-1 text-foreground">Usage Limits</h3>
+                    <div className="text-2xl font-bold text-accent">Unlimited</div>
+                    <p className="text-xs text-muted-foreground mt-1">No event caps or data retention limits.</p>
+                </div>
+                <div className="bg-secondary/30 rounded-xl p-5 border border-border/50">
+                    <h3 className="font-semibold mb-1 text-foreground">Features</h3>
+                     <div className="text-2xl font-bold text-accent">All Unlocked</div>
+                     <p className="text-xs text-muted-foreground mt-1">Session Replays, Heatmaps, AI Insights.</p>
+                </div>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-border flex flex-col md:flex-row gap-4 justify-between items-center text-sm text-muted-foreground">
+                <p>Thank you for using Helm Analytics Open Source.</p>
+                <a href="https://helm-analytics.com" target="_blank" rel="noreferrer" className="flex items-center gap-1 hover:text-accent transition-colors">
+                    Visit Cloud Version <ArrowRight className="w-3 h-3" />
+                </a>
+            </div>
+        </div>
+      </div>
+    );
+  }
+
+  // CLOUD VIEW (Standard Billing UI)
   return (
     <div className="space-y-8">
       {/* Header */}
