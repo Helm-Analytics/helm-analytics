@@ -60,19 +60,19 @@ helm.trackEvent('purchase', {
   const uniqueEvents = [...new Set(events.map(e => e.event_name))];
 
   return (
-    <div className="p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="p-4">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">
+        <div className="mb-4">
+          <h1 className="text-2xl font-bold mb-1">
             Custom <span className="text-accent">Events</span>
           </h1>
-          <p className="text-muted-foreground">Track user actions and interactions beyond pageviews</p>
+          <p className="text-xs text-muted-foreground">Track user actions and interactions beyond pageviews</p>
         </div>
 
         {/* Implementation Guide */}
-        <div className="mb-8 bg-card rounded-lg border border-border p-8">
-          <h2 className="text-2xl font-bold mb-6">Implementation Guide</h2>
+        <div className="mb-6 bg-card rounded-lg border border-border p-5">
+          <h2 className="text-lg font-bold mb-4">Implementation Guide</h2>
 
           {/* Step-by-step explanation */}
           <div className="mb-8 space-y-6">

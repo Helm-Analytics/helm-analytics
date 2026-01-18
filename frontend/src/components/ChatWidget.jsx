@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, X, Send, MessageCircleQuestion } from 'lucide-react';
+import { MessageSquare, X, Send, HelpCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { api } from '../api';
 
@@ -49,11 +49,11 @@ const ChatWidget = ({ siteId }) => {
             {isOpen && (
                 <div className="bg-white dark:bg-[#0F172A] border border-border/60 rounded-2xl shadow-2xl w-[350px] sm:w-[400px] mb-4 overflow-hidden pointer-events-auto flex flex-col animate-in slide-in-from-bottom-5 duration-300 h-[600px]">
                     {/* Header */}
-                    <div className="bg-primary p-5 flex justify-between items-center relative overflow-hidden">
+                    <div className="bg-primary p-4 flex justify-between items-center relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                        <div className="flex items-center gap-4 relative z-10">
-                            <div className="p-2 bg-accent/20 rounded-xl shadow-inner border border-white/5">
-                                <MessageCircleQuestion className="w-5 h-5 text-accent" />
+                        <div className="flex items-center gap-3 relative z-10">
+                            <div className="p-1.5 bg-accent/20 rounded-lg shadow-inner border border-white/5">
+                                <HelpCircle className="w-5 h-5 text-accent" />
                             </div>
                             <div>
                                 <span className="block font-heading font-extrabold text-white text-base tracking-tight">Helm Assistant</span>
