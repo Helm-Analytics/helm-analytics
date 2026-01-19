@@ -302,3 +302,64 @@ func GetAllUsersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(users)
 }
+
+// InitDemoHandler creates/ensures demo user exists and returns credentials
+func InitDemoHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" && r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	demoEmail := "demo@helm-analytics.com"
+	demoPassword := "demo123"
+
+	// Check if demo user exists
+	var userID int
+	err := db.QueryRow("SELECT id FROM users WHERE email = $1", demoEmail).Scan(&userID)
+	
+	if err == sql.ErrNoRows {
+		// Create demo user
+		hashedPassword, err := hashPassword(demoPassword)
+		if err != nil {
+			log.Printf("Error hashing demo password: %v", err)
+			http.Error(w, `{"error": "Failed to initialize demo"}`, http.StatusInternalServerError)
+			return
+		}
+
+		err = db.QueryRow(
+			"INSERT INTO users (email, password_hash, full_name, plan) VALUES ($1, $2, $3, $4) RETURNING id",
+			demoEmail, hashedPassword, "Demo User", "pro",
+		).Scan(&userID)
+		
+		if err != nil {
+			log.Printf("Error creating demo user: %v", err)
+			http.Error(w, `{"error": "Failed to create demo user"}`, http.StatusInternalServerError)
+			return
+		}
+
+		log.Printf("✅ Demo user created with ID: %d", userID)
+	} else if err != nil {
+		log.Printf("Error querying demo user: %v", err)
+		http.Error(w, `{"error": "Database error"}`, http.StatusInternalServerError)
+		return
+	}
+
+	// Set session cookie for demo user
+	http.SetCookie(w, &http.Cookie{
+		Name:     "sentinel_session",
+		Value:    strconv.Itoa(userID),
+		Path:     "/",
+		Expires:  time.Now().Add(24 * time.Hour),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+		Domain:   ".helm-analytics.com",
+	})
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": "Demo initialized successfully",
+		"user_id": userID,
+		"email":   demoEmail,
+	})
+}

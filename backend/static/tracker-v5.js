@@ -276,7 +276,7 @@
             }
         }
 
-        // Session replay recording
+        // Session replay recording with PRIVACY MASKING
         let stopRecording = null;
         if (typeof window.rrweb !== 'undefined' && window.rrweb.record) {
             stopRecording = window.rrweb.record({
@@ -290,7 +290,49 @@
                         sendEvents();
                     }
                 },
-                checkoutEveryNth: 100
+                checkoutEveryNth: 100,
+                
+                // PRIVACY CONFIGURATION
+                maskAllInputs: true,              // Mask all input fields by default
+                maskInputOptions: {
+                    password: true,                 // Always mask passwords
+                    email: true,                    // Mask email inputs
+                    tel: true,                      // Mask phone numbers
+                    text: true,                     // Mask text inputs
+                    textarea: true,                 // Mask textareas
+                    select: false,                  // Show select dropdowns (usually safe)
+                    radio: false,                   // Show radio buttons
+                    checkbox: false                 // Show checkboxes
+                },
+                
+                // Block credit card fields and sensitive inputs completely
+                blockSelector: [
+                    'input[autocomplete*="cc-"]',
+                    'input[name*="card"]',
+                    'input[id*="card"]',
+                    'input[name*="cvv"]',
+                    'input[name*="ssn"]',
+                    'input[type="password"]',
+                    '[data-sensitive]'
+                ].join(','),
+                
+                // Mask text content with data-private attribute
+                maskTextSelector: '[data-private], .sensitive-data, .pii',
+                
+                // Additional security - remove unnecessary elements
+                slimDOMOptions: {
+                    script: true,                   // Remove script tags
+                    comment: true,                  // Remove comments
+                    headFavicon: true,             // Remove favicon
+                },
+                
+                // Reduce data size and improve performance
+                sampling: {
+                    mousemove: true,                // Sample mouse movements
+                    mouseInteraction: false,        // Keep all clicks
+                    scroll: 10,                     // Sample every 10th scroll event
+                    input: 'last'                   // Only record final input value (masked)
+                }
             });
         }
 
@@ -304,7 +346,7 @@
                 }
                 sendEvents(true);
             } else if (document.visibilityState === 'visible') {
-                // Resume recording when tab becomes active again
+                // Resume recording when tab becomes active again - with privacy masking
                 if (!stopRecording && typeof window.rrweb !== 'undefined' && window.rrweb.record) {
                     stopRecording = window.rrweb.record({
                         emit(event) {
@@ -313,7 +355,39 @@
                                 sendEvents();
                             }
                         },
-                        checkoutEveryNth: 100
+                        checkoutEveryNth: 100,
+                        maskAllInputs: true,
+                        maskInputOptions: {
+                            password: true,
+                            email: true,
+                            tel: true,
+                            text: true,
+                            textarea: true,
+                            select: false,
+                            radio: false,
+                            checkbox: false
+                        },
+                        blockSelector: [
+                            'input[autocomplete*="cc-"]',
+                            'input[name*="card"]',
+                            'input[id*="card"]',
+                            'input[name*="cvv"]',
+                            'input[name*="ssn"]',
+                            'input[type="password"]',
+                            '[data-sensitive]'
+                        ].join(','),
+                        maskTextSelector: '[data-private], .sensitive-data, .pii',
+                        slimDOMOptions: {
+                            script: true,
+                            comment: true,
+                            headFavicon: true,
+                        },
+                        sampling: {
+                            mousemove: true,
+                            mouseInteraction: false,
+                            scroll: 10,
+                            input: 'last'
+                        }
                     });
                 }
             }

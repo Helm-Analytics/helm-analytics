@@ -63,6 +63,7 @@ func main() {
 	// --- Public API Routes ---
 	mux.Handle("/auth/signup", trackCors.Handler(http.HandlerFunc(sentinel.SignupHandler)))
 	mux.Handle("/auth/login", trackCors.Handler(http.HandlerFunc(sentinel.LoginHandler)))
+	mux.Handle("/auth/demo/init", trackCors.Handler(http.HandlerFunc(sentinel.InitDemoHandler))) // Demo Init
 	// Public tracking endpoints (no auth required)
 	mux.Handle("/track", trackCors.Handler(http.HandlerFunc(sentinel.TrackHandler)))
 	mux.Handle("/track/event", trackCors.Handler(http.HandlerFunc(sentinel.TrackCustomEventHandler))) // Custom events
