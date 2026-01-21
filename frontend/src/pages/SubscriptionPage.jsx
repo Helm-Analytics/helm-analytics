@@ -52,15 +52,18 @@ const SubscriptionPage = () => {
     setUpgrading(true);
     try {
       const email = localStorage.getItem('userEmail');
-      const response = await fetch(`${CLOUD_API_URL}/api/init`, {
+      const response = await fetch(`${CLOUD_API_URL}/api/upgrade`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, plan: planId, password: '' }),
+        body: JSON.stringify({ email, plan: planId }),
       });
 
       const data = await response.json();
       if (data.authorization_url) {
         window.location.href = data.authorization_url;
+      } else {
+        console.error('Upgrade failed:', data);
+        // Optional: Show error to user
       }
     } catch (err) {
       console.error('Upgrade failed:', err);

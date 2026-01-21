@@ -18,6 +18,7 @@ const Login = () => {
     try {
       await api.login(email, password)
       // Store email for subscription page usage tracking
+      localStorage.removeItem('isDemo')
       localStorage.setItem('userEmail', email)
       window.location.href = "/dashboard"
     } catch (error) {

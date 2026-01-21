@@ -76,11 +76,19 @@ error.txt
 # Placeholder for visual assets not ready for release
 image.png
 
-# Application Logs & Databases
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+bin/
+
+# Logs
 *.log
 backend/events.log
-# Exclude GeoIP databases (should be downloaded during build/deployment)
-# backend/GeoLite2-*.mmdb
+
+# GeoIP databases (should be downloaded during build/deployment)
+backend/GeoLite2-*.mmdb
 
 # License Server & Internal Tools
 license-server/
