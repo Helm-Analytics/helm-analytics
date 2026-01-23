@@ -166,17 +166,15 @@ const Layout = () => {
   }
 
   const navItems = [
-    {path: "/dashboard", label: "Overview", icon: LayoutDashboard },
+    {path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/session-replay", label: "Sessions", icon: PlayCircle },
     { path: "/heatmap", label: "Heatmaps", icon: MousePointer2 },
-    { path: "/funnels", label: "Funnels", icon: GitMerge },
-    { path: "/user-flow", label: "User Flow", icon: GitMerge },
+    // Funnels & User Flows removed for Community Edition
     { path: "/campaigns", label: "Campaigns", icon: Target },
     { path: "/custom-events", label: "Events", icon: Activity },
     { path: "/activity", label: "Activity Log", icon: List },
     { path: "/firewall", label: "Security", icon: Shield },
-    { path: "/errors", label: "Issues", icon: AlertOctagon },
-    { path: "/subscription", label: "Subscription", icon: CreditCard },
+    // Issues & Subscription removed for Community Edition
     { path: "/docs", label: "Help & Docs", icon: Book },
   ]
 

@@ -16,7 +16,6 @@ const Dashboard = () => {
     dashboardData, 
     isLoadingStats, 
     fetchDashboardStats, 
-    fetchAiInsights,
     fetchEngagementStats,
     engagementData,
     isLoadingEngagement
@@ -52,7 +51,7 @@ const Dashboard = () => {
   useEffect(() => {
     if (selectedSite) {
       fetchDashboardStats(selectedSite.id, dateRange)
-      fetchAiInsights(selectedSite.id)
+      // fetchAiInsights(selectedSite.id)
       fetchEngagementStats(selectedSite.id, dateRange)
 
       const statsInterval = setInterval(() => {
@@ -60,13 +59,15 @@ const Dashboard = () => {
         fetchEngagementStats(selectedSite.id, dateRange)
       }, 30000)
 
+      /* AI Insights disabled for Community Edition (BYOK coming soon)
       const aiInterval = setInterval(() => {
         fetchAiInsights(selectedSite.id)
       }, 600000)
+      */
 
       return () => {
         clearInterval(statsInterval)
-        clearInterval(aiInterval)
+        // clearInterval(aiInterval)
       }
     }
   }, [selectedSite, dateRange])
@@ -352,10 +353,11 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* AI Intelligence Insights */}
+          {/* AI Insights - Disabled for Community Edition (Pending BYOK)
           <div id="tut-insights-card">
               <InsightsCard />
           </div>
+          */}
 
           <div className="premium-card">
               <h3 className="text-base font-heading font-extrabold mb-6 flex items-center border-b border-border/50 pb-4 -mx-6 px-6">

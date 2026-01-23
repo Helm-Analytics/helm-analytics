@@ -70,12 +70,11 @@ func main() {
 	mux.Handle("/api/debug/latest", trackCors.Handler(http.HandlerFunc(sentinel.DebugLatestEventsHandler)))
 	mux.Handle("/api/debug/visit-time", trackCors.Handler(http.HandlerFunc(sentinel.DebugAvgVisitTimeHandler)))
 	mux.Handle("/api/debug/session", trackCors.Handler(http.HandlerFunc(sentinel.DebugSessionEventsHandler)))
-	mux.Handle("/api/debug/errors", trackCors.Handler(http.HandlerFunc(sentinel.DebugErrorsHandler)))
+	mux.Handle("/api/debug/latest", trackCors.Handler(http.HandlerFunc(sentinel.DebugLatestEventsHandler)))
+	mux.Handle("/api/debug/visit-time", trackCors.Handler(http.HandlerFunc(sentinel.DebugAvgVisitTimeHandler)))
+	mux.Handle("/api/debug/session", trackCors.Handler(http.HandlerFunc(sentinel.DebugSessionEventsHandler)))
 	mux.Handle("/track/click", trackCors.Handler(http.HandlerFunc(sentinel.ClickHandler)))
-	mux.Handle("/track/error", trackCors.Handler(http.HandlerFunc(sentinel.ErrorHandler)))
 	mux.Handle("/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
-	mux.Handle("/track/trap", trackCors.Handler(http.HandlerFunc(sentinel.SpiderTrapHandler))) // Advanced Bot Trap
-	mux.Handle("/api/shield/decision", trackCors.Handler(http.HandlerFunc(sentinel.CheckAccessHandler))) // Shield Decision Endpoint
 
 	mux.Handle("/api/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
 	mux.Handle("/api/users", trackCors.Handler(http.HandlerFunc(sentinel.GetAllUsersHandler)))
@@ -86,11 +85,9 @@ func main() {
 		// Analytics API (Protected)
 	mux.Handle("/api/dashboard", trackCors.Handler(sentinel.AuthMiddleware(sentinel.DashboardApiHandler)))
 	mux.Handle("/api/heatmap", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetHeatmapDataHandler)))
-	mux.Handle("/api/errors", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetErrorsStatsHandler)))
 	mux.Handle("/api/firewall", trackCors.Handler(sentinel.AuthMiddleware(sentinel.FirewallApiHandler)))
 	mux.Handle("/api/session/events", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetSessionEventsHandler)))
 	mux.Handle("/api/sessions", trackCors.Handler(sentinel.AuthMiddleware(sentinel.ListSessionsHandler)))
-	mux.Handle("/api/funnels/", trackCors.Handler(sentinel.AuthMiddleware(sentinel.FunnelsApiHandler)))
 	
 	// Custom Events API
 	mux.Handle("/api/custom-events", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler)))
@@ -103,20 +100,9 @@ func main() {
 	// Campaign & Attribution API
 	mux.Handle("/api/campaigns", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetCampaignStatsHandler)))
 
-	// User Flow API
-	mux.Handle("/api/user-flow", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetUserFlowHandler)))
-
 	// Engagement API (Scroll Depth)
 	mux.Handle("/api/engagement", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetEngagementStatsHandler)))
 	
-	// Admin API (Cloud only - for manual subscription management)
-	mux.HandleFunc("/api/admin/subscription", sentinel.AdminUpdateSubscriptionHandler)
-	mux.HandleFunc("/api/admin/subscription/get", sentinel.AdminGetUserSubscriptionHandler)
-	
-	// AI Features
-	mux.Handle("/api/ai/insights", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetInsightsHandler)))
-	mux.Handle("/api/ai/chat", trackCors.Handler(sentinel.AuthMiddleware(sentinel.ChatHandler)))
-	mux.Handle("/api/ai/analyze-error", trackCors.Handler(sentinel.AuthMiddleware(sentinel.AnalyzeErrorHandler)))
 
 	// Swagger documentation
 	mux.Handle("/docs/", httpSwagger.Handler(
