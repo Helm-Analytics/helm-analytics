@@ -70,9 +70,6 @@ func main() {
 	mux.Handle("/api/debug/latest", trackCors.Handler(http.HandlerFunc(sentinel.DebugLatestEventsHandler)))
 	mux.Handle("/api/debug/visit-time", trackCors.Handler(http.HandlerFunc(sentinel.DebugAvgVisitTimeHandler)))
 	mux.Handle("/api/debug/session", trackCors.Handler(http.HandlerFunc(sentinel.DebugSessionEventsHandler)))
-	mux.Handle("/api/debug/latest", trackCors.Handler(http.HandlerFunc(sentinel.DebugLatestEventsHandler)))
-	mux.Handle("/api/debug/visit-time", trackCors.Handler(http.HandlerFunc(sentinel.DebugAvgVisitTimeHandler)))
-	mux.Handle("/api/debug/session", trackCors.Handler(http.HandlerFunc(sentinel.DebugSessionEventsHandler)))
 	mux.Handle("/track/click", trackCors.Handler(http.HandlerFunc(sentinel.ClickHandler)))
 	mux.Handle("/session", trackCors.Handler(http.HandlerFunc(sentinel.SessionHandler)))
 
@@ -88,6 +85,7 @@ func main() {
 	mux.Handle("/api/firewall", trackCors.Handler(sentinel.AuthMiddleware(sentinel.FirewallApiHandler)))
 	mux.Handle("/api/session/events", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetSessionEventsHandler)))
 	mux.Handle("/api/sessions", trackCors.Handler(sentinel.AuthMiddleware(sentinel.ListSessionsHandler)))
+	mux.Handle("/api/funnels/", trackCors.Handler(sentinel.AuthMiddleware(sentinel.FunnelsApiHandler)))
 	
 	// Custom Events API
 	mux.Handle("/api/custom-events", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler)))

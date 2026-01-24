@@ -169,7 +169,8 @@ const Layout = () => {
     {path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { path: "/session-replay", label: "Sessions", icon: PlayCircle },
     { path: "/heatmap", label: "Heatmaps", icon: MousePointer2 },
-    // Funnels & User Flows removed for Community Edition
+    { path: "/funnels", label: "Funnels", icon: GitMerge },
+    // User Flows removed for Community Edition
     { path: "/campaigns", label: "Campaigns", icon: Target },
     { path: "/custom-events", label: "Events", icon: Activity },
     { path: "/activity", label: "Activity Log", icon: List },

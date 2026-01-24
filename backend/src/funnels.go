@@ -95,10 +95,6 @@ func calculateFunnelStats(siteID string, steps []string) ([]uint64, error) {
 	var conditions []string
 	for range steps {
 		// Basic LIKE matching for now.
-		// Note: Use parameters to prevent injection if possible, but ClickHouse Go driver
-		// handles args differently. For simplicity in dynamic SQL generation here:
-		// Check that step doesn't contain dangerous chars or rely on param binding.
-		// We will use '?' and pass args.
 		conditions = append(conditions, "URL LIKE ?")
 	}
 
@@ -112,7 +108,7 @@ func calculateFunnelStats(siteID string, steps []string) ([]uint64, error) {
 		(
 			SELECT 
 				windowFunnel(604800)(Timestamp, %s) as level 
-			FROM sentinel.events 
+			FROM helm_analytics.events 
 			WHERE SiteID = ? 
 			  AND Timestamp >= now() - INTERVAL 90 DAY 
 			  AND ClientIP NOT IN ('127.0.0.1', '::1')
@@ -135,8 +131,6 @@ func calculateFunnelStats(siteID string, steps []string) ([]uint64, error) {
 	defer rows.Close()
 
 	// Map level -> count
-	// level 0 means no steps matched (but we grouped by ClientIP who had *some* events in range? No, they must be in WHERE)
-	// Actually windowFunnel returns 0 if no events match.
 	levelCounts := make(map[uint8]uint64)
 	for rows.Next() {
 		var level uint8
@@ -148,8 +142,6 @@ func calculateFunnelStats(siteID string, steps []string) ([]uint64, error) {
 	}
 
 	// Calculate cumulative flows
-	// Step i (0-indexed) corresponds to level i+1
-	// Count for Step i = Sum(counts where level >= i+1)
 	stats := make([]uint64, len(steps))
 	for i := 0; i < len(steps); i++ {
 		targetLevel := uint8(i + 1)

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
-import { GitMerge, Plus, Trash2, ArrowDown, ExternalLink, Settings } from 'lucide-react';
+import { GitMerge, Plus, Trash2, ArrowDown, Settings } from 'lucide-react';
+import { FeatureGate } from '../components/FeatureGate';
 
-const FunnelsPage = () => {
+const FunnelsPageContent = () => {
     const { selectedSite } = useOutletContext();
     const [funnels, setFunnels] = useState([]);
     const [newFunnelName, setNewFunnelName] = useState('');
@@ -226,7 +227,7 @@ const FunnelsPage = () => {
                                                     // Conversion from PREVIOUS step
                                                     const conversionRate = prevCount > 0 ? ((count / prevCount) * 100) : (idx === 0 ? 100 : 0);
                                                     
-                                                    // Dropoff from THIS step to NEXT (calculated for all except last)
+                                                    // Dropoff from THIS step to NEXT
                                                     const nextCount = (idx < funnel.steps.length - 1 && funnel.stepCounts) ? funnel.stepCounts[idx + 1] : 0;
                                                     const dropoffCount = count - nextCount;
                                                     const dropoffRate = count > 0 ? ((dropoffCount / count) * 100) : 0;
@@ -266,7 +267,7 @@ const FunnelsPage = () => {
                                                                     )}
                                                                 </div>
 
-                                                                {/* Dropoff Indicator (Only if not last step and has data) */}
+                                                                {/* Dropoff Indicator */}
                                                                 {hasData && !isLast && dropoffCount > 0 && (
                                                                     <div className="mt-4 flex flex-col items-center text-rose-500/80 animate-in slide-in-from-top-2">
                                                                         <ArrowDown className="w-4 h-4 mb-1" />
@@ -282,7 +283,6 @@ const FunnelsPage = () => {
                                                                     <ArrowDown className="lg:-rotate-90 w-6 h-6" />
                                                                 </div>
                                                             )}
-                                                            {/* Mobile Connector */}
                                                             {!isLast && (
                                                                 <div className="lg:hidden my-2 text-muted-foreground/30">
                                                                     <ArrowDown className="w-6 h-6" />
@@ -329,5 +329,8 @@ const FunnelsPage = () => {
         </div>
     );
 };
+
+// FunnelsPage no longer gated for Community
+const FunnelsPage = () => <FunnelsPageContent />;
 
 export default FunnelsPage;
