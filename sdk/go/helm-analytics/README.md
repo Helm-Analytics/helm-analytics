@@ -52,4 +52,11 @@ http.ListenAndServe(":3000", helm.Middleware(mux, true))
 | Field | Description | Default |
 | :--- | :--- | :--- |
 | `SiteID` | Your website's UUID | `HELM_SITE_ID` env var |
-| `APIURL` | Helm Backend URL | `https://api-sentinel.getmusterup.com` |
+| `APIURL` | Helm Backend URL | `HELM_API_URL` env var or `https://api.helm-analytics.com` |
+
+## Features
+
+- **Sub-millisecond overhead**: Optimized for high-throughput Go services.
+- **Shield Mode**: Real-time blocking of malicious traffic.
+- **Auto-UTM Extraction**: Automatically parses campaign data from `*http.Request`.
+- **Customizable Metadata**: Easily attach user data or performance metrics.

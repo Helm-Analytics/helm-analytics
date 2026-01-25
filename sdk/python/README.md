@@ -60,6 +60,8 @@ To link server-side events back to the browser session, pass the `sessionId` fro
 
 - **Non-blocking**: Uses background threads to send data without slowing down your app.
 - **Shield Mode**: Synchronously queries Helm to block threats at the edge.
+- **Auto-UTM Extraction**: Automatically captures marketing campaign data from query strings.
+- **Web Vitals**: Track LCP, CLS, and FID performance metrics from the server.
 - **Custom Events**: Track business milestones beyond simple pageviews.
 - **Session Stitching**: Link server-side actions to web sessions via headers.
 - **Fail-safe**: Failures in tracking do not crash your application.
@@ -70,4 +72,5 @@ You can also set the Site ID via environment variable:
 
 ```bash
 export HELM_SITE_ID="your-uuid"
+export HELM_API_URL="https://analytics.your-domain.com"
 ```

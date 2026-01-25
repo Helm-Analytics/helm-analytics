@@ -83,13 +83,14 @@ image.png
 *.dylib
 bin/
 
+
 # Logs
 *.log
 backend/events.log
 
 # GeoIP databases (should be downloaded during build/deployment)
 backend/GeoLite2-*.mmdb
-
+.agent/
 # License Server & Internal Tools
 license-server/
 tools/

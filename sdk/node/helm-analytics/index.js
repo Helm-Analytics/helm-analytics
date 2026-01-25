@@ -3,7 +3,8 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 class HelmAnalytics {
   constructor(options = {}) {
     this.siteId = options.siteId || process.env.HELM_SITE_ID;
-    this.apiUrl = (options.apiUrl || 'https://api.helm-analytics.com').replace(/\/$/, '').replace(/\/track$/, '');
+    const baseApi = options.apiUrl || process.env.HELM_API_URL || 'https://api.helm-analytics.com';
+    this.apiUrl = baseApi.replace(/\/$/, '').replace(/\/track$/, '');
     
     if (!this.siteId) {
       console.warn('HelmAnalytics: No Site ID provided. Tracking will be disabled.');
@@ -42,20 +43,34 @@ class HelmAnalytics {
   }
 
   // Generic track method
-  async track(req, eventType = 'pageview', metadata = {}, shield = false) {
+  async track(req, eventType = 'pageview', options = {}) {
     if (!this.siteId) return true;
+    
+    const { metadata = {}, shield = false, pageTitle = '', screenWidth = 0, performance = {} } = options;
 
     try {
+      const url = req.originalUrl || req.url || '';
+      const query = req.query || {};
+      
+      // Auto-extract UTMs
+      const utmParams = {};
+      Object.keys(query).forEach(key => {
+        if (key.startsWith('utm_')) utmParams[key] = query[key];
+      });
+
       const payload = {
         siteId: this.siteId,
-        sessionId: req.headers['x-helm-session-id'] || req.sessionId || '', // Support session stitching
-        url: req.originalUrl || req.url,
+        sessionId: req.headers['x-helm-session-id'] || req.sessionId || '', 
+        url: url,
         userAgent: req.headers['user-agent'] || '',
         referrer: req.headers['referer'] || req.headers['referrer'] || '',
-        // ClientIP logic: Headers or socket
         clientIp: req.headers['x-forwarded-for'] ? req.headers['x-forwarded-for'].split(',')[0].trim() : (req.socket ? req.socket.remoteAddress : ''),
         eventType: eventType,
+        pageTitle: pageTitle,
+        screenWidth: screenWidth,
         isServerSide: true,
+        ...utmParams,
+        ...performance,
         ...metadata
       };
 

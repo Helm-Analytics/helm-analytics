@@ -57,5 +57,16 @@ To link server-side events back to the browser session, ensure you pass the `ses
 
 - **Non-blocking**: Uses non-blocking fetch calls for event ingestion.
 - **Shield Mode**: Active defense against bots and malicious traffic.
+- **Auto-UTM Extraction**: Automatically captures marketing campaign data from query strings.
+- **Web Vitals**: Track LCP, CLS, and FID performance metrics from the server.
 - **Custom Events**: Track business milestones beyond pageviews.
 - **Session Stitching**: Maintain user journey continuity via headers.
+
+## Configuration
+
+You can also set the Site ID and API URL via environment variables:
+
+```bash
+export HELM_SITE_ID="your-uuid"
+export HELM_API_URL="https://analytics.your-domain.com"
+```

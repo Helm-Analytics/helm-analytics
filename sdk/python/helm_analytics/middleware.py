@@ -7,10 +7,12 @@ import logging
 logger = logging.getLogger("helm-analytics")
 
 class HelmAnalytics:
-    def __init__(self, site_id=None, api_url="https://api.helm-analytics.com"):
+    def __init__(self, site_id=None, api_url=None):
         self.site_id = site_id or os.getenv('HELM_SITE_ID')
+        # Priority: explicit arg > env var > default cloud URL
+        base_url = api_url or os.getenv('HELM_API_URL') or "https://api.helm-analytics.com"
         # Remove trailing slash and /track if present to get base URL
-        self.api_url = api_url.rstrip('/').replace('/track', '')
+        self.api_url = base_url.rstrip('/').replace('/track', '')
         
         if not self.site_id:
             logger.warning("HelmAnalytics: No Site ID provided. Tracking will be disabled.")
@@ -68,10 +70,11 @@ class HelmAnalytics:
             logger.error(f"Helm Shield Error: {e}")
             return True, "error_open"
 
-    def track(self, request, event_type="pageview", metadata=None, shield=False):
+    def track(self, request, event_type="pageview", metadata=None, shield=False, 
+              page_title=None, screen_width=0, lcp=None, cls=None, fid=None):
         """
         Generic track method. 
-        If shield=True, this method returns False if the request should be blocked.
+        Supports UTM attribution, Web Vitals, and server-side shield protection.
         """
         try:
             # 1. URL
@@ -100,18 +103,21 @@ class HelmAnalytics:
             user_agent = headers.get('user-agent') if hasattr(headers, 'get') else ''
             referrer = headers.get('referer') if hasattr(headers, 'get') else ''
             
-            # Session ID from header
+            # 4. Session ID from header
             session_id = headers.get('x-helm-session-id') if hasattr(headers, 'get') else ''
             if not session_id and hasattr(request, 'session_id'):
                 session_id = request.session_id
             
-            # Fallback for dict-like headers
-            if not user_agent and isinstance(headers, dict):
-                 user_agent = headers.get('User-Agent', '')
-            if not referrer and isinstance(headers, dict):
-                 referrer = headers.get('Referer', '')
-            if not session_id and isinstance(headers, dict):
-                 session_id = headers.get('X-Helm-Session-Id', '')
+            # 5. Extract UTMs from query params (if available)
+            utm_params = {}
+            if hasattr(request, 'query_params'): # FastAPI/Starlette
+                for k, v in request.query_params.items():
+                    if k.startswith('utm_'):
+                        utm_params[k] = v
+            elif hasattr(request, 'args'): # Flask
+                for k, v in request.args.items():
+                    if k.startswith('utm_'):
+                        utm_params[k] = v
 
             payload = {
                 "siteId": self.site_id,
@@ -121,9 +127,17 @@ class HelmAnalytics:
                 "userAgent": user_agent,
                 "referrer": referrer,
                 "eventType": event_type,
-                "screenWidth": 0,
-                "isServerSide": True
+                "screenWidth": screen_width,
+                "pageTitle": page_title or "",
+                "isServerSide": True,
+                **utm_params
             }
+
+            # Performance Metrics (Vitals)
+            if lcp: payload["LCP"] = float(lcp)
+            if cls: payload["CLS"] = float(cls)
+            if fid: payload["FID"] = float(fid)
+
             if metadata:
                 payload.update(metadata)
             

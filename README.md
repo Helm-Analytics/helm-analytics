@@ -1,90 +1,249 @@
 # Helm Analytics
 
-**Privacy-first, self-hosted web analytics platform.**
+<div align="center">
+  <img src="assets/dashboard.png" alt="Helm Analytics Dashboard" width="100%" />
+</div>
 
-Helm Analytics provides real-time traffic insights, session replay, and conversion tracking while maintaining complete data ownership and compliance. Designed as a high-performance alternative to SaaS analytics, it runs entirely on your infrastructure.
+<div align="center">
 
-![Dashboard Preview](assets/dashboard.png)
+**The High-Performance, Privacy-First Web Analytics Platform.**
 
-## Overview
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Docker Pulls](https://img.shields.io/docker/pulls/danielowenllm/helm-analytics-backend.svg)](https://hub.docker.com/r/danielowenllm/helm-analytics-backend)
+[![Go Report Card](https://goreportcard.com/badge/github.com/helm-analytics/helm-analytics)](https://goreportcard.com/report/github.com/helm-analytics/helm-analytics)
 
-Helm Analytics is built for performance and privacy. It uses a lightweight JavaScript tracker (< 2KB) to collect essential metrics without cookies or invasive fingerprinting. The backend leverages ClickHouse for rapid query execution on large datasets.
+[Live Demo](https://app.helm-analytics.com/demo) · [Documentation](https://docs.helm-analytics.com) · [Community](https://discord.gg/helm-analytics)
 
-**Key Capabilities:**
-- **Real-Time Dashboard:** Monitor visitors, page views, and traffic sources instantly.
-- **Session Replay:** Visual playback of user interactions to identify UX issues.
-- **Conversion Funnels:** Track user journeys through multi-step flows.
-- **Heatmaps:** Click and scroll analysis for page optimization.
-- **Privacy Compliance:** GDPR/CCPA compliant by design. No PII storage.
+</div>
 
-## Architecture
+---
 
-The platform consists of three core components:
+## 📖 Introduction
 
-1.  **Ingestion API (Go):** High-throughput event collector. Handles validation, rate limiting, and writes to ClickHouse.
-2.  **Analytics Engine (ClickHouse):** Columnar database optimized for aggregation queries.
-3.  **Dashboard (React/Vite):** Single-page application for data visualization and management.
+Helm Analytics is a self-hosted, open-source alternative to Google Analytics, designed for those who care about speed, privacy, and data ownership. 
 
-## Quick Start
+Unlike traditional analytics tools that bloat your website with heavy scripts and sell your user data, Helm uses a **< 2KB lightweight tracker** and stores all data on your own infrastructure (or our private cloud). We utilize **ClickHouse** for sub-second query performance on massive datasets.
 
-The recommended way to deploy Helm Analytics is via Docker Compose.
+## 🚀 Why Helm? (Comparison)
+
+| Feature | Helm Analytics | Google Analytics 4 | Plausible / Fathom |
+| :--- | :--- | :--- | :--- |
+| **Privacy Law Compliance** | ✅ GDPR/CCPA Ready | ❌ Complex / Grey Area | ✅ Yes |
+| **Data Ownership** | ✅ 100% Yours | ❌ Google's Data | ✅ Yours |
+| **Script Weight** | ⚡ **< 2 KB** | 🐢 ~45 KB | ~1 KB |
+| **Cookies** | 🍪 **Cookie-Free** | 🍪 Heavy Usage | Cookie-Free |
+| **Session Replay** | ✅ **Included** | ❌ No | ❌ No (Usually separate) |
+| **Heatmaps** | ✅ **Included** | ❌ No | ❌ No |
+| **Self-Hosted Option** | ✅ MIT License | ❌ No | ✅ / ❌ (Varies) |
+
+---
+
+## ✨ Key Features
+
+### 📊 Core Analytics
+- **Real-Time Traffic:** See visitors on your site *right now*.
+- **Privacy-First Tracking:** Unique visitor counting without persistent cookies or IP logging.
+- **Device & Geo Data:** Breakdown by Browser, OS, Country, and City.
+- **UTM Campaign Tracking:** Automatic attribution for marketing campaigns.
+
+### 🎭 Session Intelligence
+- **Session Replay:** Watch high-fidelity replays of user sessions to understand behavior. 
+  - *Privacy Note:* All inputs and text can be masked automatically.
+- **Heatmaps:** Visualize Click and Scroll data to optimize landing pages.
+- **Conversion Funnels:** Define multi-step paths and spot where users drop off.
+
+### 🛡️ Security & Performance
+- **Application WAF:** Built-in protection against XSS, SQLi, and path traversal attacks directly in the ingestion layer.
+- **Rate Limiting:** Automatic IP-based rate limiting to prevent abuse.
+- **Zero-Dependency Tracker:** No external requests, no ad-blocker triggers (when self-hosted).
+
+---
+
+## 🛠️ Architecture
+
+Helm is designed for horizontal scalability and high throughput.
+
+```mermaid
+graph TD
+    User[Visitor Browser] -->|HTTP POST /track| LoadBalancer
+    LoadBalancer -->|Traffic| API[Ingestion API (Go)]
+    API -->|Write (Batch)| ClickHouse[(ClickHouse DB)]
+    API -->|Metadata| PostgreSQL[(PostgreSQL DB)]
+    API -->|Read (Aggregates)| ClickHouse
+    Admin[Dashboard User] -->|View Stats| API
+```
+
+- **Ingestion API (Go):** Handles thousands of requests per second with minimal CPU footprint.
+- **Storage (ClickHouse):** Columnar database optimized for analytical queries (OLAP).
+- **Metadata (PostgreSQL):** Stores user accounts, site configurations, and saved reports.
+- **Frontend (React/Vite):** A fast Single Page Application (SPA) for the dashboard.
+
+---
+
+## ⚡ Quick Start (Docker Compose)
+
+The fastest way to run Helm Analytics in production is using Docker Compose.
 
 ### Prerequisites
-- Docker & Docker Compose
-- 2GB RAM (Recommended minimum)
+- Docker Engine 24+
+- Docker Compose v2+
+- 2 GB RAM (Recommended 4GB for ClickHouse + Postgres)
 
-### Deployment
+### 1. Installation
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/helm-analytics/helm-analytics.git
-    cd helm-analytics
-    ```
+```bash
+# Clone the repository
+git clone https://github.com/helm-analytics/helm-analytics.git
+cd helm-analytics
 
-2.  **Start services:**
-    ```bash
-    docker-compose up -d
-    ```
+# Download the production compose file
+curl -o docker-compose.yml https://raw.githubusercontent.com/helm-analytics/helm-analytics/main/docker-compose.yml
 
-3.  **Access the dashboard:**
-    Open `http://localhost:8012` in your browser.
-    
-    **Default Credentials:**
-    - Email: `admin@helm-analytics.com`
-    - Password: `admin123`
-
-> **Security Note:** Change the default password immediately after initial login.
-
-## Integration
-
-Add the tracking script to your website's `<head>` section. Replace `SITE_ID` with the ID generated in your dashboard.
-
-```html
-<script 
-  defer 
-  data-site-id="SITE_ID" 
-  data-api="https://your-instance.com" 
-  src="https://your-instance.com/static/tracker-v5.js">
-</script>
+# Start the stack
+docker-compose up -d
 ```
 
-### Custom Events
+### 2. Access & Setup
 
-Track specific user actions using the `helm` global object:
+1.  Open `http://localhost:8012` (or your server IP).
+2.  Log in with default credentials:
+    -   **Email:** `admin@helm-analytics.com`
+    -   **Password:** `admin123`
+3.  **IMPORTANT:** Go to Profile and change your password immediately.
+
+### 3. Add Your Website
+
+1.  Click **"Add Site"** in the dashboard.
+2.  Enter your domain name (e.g., `example.com`).
+3.  Copy the generated Tracking Snippet.
+
+---
+
+## 🔌 Integration Guide (SDKs)
+
+Helm offers high-performance server-side SDKs to track events, performance, and protect your API.
+
+### ⚙️ Global Configuration
+Configure your SDKs via Environment Variables for zero-code configuration:
+- `HELM_SITE_ID`: Your unique site identifier.
+- `HELM_API_URL`: Set this if you are self-hosting Helm (e.g., `https://analytics.your-domain.com`).
+
+### 🐍 Python SDK
+**Features**: Automatic UTM extraction, Flask/FastAPI middleware, blocking firewall protection.
+
+```python
+from helm_analytics import HelmAnalytics
+
+# Configured automatically via HELM_SITE_ID & HELM_API_URL env vars
+helm = HelmAnalytics()
+
+# Manual Tracking with Web Vitals
+helm.track(request, page_title="Checkout", lcp=1.2, cls=0.01)
+
+# Middleware (FastAPI)
+app.add_middleware(BaseHTTPMiddleware, dispatch=helm.fastapi_middleware(shield=True))
+```
+
+### 🟢 Node.js SDK
+**Features**: Express/Koa support, auto-UTM parsing, non-blocking ingestion.
 
 ```javascript
-// Track button click
-helm.trackEvent('signup_click', { plan: 'pro' });
+const HelmAnalytics = require('helm-analytics');
+const helm = new HelmAnalytics();
+
+// Track pageview with custom metadata
+await helm.track(req, 'pageview', { 
+  options: { pageTitle: 'Pricing', screenWidth: 1920 } 
+});
+
+// Express Middleware with Aegis Shield (Firewall)
+app.use(helm.middleware({ shield: true }));
 ```
 
-## Documentation
+### 💙 Go SDK
+**Features**: Sub-millisecond overhead, raw HTTP handler support, type-safe tracking.
 
-Comprehensive documentation is available at [docs.helm-analytics.com](https://docs.helm-analytics.com).
+```go
+import "github.com/helm-analytics/helm-go"
 
-- [Installation Guide](https://docs.helm-analytics.com/guide/installation)
-- [API Reference](https://docs.helm-analytics.com/api/tracking)
-- [Self-Hosting](https://docs.helm-analytics.com/self-hosting/docker)
+h := helm.New(helm.Config{}) // Pulls from ENV
 
-## License
+func handler(w http.ResponseWriter, r *http.Request) {
+    // track returns false if blocked by firewall
+    if !h.Track(r, "pageview", nil, true) {
+        return 
+    }
+}
+```
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+### 🧪 Advanced Tracking
+All SDKs support:
+- **UTM Attribution**: Automatically parsed from query strings.
+- **Custom Events**: `trackEvent(req, 'button_click', { color: 'blue' })`.
+- **Aegis Shield**: Real-time blocking of malicious IPs and bots before your app processes the request.
+- **Web Vitals**: Capture LCP, CLS, and FID directly from the server.
+
+---
+
+## ⚙️ Configuration Reference
+
+Helm is configured via environment variables in `.env` or `docker-compose.yml`.
+
+### Essential Config
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `DATABASE_URL` | PostgreSQL connection string | `postgres://user:pass@db:5432/helm` |
+| `CLICKHOUSE_URL` | ClickHouse TCP connection | `tcp://clickhouse:9000` |
+| `ADMIN_SECRET` | Secret key for session signing | **CHANGE_THIS** |
+| `PORT` | API Server Port | `6060` |
+
+### Feature Flags
+
+| Variable | Description | Default |
+| :--- | :--- | :--- |
+| `ENABLE_REGISTRATION` | Allow public signups | `false` |
+| `SESSION_REPLAY_ENABLED` | Enable recording features | `true` |
+| `RETENTION_DAYS` | Data retention period | `365` |
+
+---
+
+## 🔧 Troubleshooting
+
+### "Tracker script returns 404"
+Ensure your `docker-compose` volumes are mounted correctly and the `static` directory exists in the backend container.
+
+### "ClickHouse Connection Refused"
+ClickHouse takes a few seconds to start. The backend container usually retries automatically, but you may need to restart the backend:
+```bash
+docker-compose restart backend
+```
+
+### "Data not showing in dashboard"
+1. Check browser console for network errors (CSP blocking the script?).
+2. Ensure `data-api` points to the correct URL (your self-hosted instance, not example.com).
+3. Check backend logs: `docker-compose logs -f backend`.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community!
+
+1.  **Fork** the project.
+2.  **Create** your feature branch (`git checkout -b feature/AmazingFeature`).
+3.  **Commit** your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  **Push** to the branch (`git push origin feature/AmazingFeature`).
+5.  **Open** a Pull Request.
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and development process.
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <small>Made with ❤️ by <a href="https://github.com/danielowenllm">Daniel Owen</a> and the Community</small>
+</div>

@@ -30,7 +30,10 @@ func New(cfg Config) *HelmAnalytics {
 		cfg.SiteID = os.Getenv("HELM_SITE_ID")
 	}
 	if cfg.APIURL == "" {
-		cfg.APIURL = "https://api.helm-analytics.com"
+		cfg.APIURL = os.Getenv("HELM_API_URL")
+		if cfg.APIURL == "" {
+			cfg.APIURL = "https://api.helm-analytics.com"
+		}
 	}
 
 	// Clean URL
@@ -105,7 +108,7 @@ func (h *HelmAnalytics) Track(r *http.Request, eventType string, metadata map[st
 		ip = strings.TrimSpace(parts[0])
 	}
 
-	// Session ID from header or request context
+	// Session ID from header
 	sessionID := r.Header.Get("X-Helm-Session-Id")
 
 	// Prepare Payload
@@ -118,9 +121,18 @@ func (h *HelmAnalytics) Track(r *http.Request, eventType string, metadata map[st
 		"referrer":     r.Referer(),
 		"eventType":    eventType,
 		"screenWidth":  0,
+		"pageTitle":    "", // User can override in metadata
 		"isServerSide": true,
 	}
 	
+	// Auto-extract UTM parameters
+	query := r.URL.Query()
+	for k, v := range query {
+		if strings.HasPrefix(strings.ToLower(k), "utm_") && len(v) > 0 {
+			payload[k] = v[0]
+		}
+	}
+
 	for k, v := range metadata {
 		payload[k] = v
 	}
