@@ -344,6 +344,25 @@ func InitDemoHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if demo site exists for this user
+	var siteID string
+	err = db.QueryRow("SELECT id FROM sites WHERE user_id = $1 AND name = $2", userID, "Demo Analytics Site").Scan(&siteID)
+	
+	if err == sql.ErrNoRows {
+		// Create demo site
+		err = db.QueryRow(
+			"INSERT INTO sites (user_id, name, domain, shield_mode) VALUES ($1, $2, $3, $4) RETURNING id",
+			userID, "Demo Analytics Site", "demo.helm-analytics.com", true,
+		).Scan(&siteID)
+		
+		if err != nil {
+			log.Printf("Error creating demo site: %v", err)
+			// Non-fatal - user can still use the demo, just without a pre-created site
+		} else {
+			log.Printf("✅ Demo site created with ID: %s", siteID)
+		}
+	}
+
 	// Set session cookie for demo user
 	http.SetCookie(w, &http.Cookie{
 		Name:     "sentinel_session",
@@ -361,5 +380,6 @@ func InitDemoHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Demo initialized successfully",
 		"user_id": userID,
 		"email":   demoEmail,
+		"site_id": siteID,
 	})
 }
