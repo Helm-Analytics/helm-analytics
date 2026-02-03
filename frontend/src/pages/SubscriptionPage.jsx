@@ -24,20 +24,20 @@ const SubscriptionPage = () => {
 
   const fetchUserPlan = async () => {
     try {
-      // Get email from localStorage or session
-      const email = localStorage.getItem('userEmail');
-      if (!email) {
-        setLoading(false);
-        return;
-      }
-
-      const response = await fetch(`${CLOUD_API_URL}/api/user/plan?email=${encodeURIComponent(email)}`);
-      if (response.ok) {
-        const data = await response.json();
-        setUserPlan(data);
-      }
+      // Prioritize session cookie by calling API without arguments first
+      // The backend will extract user from cookie
+      const data = await api.getUserPlan();
+      setUserPlan(data);
     } catch (err) {
       console.error('Failed to fetch plan:', err);
+      // Fallback: If cookie auth fails, try using email from localStorage (rare edge case)
+      const email = localStorage.getItem('userEmail');
+      if (email) {
+          try {
+             const dataFallback = await api.getUserPlan(email);
+             setUserPlan(dataFallback);
+          } catch (e) { console.error('Fallback plan fetch failed', e); }
+      }
     } finally {
       setLoading(false);
     }

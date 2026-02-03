@@ -239,7 +239,9 @@ const Layout = () => {
                 {isSiteDropdownOpen && sites.length > 1 && (
                   <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="max-h-64 overflow-y-auto">
-                      {sites.filter(site => site.id !== selectedSite?.id).map((site) => (
+                      {sites
+                        .filter(site => site.id !== selectedSite?.id)
+                        .map((site) => (
                         <button
                           key={site.id}
                           onClick={() => {
