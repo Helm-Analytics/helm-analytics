@@ -241,7 +241,7 @@ const CampaignsPage = () => {
             </h4>
             <div className="flex items-center gap-2 bg-background p-3 rounded-xl border border-border group overflow-hidden">
                 <code className="text-xs text-sky-500 font-mono truncate flex-1">
-                  {selectedSite.domain || 'yoursite.com'}/?utm_source=<b>google</b>&utm_medium=<b>cpc</b>&utm_campaign=<b>summersale</b>
+                  {selectedSite.name || 'yoursite.com'}/?utm_source=<b>google</b>&utm_medium=<b>cpc</b>&utm_campaign=<b>summersale</b>
                 </code>
             </div>
             <p className="text-[11px] text-muted-foreground mt-3 italic">
