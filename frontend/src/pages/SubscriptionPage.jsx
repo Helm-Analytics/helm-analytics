@@ -5,10 +5,10 @@ import { Crown, Zap, Check, ArrowRight, Loader2 } from 'lucide-react';
 const CLOUD_API_URL = 'https://cloud.helm-analytics.com';
 
 const plans = [
-  { id: 'free', name: 'Hobby', price: '$0', monthly: '/month', eventLimit: '10,000', features: ['10,000 events/month', '30-day data retention', '3 Websites', 'Community support'] },
-  { id: 'pro', name: 'Pro', price: '$12', monthly: '/month', eventLimit: '100,000', features: ['100,000 events/month', '12-month data retention', 'Unlimited Websites', 'Priority email support', 'Session Replays', 'Custom Events'], popular: true },
-  { id: 'growth', name: 'Growth', price: '$25', monthly: '/month', eventLimit: '500,000', features: ['500,000 events/month', '12-month data retention', 'Unlimited Websites', 'Dedicated support', 'Everything in Pro', 'Bot Detection'] },
-  { id: 'enterprise', name: 'Enterprise', price: 'Custom', monthly: '', eventLimit: 'Unlimited', features: ['Unlimited events', '12-month data retention', 'Unlimited Websites', 'Dedicated account manager', 'Everything in Growth', 'SLA guarantee'] },
+  { id: 'free', name: 'Hobby', priceMonthly: '$0', priceYearly: '$0', eventLimit: '10,000', features: ['10,000 events/month', '30-day data retention', '3 Websites', 'Community support'] },
+  { id: 'pro', name: 'Pro', priceMonthly: '$12', priceYearly: '$120', eventLimit: '100,000', features: ['100,000 events/month', '12-month data retention', 'Unlimited Websites', 'Priority email support', 'Session Replays', 'Custom Events'], popular: true },
+  { id: 'growth', name: 'Growth', priceMonthly: '$25', priceYearly: '$250', eventLimit: '500,000', features: ['500,000 events/month', '12-month data retention', 'Unlimited Websites', 'Dedicated support', 'Everything in Pro', 'Bot Detection'] },
+  { id: 'enterprise', name: 'Enterprise', priceMonthly: 'Custom', priceYearly: 'Custom', eventLimit: 'Unlimited', features: ['Unlimited events', '12-month data retention', 'Unlimited Websites', 'Dedicated account manager', 'Everything in Growth', 'SLA guarantee'] },
 ];
 
 const SubscriptionPage = () => {
@@ -17,6 +17,7 @@ const SubscriptionPage = () => {
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [billingCycle, setBillingCycle] = useState('monthly');
 
   useEffect(() => {
     fetchUserPlan();
@@ -55,7 +56,11 @@ const SubscriptionPage = () => {
       const response = await fetch(`${CLOUD_API_URL}/api/upgrade`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, plan: planId }),
+        body: JSON.stringify({ 
+          email, 
+          plan: planId,
+          billing_cycle: billingCycle
+        }),
       });
 
       const data = await response.json();
@@ -200,10 +205,32 @@ const SubscriptionPage = () => {
         </div>
       </div>
 
-      {/* Plan Comparison */}
-      <div>
-        <h2 className="text-xl font-bold mb-4">All Plans</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Plan Selection Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+        <h2 className="text-xl font-bold">All Plans</h2>
+        
+        <div className="flex items-center gap-2 p-1 bg-secondary/50 rounded-xl border border-border/50 self-start">
+          <button
+            onClick={() => setBillingCycle('monthly')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              billingCycle === 'monthly' ? 'bg-primary text-primary-foreground shadow-md' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBillingCycle('yearly')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              billingCycle === 'yearly' ? 'bg-accent text-accent-foreground shadow-md' : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            Yearly
+            <span className="bg-emerald-500/20 text-emerald-500 px-1.5 py-0.5 rounded-md text-[9px] animate-pulse">Save 20%</span>
+          </button>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {plans.map((plan, index) => {
             const isCurrent = plan.id === (userPlan?.plan || 'free');
             const isEnterprise = plan.id === 'enterprise';
@@ -229,10 +256,16 @@ const SubscriptionPage = () => {
                 
                 <h3 className="font-bold text-lg">{plan.name}</h3>
                 <div className="flex items-baseline gap-1 mt-2">
-                  <span className="text-2xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground text-sm">{plan.monthly}</span>
+                  <span className="text-2xl font-bold">
+                    {billingCycle === 'monthly' ? plan.priceMonthly : plan.priceYearly}
+                  </span>
+                  <span className="text-muted-foreground text-sm">
+                    {plan.priceMonthly === 'Custom' ? '' : (billingCycle === 'monthly' ? '/mo' : '/yr')}
+                  </span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">{plan.eventLimit === 'Unlimited' ? 'Unlimited events' : `${plan.eventLimit} events/mo`}</p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {plan.eventLimit === 'Unlimited' ? 'Unlimited events' : `${plan.eventLimit} events/${billingCycle === 'monthly' ? 'mo' : 'yr'}`}
+                </p>
                 
                 <ul className="mt-4 space-y-2">
                   {plan.features.slice(0, 4).map((feature, i) => (
@@ -275,7 +308,10 @@ const SubscriptionPage = () => {
               {plans.filter(p => plans.findIndex(pl => pl.id === p.id) > currentPlanIndex).map(plan => (
                 <div key={plan.id} className={`border rounded-xl p-4 ${plan.popular ? 'border-accent' : 'border-border'}`}>
                   <h3 className="font-bold">{plan.name}</h3>
-                  <p className="text-2xl font-bold mt-1">{plan.price}<span className="text-sm text-muted-foreground">/mo</span></p>
+                  <p className="text-2xl font-bold mt-1">
+                    {billingCycle === 'monthly' ? plan.priceMonthly : plan.priceYearly}
+                    <span className="text-sm text-muted-foreground">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
+                  </p>
                   <button
                     onClick={() => handleUpgrade(plan.id)}
                     disabled={upgrading}
