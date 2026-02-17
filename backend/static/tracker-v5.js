@@ -286,7 +286,8 @@
                         console.log('[Sentinel v5] Event type:', event.type, 'Total events:', events.length);
                     }
                     events.push(event);
-                    if (events.length > 2) {
+                    // Batch optimization: Send every 50 events or via 5s interval
+                    if (events.length >= 50) {
                         sendEvents();
                     }
                 },
@@ -351,7 +352,7 @@
                     stopRecording = window.rrweb.record({
                         emit(event) {
                             events.push(event);
-                            if (events.length > 2) {
+                            if (events.length >= 50) {
                                 sendEvents();
                             }
                         },
