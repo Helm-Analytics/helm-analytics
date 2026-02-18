@@ -278,149 +278,92 @@
 
         // Session replay recording with PRIVACY MASKING
         let stopRecording = null;
-        if (typeof window.rrweb !== 'undefined' && window.rrweb.record) {
-            stopRecording = window.rrweb.record({
-                emit(event) {
-                    // Debug: Log first few events to check for snapshot
-                    if (events.length < 5) {
-                        console.log('[Sentinel v5] Event type:', event.type, 'Total events:', events.length);
-                    }
-                    events.push(event);
-                    // Batch optimization: Send every 50 events or via 5s interval
-                    if (events.length >= 50) {
-                        sendEvents();
-                    }
-                },
-                checkoutEveryNth: 100,
-                
-                // PRIVACY CONFIGURATION
-                maskAllInputs: true,              // Mask all input fields by default
-                maskInputOptions: {
-                    password: true,                 // Always mask passwords
-                    email: true,                    // Mask email inputs
-                    tel: true,                      // Mask phone numbers
-                    text: true,                     // Mask text inputs
-                    textarea: true,                 // Mask textareas
-                    select: false,                  // Show select dropdowns (usually safe)
-                    radio: false,                   // Show radio buttons
-                    checkbox: false                 // Show checkboxes
-                },
-                
-                // Block credit card fields and sensitive inputs completely
-                blockSelector: [
-                    'input[autocomplete*="cc-"]',
-                    'input[name*="card"]',
-                    'input[id*="card"]',
-                    'input[name*="cvv"]',
-                    'input[name*="ssn"]',
-                    'input[type="password"]',
-                    '[data-sensitive]'
-                ].join(','),
-                
-                // Mask text content with data-private attribute
-                maskTextSelector: '[data-private], .sensitive-data, .pii',
-                
-                // Additional security - remove unnecessary elements
-                slimDOMOptions: {
-                    script: true,                   // Remove script tags
-                    comment: true,                  // Remove comments
-                    headFavicon: true,             // Remove favicon
-                },
-                
-                // Reduce data size and improve performance
-                sampling: {
-                    mousemove: true,                // Sample mouse movements
-                    mouseInteraction: false,        // Keep all clicks
-                    scroll: 10,                     // Sample every 10th scroll event
-                    input: 'last'                   // Only record final input value (masked)
-                }
-            });
-        }
+        
+        const startTracker = () => {
+            if (typeof window.rrweb !== 'undefined' && window.rrweb.record && !stopRecording) {
+                stopRecording = window.rrweb.record({
+                    emit(event) {
+                        events.push(event);
+                        if (events.length >= 100) {
+                            sendEvents();
+                        }
+                    },
+                    checkoutEveryNth: 100,
+                    maskAllInputs: true,
+                    maskInputOptions: {
+                        password: true,
+                        email: true,
+                        tel: true,
+                        text: true,
+                        textarea: true,
+                        select: false,
+                        radio: false,
+                        checkbox: false
+                    },
+                    blockSelector: [
+                        'input[autocomplete*="cc-"]',
+                        'input[name*="card"]',
+                        'input[id*="card"]',
+                        'input[name*="cvv"]',
+                        'input[name*="ssn"]',
+                        'input[type="password"]',
+                        '[data-sensitive]'
+                    ].join(','),
+                    maskTextSelector: '[data-private], .sensitive-data, .pii',
+                    slimDOMOptions: {
+                        script: true,
+                        comment: true,
+                        headFavicon: true,
+                    },
+                    sampling: {
+                        mousemove: 500,
+                        mouseInteraction: false,
+                        scroll: 20,
+                        input: 'last'
+                    },
+                    recordLog: false,
+                    recordCanvas: false
+                });
+            }
+        };
+
+        // Start initial recording
+        startTracker();
 
         // Pause/resume recording when tab visibility changes
         document.addEventListener('visibilitychange', function() {
             if (document.visibilityState === 'hidden') {
-                // Pause recording by stopping and flushing events
                 if (stopRecording) {
                     stopRecording();
                     stopRecording = null;
                 }
                 sendEvents(true);
             } else if (document.visibilityState === 'visible') {
-                // Resume recording when tab becomes active again - with privacy masking
-                if (!stopRecording && typeof window.rrweb !== 'undefined' && window.rrweb.record) {
-                    stopRecording = window.rrweb.record({
-                        emit(event) {
-                            events.push(event);
-                            if (events.length >= 50) {
-                                sendEvents();
-                            }
-                        },
-                        checkoutEveryNth: 100,
-                        maskAllInputs: true,
-                        maskInputOptions: {
-                            password: true,
-                            email: true,
-                            tel: true,
-                            text: true,
-                            textarea: true,
-                            select: false,
-                            radio: false,
-                            checkbox: false
-                        },
-                        blockSelector: [
-                            'input[autocomplete*="cc-"]',
-                            'input[name*="card"]',
-                            'input[id*="card"]',
-                            'input[name*="cvv"]',
-                            'input[name*="ssn"]',
-                            'input[type="password"]',
-                            '[data-sensitive]'
-                        ].join(','),
-                        maskTextSelector: '[data-private], .sensitive-data, .pii',
-                        slimDOMOptions: {
-                            script: true,
-                            comment: true,
-                            headFavicon: true,
-                        },
-                        sampling: {
-                            mousemove: true,
-                            mouseInteraction: false,
-                            scroll: 10,
-                            input: 'last'
-                        }
-                    });
-                }
+                startTracker();
             }
         });
 
         function sendEvents(isUnload = false) {
             if (events.length === 0) return;
-            console.log('[Sentinel v5] Sending', events.length, 'events. First event type:', events[0]?.type);
             const body = JSON.stringify({ 
                 siteId: siteId,
                 sessionId: sessionId, 
                 events: events 
             });
             events = [];
+            
             fetch(sessionEndpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: body,
                 keepalive: isUnload
-            }).catch(err => console.error('Session replay error:', err));
+            }).catch(err => {}); // Silent catch for network errors to avoid console noise
         }
 
-        setInterval(sendEvents, 5000);
+        setInterval(sendEvents, 10000);
         
-        // Flush on exit - match v4 exactly
-        const flushOnUnload = () => sendEvents(true);
-        window.addEventListener('pagehide', flushOnUnload);
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                sendEvents(true);
-            }
-        });
+        // Flush on exit
+        window.addEventListener('pagehide', () => sendEvents(true));
 
         // Click heatmap tracking
         document.addEventListener('click', function(e) {
@@ -439,7 +382,7 @@
                     x, y, target, text
                 }),
                 keepalive: true
-            }).catch(err => console.error('Click tracking error:', err));
+            }).catch(err => {});
         });
 
         // Error tracking
