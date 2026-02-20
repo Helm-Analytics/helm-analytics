@@ -3,6 +3,7 @@ const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch
 class HelmAnalytics {
   constructor(options = {}) {
     this.siteId = options.siteId || process.env.HELM_SITE_ID;
+    this.apiKey = options.apiKey || process.env.HELM_API_KEY;
     const baseApi = options.apiUrl || process.env.HELM_API_URL || 'https://api.helm-analytics.com';
     this.apiUrl = baseApi.replace(/\/$/, '').replace(/\/track$/, '');
     
@@ -23,10 +24,15 @@ class HelmAnalytics {
             url: payload.url
         };
 
+        const headers = { 'Content-Type': 'application/json' };
+        if (this.apiKey) {
+            headers['Authorization'] = `Bearer ${this.apiKey}`;
+        }
+
         const res = await fetch(`${this.apiUrl}/api/shield/decision`, {
             method: 'POST',
             body: JSON.stringify(checkPayload),
-            headers: { 'Content-Type': 'application/json' }
+            headers: headers
         });
 
         if (res.ok) {
@@ -83,11 +89,16 @@ class HelmAnalytics {
         }
       }
 
+      const headers = { 'Content-Type': 'application/json' };
+      if (this.apiKey) {
+          headers['Authorization'] = `Bearer ${this.apiKey}`;
+      }
+
       // Fire and forget
       fetch(`${this.apiUrl}/track`, {
         method: 'POST',
         body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'application/json' }
+        headers: headers
       }).catch(err => {});
 
       return true;
@@ -112,10 +123,15 @@ class HelmAnalytics {
         isServerSide: true
       };
 
+      const headers = { 'Content-Type': 'application/json' };
+      if (this.apiKey) {
+          headers['Authorization'] = `Bearer ${this.apiKey}`;
+      }
+
       fetch(`${this.apiUrl}/track/event`, {
         method: 'POST',
         body: JSON.stringify(payload),
-        headers: { 'Content-Type': 'application/json' }
+        headers: headers
       }).catch(err => {});
 
       return true;

@@ -5,10 +5,21 @@
         return;
     }
     const siteId = scriptTag.getAttribute('data-site-id');
-    const apiEndpoint = 'https://api.helm-analytics.com/track';
-    const clickEndpoint = 'https://api.helm-analytics.com/track/click';
-    const errorEndpoint = 'https://api.helm-analytics.com/track/error';
-    const sessionEndpoint = 'https://api.helm-analytics.com/session';
+    
+    let apiBase = scriptTag.getAttribute('data-api');
+    if (!apiBase && scriptTag.src) {
+        try {
+            const scriptUrl = new URL(scriptTag.src);
+            apiBase = `${scriptUrl.protocol}//${scriptUrl.host}`;
+        } catch (e) {
+            console.error('Sentinel: Unable to detect API URL');
+        }
+    }
+    
+    const apiEndpoint = `${apiBase}/track`;
+    const clickEndpoint = `${apiBase}/track/click`;
+    const errorEndpoint = `${apiBase}/track/error`;
+    const sessionEndpoint = `${apiBase}/session`;
 
     // Inject rrweb
     const rrwebScript = document.createElement('script');
@@ -210,7 +221,7 @@
         // --- Spider Trap (Honey Pot) ---
         (function() {
             const trap = document.createElement('a');
-            trap.href = `https://api.helm-analytics.com/track/trap?siteId=${siteId}`;
+            trap.href = `${apiBase}/track/trap?siteId=${siteId}`;
             trap.style.display = 'none';
             trap.setAttribute('aria-hidden', 'true');
             trap.innerText = 'Health Check';

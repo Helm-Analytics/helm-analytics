@@ -15,12 +15,14 @@ import (
 type Config struct {
 	SiteID string
 	APIURL string
+	APIKey string
 }
 
 // HelmAnalytics is the main client struct
 type HelmAnalytics struct {
 	siteID string
 	apiURL string
+	apiKey string
 	client *http.Client
 }
 
@@ -40,9 +42,14 @@ func New(cfg Config) *HelmAnalytics {
 	cfg.APIURL = strings.TrimRight(cfg.APIURL, "/")
 	cfg.APIURL = strings.Replace(cfg.APIURL, "/track", "", 1)
 
+	if cfg.APIKey == "" {
+		cfg.APIKey = os.Getenv("HELM_API_KEY")
+	}
+
 	return &HelmAnalytics{
 		siteID: cfg.SiteID,
 		apiURL: cfg.APIURL,
+		apiKey: cfg.APIKey,
 		client: &http.Client{
 			Timeout: 5 * time.Second,
 		},
@@ -71,6 +78,9 @@ func (h *HelmAnalytics) CheckShieldSync(payload map[string]interface{}) (denied 
 		return false, "error_create_req"
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if h.apiKey != "" {
+		req.Header.Set("Authorization", "Bearer "+h.apiKey)
+	}
 
 	// Use a shorter timeout for blocking checks
 	client := &http.Client{Timeout: 2 * time.Second}
@@ -177,6 +187,9 @@ func (h *HelmAnalytics) send(payload map[string]interface{}, path string) {
 	jsonBytes, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", h.apiURL+path, bytes.NewBuffer(jsonBytes))
 	req.Header.Set("Content-Type", "application/json")
+	if h.apiKey != "" {
+		req.Header.Set("Authorization", "Bearer "+h.apiKey)
+	}
 	
 	resp, err := h.client.Do(req)
 	if err != nil {

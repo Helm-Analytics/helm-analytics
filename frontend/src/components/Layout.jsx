@@ -3,7 +3,6 @@ import { Outlet,useLocation, Link, useNavigate } from "react-router-dom"
 import { LayoutDashboard, PlayCircle, MousePointer2, GitMerge, AlertOctagon, Activity, Shield, Book, Globe, Plus, ChevronRight, Trash2, List, GraduationCap, LogOut, Moon, Sun, Menu, X, Target, CreditCard } from "lucide-react"
 import { api } from "../api"
 import Logo from "./Logo"
-import ChatWidget from "./ChatWidget"
 import Tutorial from "./Tutorial"
 import Toast from "./Toast"
 import ConfirmModal from "./ConfirmModal"
@@ -350,7 +349,6 @@ const Layout = () => {
         <div className="fixed top-0 right-0 w-[500px] h-[500px] bg-accent/5 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
       </main>
 
-      <ChatWidget siteId={selectedSite?.id} />
       {showTutorial && (
         <Tutorial onComplete={() => {
           setShowTutorial(false)

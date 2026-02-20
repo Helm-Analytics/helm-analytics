@@ -96,11 +96,11 @@ The fastest way to run Helm Analytics in production is using Docker Compose.
 git clone https://github.com/helm-analytics/helm-analytics.git
 cd helm-analytics
 
-# Download the production compose file
-curl -o docker-compose.yml https://raw.githubusercontent.com/helm-analytics/helm-analytics/main/docker-compose.yml
+# Download the community compose file
+curl -o docker-compose.community.yml https://raw.githubusercontent.com/helm-analytics/helm-analytics/main/docker-compose.community.yml
 
 # Start the stack
-docker-compose up -d
+docker-compose -f docker-compose.community.yml up -d
 ```
 
 ### 2. Access & Setup

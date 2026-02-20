@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { Shield, Plus, Trash2, AlertTriangle, Globe, Hash, Server, Copy, Check, Cpu, Hexagon } from 'lucide-react';
-import PremiumSelect from '../components/PremiumSelect';
 
 const FirewallPage = () => {
   const { selectedSite } = useOutletContext();
@@ -181,15 +180,15 @@ const FirewallPage = () => {
             </h2>
             <form onSubmit={handleAddRule} className="grid grid-cols-1 md:grid-cols-12 gap-4">
               <div className="md:col-span-3">
-                 <PremiumSelect
+                 <select
                     value={ruleType}
-                    onChange={setRuleType}
-                    options={[
-                        { value: 'ip', label: 'IP Address', icon: Hash },
-                        { value: 'country', label: 'Country', icon: Globe },
-                        { value: 'asn', label: 'ASN / Data Center', icon: Server }
-                    ]}
-                 />
+                    onChange={(e) => setRuleType(e.target.value)}
+                    className="w-full h-full min-h-[44px] px-4 py-2.5 bg-background border border-border rounded-xl text-sm font-medium text-foreground appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent transition-all"
+                 >
+                    <option value="ip">IP Address</option>
+                    <option value="country">Country</option>
+                    <option value="asn">ASN / Data Center</option>
+                 </select>
               </div>
              
               <div className="md:col-span-6">
@@ -368,10 +367,10 @@ const FirewallPage = () => {
                   </p>
                   <div className="relative group mb-4">
                       <div className="bg-background border border-border rounded-xl p-4 font-mono text-[10px] text-foreground break-all select-all">
-                        {`<a href="https://api.helm-analytics.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
+                        {`<a href="${import.meta.env.VITE_API_URL || 'http://localhost:6060'}/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
                       </div>
                       <button 
-                            onClick={() => copyToClipboard(`<a href="https://api.helm-analytics.com/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`)}
+                            onClick={() => copyToClipboard(`<a href="${import.meta.env.VITE_API_URL || 'http://localhost:6060'}/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`)}
                             className="absolute top-2 right-2 p-2 bg-muted hover:bg-muted/80 rounded-lg transition-all border border-border text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
                             title="Copy Snippet"
                         >

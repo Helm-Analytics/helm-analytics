@@ -66,7 +66,7 @@ const DocsPage = () => {
         }
     ];
 
-    const quickStartCode = `<script defer data-site-id="YOUR_SITE_ID" src="https://api.helm-analytics.com/static/tracker-v5.js"></script>`;
+    const quickStartCode = `<script defer data-site-id="YOUR_SITE_ID" src="${import.meta.env.VITE_API_URL || 'http://localhost:6060'}/static/tracker-v5.js"></script>`;
     const spiderTrapCode = `<a href="/track/trap?siteId=YOUR_SITE_ID" style="display:none" aria-hidden="true">Health Check</a>`;
 
     return (

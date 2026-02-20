@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { GitMerge, Plus, Trash2, ArrowDown, Settings } from 'lucide-react';
-import { FeatureGate } from '../components/FeatureGate';
-
 const FunnelsPageContent = () => {
     const { selectedSite } = useOutletContext();
     const [funnels, setFunnels] = useState([]);

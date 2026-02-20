@@ -10,13 +10,10 @@ const SessionReplay = lazy(() => import("./pages/SessionReplay"))
 const FunnelsPage = lazy(() => import("./pages/FunnelsPage"))
 const FirewallPage = lazy(() => import("./pages/FirewallPage"))
 const HeatmapPage = lazy(() => import("./pages/HeatmapPage"))
-const ErrorsPage = lazy(() => import("./pages/ErrorsPage"))
 const CustomEventsPage = lazy(() => import("./pages/CustomEventsPage"))
 const DocsPage = lazy(() => import("./pages/DocsPage"))
 const ActivityPage = lazy(() => import("./pages/ActivityPage"))
 const CampaignsPage = lazy(() => import("./pages/CampaignsPage"))
-const UserFlowPage = lazy(() => import("./pages/UserFlowPage"))
-const SubscriptionPage = lazy(() => import("./pages/SubscriptionPage"))
 const DemoLogin = lazy(() => import("./pages/DemoLogin"))
 
 // Loading component
@@ -41,14 +38,11 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/session-replay" element={<SessionReplay />} />
             <Route path="/heatmap" element={<HeatmapPage />} />
-            <Route path="/errors" element={<ErrorsPage />} />
             <Route path="/funnels" element={<FunnelsPage />} />
             <Route path="/custom-events" element={<CustomEventsPage />} />
             <Route path="/activity" element={<ActivityPage />} />
             <Route path="/firewall" element={<FirewallPage />} />
             <Route path="/campaigns" element={<CampaignsPage />} />
-            <Route path="/user-flow" element={<UserFlowPage />} />
-            <Route path="/subscription" element={<SubscriptionPage />} />
             <Route path="/docs" element={<DocsPage />} />
           </Route>
 

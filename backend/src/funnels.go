@@ -108,13 +108,13 @@ func calculateFunnelStats(siteID string, steps []string) ([]uint64, error) {
 		(
 			SELECT 
 				windowFunnel(604800)(Timestamp, %s) as level 
-			FROM helm_analytics.events 
+			FROM %s.events 
 			WHERE SiteID = ? 
 			  AND Timestamp >= now() - INTERVAL 90 DAY 
 			  AND ClientIP NOT IN ('127.0.0.1', '::1')
 			GROUP BY if(SessionID != '', SessionID, ClientIP)
 		) 
-		GROUP BY level`, strings.Join(conditions, ", "))
+		GROUP BY level`, strings.Join(conditions, ", "), dbName)
 
 	// Prepare args: first for each LIKE condition, then for SiteID
 	args := make([]interface{}, len(steps)+1)

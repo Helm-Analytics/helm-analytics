@@ -7,8 +7,9 @@ import logging
 logger = logging.getLogger("helm-analytics")
 
 class HelmAnalytics:
-    def __init__(self, site_id=None, api_url=None):
+    def __init__(self, site_id=None, api_url=None, api_key=None):
         self.site_id = site_id or os.getenv('HELM_SITE_ID')
+        self.api_key = api_key or os.getenv('HELM_API_KEY')
         # Priority: explicit arg > env var > default cloud URL
         base_url = api_url or os.getenv('HELM_API_URL') or "https://api.helm-analytics.com"
         # Remove trailing slash and /track if present to get base URL
@@ -23,10 +24,14 @@ class HelmAnalytics:
             
         def _post():
             try:
+                headers = {'Content-Type': 'application/json'}
+                if hasattr(self, 'api_key') and self.api_key:
+                    headers['Authorization'] = f'Bearer {self.api_key}'
+
                 requests.post(
                     f"{self.api_url}{path}", 
                     json=payload, 
-                    headers={'Content-Type': 'application/json'},
+                    headers=headers,
                     timeout=5
                 )
             except Exception as e:
@@ -52,10 +57,14 @@ class HelmAnalytics:
                 "url": payload["url"]
             }
             
+            headers = {'Content-Type': 'application/json'}
+            if hasattr(self, 'api_key') and self.api_key:
+                headers['Authorization'] = f'Bearer {self.api_key}'
+
             resp = requests.post(
                 f"{self.api_url}/api/shield/decision",
                 json=check_payload,
-                headers={'Content-Type': 'application/json'},
+                headers=headers,
                 timeout=2 # Fast timeout for blocking checks
             )
             
