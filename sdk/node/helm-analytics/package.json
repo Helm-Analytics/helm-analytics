@@ -1,6 +1,6 @@
 {
   "name": "helm-analytics",
-  "version": "1.2.0",
+  "version": "5.0.2",
   "description": "Official Node.js SDK for Helm Analytics",
   "main": "index.js",
   "scripts": {

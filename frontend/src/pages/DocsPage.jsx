@@ -594,9 +594,11 @@ app.before_request(helm.flask_middleware(shield=True))`}
                          <div className="p-5 bg-[#0F172A] space-y-6">
                             <div className="space-y-2">
                                 <div className="text-[10px] uppercase tracking-wider font-bold text-slate-500">Installation</div>
-                                <div className="bg-black/40 p-3 rounded-lg border border-white/10 font-mono text-xs text-emerald-400">
-                                    go get github.com/Sentinel-Analytics/sentinel-mvp/sdk/go/helm-analytics
-                                </div>
+                                    <div className="bg-black/90 p-4 rounded-xl font-mono text-sm text-sky-400 overflow-x-auto shadow-inner border border-white/10">
+                                        <code>
+                                            go get github.com/Helm-Analytics/sentinel-mvp/sdk/go/helm-analytics
+                                        </code>
+                                    </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-2">

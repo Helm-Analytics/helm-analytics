@@ -89,7 +89,11 @@ class HelmAnalytics {
         }
       }
 
-      const headers = { 'Content-Type': 'application/json' };
+      const headers = { 
+        'Content-Type': 'application/json',
+        'User-Agent': payload.userAgent || 'HelmAnalytics/NodeSDK',
+        'X-Forwarded-For': payload.clientIp || ''
+      };
       if (this.apiKey) {
           headers['Authorization'] = `Bearer ${this.apiKey}`;
       }
@@ -123,7 +127,11 @@ class HelmAnalytics {
         isServerSide: true
       };
 
-      const headers = { 'Content-Type': 'application/json' };
+      const headers = { 
+        'Content-Type': 'application/json',
+        'User-Agent': payload.userAgent || 'HelmAnalytics/NodeSDK',
+        'X-Forwarded-For': payload.clientIp || ''
+      };
       if (this.apiKey) {
           headers['Authorization'] = `Bearer ${this.apiKey}`;
       }

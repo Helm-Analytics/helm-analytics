@@ -22,7 +22,7 @@ services:
 
   # ClickHouse Analytics Database
   clickhouse:
-    image: clickhouse/clickhouse-server:23-alpine
+    image: clickhouse/clickhouse-server
     container_name: helm-clickhouse
     environment:
       CLICKHOUSE_DB: helm_events
@@ -38,7 +38,7 @@ services:
         soft: 262144
         hard: 262144
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
+      test: ["CMD-SHELL", "clickhouse-client --user helm --password helmpass --query \"SELECT 1\""]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -46,7 +46,7 @@ services:
 
   # Backend API Server
   backend:
-    image: danielowenllm/helm-analytics-backend:latest
+    build: ./backend
     container_name: helm-backend
     environment:
       - DATABASE_URL=postgres://helm:helmpass@postgres:5432/helm_analytics?sslmode=disable
@@ -70,7 +70,7 @@ services:
 
   # Frontend Dashboard
   frontend:
-    image: danielowenllm/helm-analytics-frontend:latest
+    build: ./frontend
     container_name: helm-frontend
     environment:
       - VITE_API_URL=http://localhost:6060

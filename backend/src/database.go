@@ -186,6 +186,15 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	domain := ""
+	secure := false
+	sameSite := http.SameSiteLaxMode
+	if os.Getenv("DEPLOYMENT_MODE") == "cloud" {
+		domain = ".helm-analytics.com"
+		secure = true
+		sameSite = http.SameSiteNoneMode
+	}
+
 	// Set session cookie upon successful signup
 	http.SetCookie(w, &http.Cookie{
 		Name:     "sentinel_session",
@@ -193,9 +202,9 @@ func SignupHandler(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		Expires:  time.Now().Add(24 * time.Hour),
 		HttpOnly: true,
-		Secure:   true, // Important for cross-domain
-		SameSite: http.SameSiteNoneMode,
-		Domain:   ".helm-analytics.com", // Set to the parent domain
+		Secure:   secure, // Important for cross-domain
+		SameSite: sameSite,
+		Domain:   domain, // Only set domain for cloud to fix localhost development
 	})
 
 	w.WriteHeader(http.StatusCreated)
@@ -236,15 +245,24 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error": "Incorrect password"}`, http.StatusUnauthorized)
 		return
 	}
+	domain := ""
+	secure := false
+	sameSite := http.SameSiteLaxMode
+	if os.Getenv("DEPLOYMENT_MODE") == "cloud" {
+		domain = ".helm-analytics.com"
+		secure = true
+		sameSite = http.SameSiteNoneMode
+	}
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "sentinel_session",
 		Value:    strconv.Itoa(userID),
 		Path:     "/",
 		Expires:  time.Now().Add(24 * time.Hour),
 		HttpOnly: true,
-		Secure:   true, // Important for cross-domain
-		SameSite: http.SameSiteNoneMode,
-		Domain:   ".helm-analytics.com", // Set to the parent domain
+		Secure:   secure, // Important for cross-domain
+		SameSite: sameSite,
+		Domain:   domain, // Only set domain for cloud to fix localhost development
 	})
 
 	w.WriteHeader(http.StatusOK)
