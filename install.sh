@@ -51,15 +51,15 @@ fi
 
 # 4. Optional SSL Setup
 echo -e "\n${BLUE}🔒 Do you want to configure automatic HTTPS with a custom domain? (y/N): ${NC}\c"
-read -r SETUP_SSL
+read -r SETUP_SSL < /dev/tty
 
 if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
     echo -e "\n${YELLOW}Ensure you have already pointed your domain's A Record to this server's IP address!${NC}"
     echo -e "${BLUE}➤ Enter your Domain Name (e.g. analytics.company.com): ${NC}\c"
-    read -r DOMAIN
+    read -r DOMAIN < /dev/tty
     
     echo -e "${BLUE}➤ Enter your Email (for Let's Encrypt expiration alerts): ${NC}\c"
-    read -r EMAIL
+    read -r EMAIL < /dev/tty
 
     echo -e "\n${BLUE}⚙️ Generating Caddyfile...${NC}"
     cat <<EOF > Caddyfile
