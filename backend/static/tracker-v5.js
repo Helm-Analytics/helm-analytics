@@ -413,15 +413,6 @@
 
         setInterval(sendEvents, 5000);
         
-        // Flush on exit - match v4 exactly
-        const flushOnUnload = () => sendEvents(true);
-        window.addEventListener('pagehide', flushOnUnload);
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'hidden') {
-                sendEvents(true);
-            }
-        });
-
         // Click heatmap tracking
         document.addEventListener('click', function(e) {
             const x = e.pageX;
