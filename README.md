@@ -80,24 +80,29 @@ graph TD
 
 ---
 
-## ⚡ Quick Start (Docker Compose)
+## ⚡ Quick Start (Community Edition)
 
-The fastest way to run Helm Analytics in production is using Docker Compose.
+The fastest way to run Helm Analytics in production is using our automated installation script.
 
-### Prerequisites
-- Docker Engine 24+
-- Docker Compose v2+
-- 2 GB RAM (Recommended 4GB for ClickHouse + Postgres)
+### 1-Click Installer (Recommended)
 
-### 1. Installation
+Run this command on a fresh Ubuntu 20.04+ or Debian VPS. It will install Docker, pull the latest release, optionally configure automatic SSL via Caddy, and start the platform.
+
+```bash
+curl -sSL https://raw.githubusercontent.com/Helm-Analytics/sentinel-mvp/master/install.sh | bash
+```
+
+### Manual Installation (Advanced)
+
+If you prefer to set up your own reverse proxy (like Nginx, Traefik, or Cloudflare Tunnels), you can run Helm manually using Docker Compose.
 
 ```bash
 # Clone the repository
-git clone https://github.com/helm-analytics/helm-analytics.git
+git clone https://github.com/Helm-Analytics/helm-analytics.git
 cd helm-analytics
 
 # Download the community compose file
-curl -o docker-compose.community.yml https://raw.githubusercontent.com/helm-analytics/helm-analytics/main/docker-compose.community.yml
+curl -o docker-compose.community.yml https://raw.githubusercontent.com/Helm-Analytics/helm-analytics/main/docker-compose.community.yml
 
 # Start the stack
 docker-compose -f docker-compose.community.yml up -d
@@ -105,17 +110,15 @@ docker-compose -f docker-compose.community.yml up -d
 
 ### 2. Access & Setup
 
-1.  Open `http://localhost:8012` (or your server IP).
-2.  Log in with default credentials:
-    -   **Email:** `admin@helm-analytics.com`
-    -   **Password:** `admin123`
-3.  **IMPORTANT:** Go to Profile and change your password immediately.
+1.  **With Installer SSL:** Open `https://your-domain.com`.
+2.  **Without SSL/Local:** Open `http://<your-server-ip>:8012` (or `localhost:8012`).
+3.  Register a new account (the first account created becomes the Admin).
 
 ### 3. Add Your Website
 
 1.  Click **"Add Site"** in the dashboard.
 2.  Enter your domain name (e.g., `example.com`).
-3.  Copy the generated Tracking Snippet.
+3.  Copy the generated Tracking Snippet and paste it into the `<head>` of your website.
 
 ---
 
@@ -210,19 +213,28 @@ Helm is configured via environment variables in `.env` or `docker-compose.yml`.
 
 ## 🔧 Troubleshooting
 
+### "Port is already allocated" (Caddy 443 / 80 Error)
+If you opted for the automated SSL configuration, Caddy needs ports 80 and 443. Most VPS providers pre-install Apache or Nginx which blocks these ports. Stop and disable them:
+```bash
+sudo systemctl stop nginx apache2
+sudo systemctl disable nginx apache2
+# Then restart Helm:
+cd /opt/helm-analytics && sudo docker compose up -d
+```
+
 ### "Tracker script returns 404"
-Ensure your `docker-compose` volumes are mounted correctly and the `static` directory exists in the backend container.
+Ensure your `docker-compose` volumes are mounted correctly and the `static` directory exists in the backend container. Our community compose file handles this automatically.
 
 ### "ClickHouse Connection Refused"
-ClickHouse takes a few seconds to start. The backend container usually retries automatically, but you may need to restart the backend:
+ClickHouse takes a few seconds to start. The backend container usually retries automatically, but you may need to restart the backend manually if it times out:
 ```bash
-docker-compose restart backend
+docker compose restart backend
 ```
 
 ### "Data not showing in dashboard"
-1. Check browser console for network errors (CSP blocking the script?).
-2. Ensure `data-api` points to the correct URL (your self-hosted instance, not example.com).
-3. Check backend logs: `docker-compose logs -f backend`.
+1. Check your browser console for network errors (is an ad-blocker or strict CSP blocking the script?).
+2. Ensure `data-api` points to the correct URL (e.g., `https://analytics.yourdomain.com`).
+3. Check backend logs: `docker compose logs -f backend`.
 
 ---
 
