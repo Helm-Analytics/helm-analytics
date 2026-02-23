@@ -6,12 +6,12 @@ set -e
 
 # Styling
 GREEN='\033[0;32m'
-BLUE='\033[0;34m'
+
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}"
+echo -e "${YELLOW}"
 echo "======================================================="
 echo "    🚀 Installing Helm Analytics (Community Edition)   "
 echo "======================================================="
@@ -35,16 +35,14 @@ fi
 
 # 2. Setup Directory
 INSTALL_DIR="/opt/helm-analytics"
-echo -e "\n${BLUE}📂 Setting up installation directory at ${INSTALL_DIR}...${NC}"
+echo -e "\n${YELLOW}📂 Setting up installation directory at ${INSTALL_DIR}...${NC}"
 sudo mkdir -p $INSTALL_DIR
 cd $INSTALL_DIR
 
 # 3. Generate docker-compose.yml for Prebuilt Image
-echo -e "\n${BLUE}⬇️ Downloading and configuring Helm Analytics...${NC}"
+echo -e "\n${YELLOW}⬇️ Downloading and configuring Helm Analytics...${NC}"
 
 sudo bash -c 'cat <<EOF > docker-compose.yml
-version: "3.8"
-
 services:
   postgres:
     image: postgres:14-alpine
@@ -83,7 +81,7 @@ services:
     restart: unless-stopped
 
   sentinel:
-    image: ghcr.io/${GITHUB_REPOSITORY:-Helm-Analytics/sentinel-mvp}:latest
+    image: ghcr.io/helm-analytics/helm-analytics:latest
     container_name: helm-analytics-core
     environment:
       - DATABASE_URL=postgres://helm:helmpass@postgres:5432/helm_analytics?sslmode=disable
@@ -109,7 +107,7 @@ volumes:
 EOF'
 
 # 4. Optional SSL Setup
-echo -e "\n${BLUE}🔒 Do you want to configure automatic HTTPS with a custom domain? (y/N): ${NC}\c"
+echo -e "\n${YELLOW}🔒 Do you want to configure automatic HTTPS with a custom domain? (y/N): ${NC}\c"
 read -r SETUP_SSL < /dev/tty
 
 if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
@@ -120,18 +118,18 @@ if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
         sudo apt-get update -yqq && sudo apt-get install -y lsof >/dev/null 2>&1 || true
     fi
 
-    echo -e "\n${BLUE}🔎 Checking for port 80/443 availability...${NC}"
+    echo -e "\n${YELLOW}🔎 Checking for port 80/443 availability...${NC}"
     if sudo lsof -i :80 -i :443 -sTCP:LISTEN -t >/dev/null 2>&1; then
         echo -e "${RED}⚠️  WARNING: Port 80 or 443 is already in use by another service!${NC}"
         echo -e "The following processes are currently using these ports:"
         sudo lsof -i :80 -i :443 -sTCP:LISTEN | awk 'NR>1 {print "  - " $1 " (PID: " $2 ")"}' | sort -u
         
         echo -e "\n${YELLOW}Caddy (our auto-SSL engine) requires these ports to be completely free to acquire certificates.${NC}"
-        echo -e "${BLUE}➤ Do you want Helm Analytics to automatically STOP these services for you? (y/N): ${NC}\c"
+        echo -e "${YELLOW}➤ Do you want Helm Analytics to automatically STOP these services for you? (y/N): ${NC}\c"
         read -r STOP_SERVICES < /dev/tty
         
         if [[ "$STOP_SERVICES" =~ ^[Yy]$ ]]; then
-            echo -e "${BLUE}⚙️ Stopping conflicting services...${NC}"
+            echo -e "${YELLOW}⚙️ Stopping conflicting services...${NC}"
             sudo systemctl stop nginx apache2 traefik caddy 2>/dev/null || true
             sudo systemctl disable nginx apache2 traefik caddy 2>/dev/null || true
             
@@ -148,13 +146,13 @@ if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
         echo -e "${GREEN}✅ Ports 80 and 443 are free.${NC}"
     fi
 
-    echo -e "\n${BLUE}➤ Enter your Domain Name (e.g. analytics.company.com): ${NC}\c"
+    echo -e "\n${YELLOW}➤ Enter your Domain Name (e.g. analytics.company.com): ${NC}\c"
     read -r DOMAIN < /dev/tty
     
-    echo -e "${BLUE}➤ Enter your Email (for Let's Encrypt expiration alerts): ${NC}\c"
+    echo -e "${YELLOW}➤ Enter your Email (for Let's Encrypt expiration alerts): ${NC}\c"
     read -r EMAIL < /dev/tty
 
-    echo -e "\n${BLUE}⚙️ Generating Caddyfile...${NC}"
+    echo -e "\n${YELLOW}⚙️ Generating Caddyfile...${NC}"
     cat <<EOF > Caddyfile
 $DOMAIN {
     tls $EMAIL
@@ -162,7 +160,7 @@ $DOMAIN {
 }
 EOF
 
-    echo -e "${BLUE}⚙️ Integrating Caddy into Docker Compose...${NC}"
+    echo -e "${YELLOW}⚙️ Integrating Caddy into Docker Compose...${NC}"
     cat <<EOF > docker-compose.override.yml
 services:
   caddy:
@@ -190,7 +188,7 @@ else
 fi
 
 # 5. Pull and Start the Application
-echo -e "\n${BLUE}⚡ Pulling images and starting Helm Analytics...${NC}"
+echo -e "\n${YELLOW}⚡ Pulling images and starting Helm Analytics...${NC}"
 sudo docker compose pull
 sudo docker compose up -d
 
@@ -198,6 +196,6 @@ sudo docker compose up -d
 echo -e "\n${GREEN}=======================================================${NC}"
 echo -e "${GREEN}🎉 Helm Analytics has been successfully installed!${NC}"
 echo -e "${GREEN}=======================================================${NC}"
-echo -e "👉 Access your dashboard at: ${BLUE}$DASHBOARD_URL${NC}"
+echo -e "👉 Access your dashboard at: ${YELLOW}$DASHBOARD_URL${NC}"
 echo -e "👉 Default Login: Register a new account on the dashboard."
 echo -e "To manage your instance, run: cd $INSTALL_DIR && sudo docker compose <up|down|logs>"

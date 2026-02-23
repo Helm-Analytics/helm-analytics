@@ -8,11 +8,10 @@
 
 **The High-Performance, Privacy-First Web Analytics Platform.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Docker Pulls](https://img.shields.io/docker/pulls/danielowenllm/helm-analytics-backend.svg)](https://hub.docker.com/r/danielowenllm/helm-analytics-backend)
-[![Go Report Card](https://goreportcard.com/badge/github.com/helm-analytics/helm-analytics)](https://goreportcard.com/report/github.com/helm-analytics/helm-analytics)
+[![License: AGPLv3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+[![GitHub Container Registry](https://img.shields.io/badge/Docker-ghcr.io-blue?logo=docker)](https://github.com/orgs/Helm-Analytics/packages?repo_name=helm-analytics)
 
-[Live Demo](https://app.helm-analytics.com/demo) · [Documentation](https://docs.helm-analytics.com) · [Community](https://discord.gg/helm-analytics)
+[Live Demo](https://helm-analytics.com/demo) · [Documentation](https://helm-analytics.com/docs/guide/getting-started.html) · [Community](https://discord.gg/helm-analytics)
 
 </div>
 
@@ -33,8 +32,8 @@ Unlike traditional analytics tools that bloat your website with heavy scripts an
 | **Script Weight** | ⚡ **< 2 KB** | 🐢 ~45 KB | ~1 KB |
 | **Cookies** | 🍪 **Cookie-Free** | 🍪 Heavy Usage | Cookie-Free |
 | **Session Replay** | ✅ **Included** | ❌ No | ❌ No (Usually separate) |
-| **Heatmaps** | ✅ **Included** | ❌ No | ❌ No |
-| **Self-Hosted Option** | ✅ MIT License | ❌ No | ✅ / ❌ (Varies) |
+| **Security/WAF** | ✅ **Built-in Shield** | ❌ No | ❌ No |
+| **Self-Hosted Option** | ✅ AGPLv3 License | ❌ No | ✅ / ❌ (Varies) |
 
 ---
 
@@ -65,12 +64,12 @@ Helm is designed for horizontal scalability and high throughput.
 
 ```mermaid
 graph TD
-    User[Visitor Browser] -->|HTTP POST /track| LoadBalancer
-    LoadBalancer -->|Traffic| API[Ingestion API (Go)]
-    API -->|Write (Batch)| ClickHouse[(ClickHouse DB)]
-    API -->|Metadata| PostgreSQL[(PostgreSQL DB)]
+    User["Visitor Browser"] -->|HTTP POST /track| LoadBalancer
+    LoadBalancer -->|Traffic| API["Ingestion API (Go)"]
+    API -->|Write (Batch)| ClickHouse[("ClickHouse DB")]
+    API -->|Metadata| PostgreSQL[("PostgreSQL DB")]
     API -->|Read (Aggregates)| ClickHouse
-    Admin[Dashboard User] -->|View Stats| API
+    Admin["Dashboard User"] -->|View Stats| API
 ```
 
 - **Ingestion API (Go):** Handles thousands of requests per second with minimal CPU footprint.
@@ -89,23 +88,21 @@ The fastest way to run Helm Analytics in production is using our automated insta
 Run this command on a fresh Ubuntu 20.04+ or Debian VPS. It will install Docker, pull the latest release, optionally configure automatic SSL via Caddy, and start the platform.
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/Helm-Analytics/sentinel-mvp/master/install.sh | bash
+curl -sSL https://helm-analytics.com/install.sh | bash
 ```
 
 ### Manual Installation (Advanced)
 
 If you prefer to set up your own reverse proxy (like Nginx, Traefik, or Cloudflare Tunnels), you can run Helm manually using Docker Compose.
 
+If you prefer to set up your own reverse proxy (like Nginx, Traefik, or Cloudflare Tunnels), you can run Helm manually by copying the raw docker-compose file.
+
 ```bash
-# Clone the repository
-git clone https://github.com/Helm-Analytics/helm-analytics.git
-cd helm-analytics
+# Download the production compose file
+curl -o docker-compose.yml https://raw.githubusercontent.com/Helm-Analytics/helm-analytics/master/docker-compose.yml
 
-# Download the community compose file
-curl -o docker-compose.community.yml https://raw.githubusercontent.com/Helm-Analytics/helm-analytics/main/docker-compose.community.yml
-
-# Start the stack
-docker-compose -f docker-compose.community.yml up -d
+# Start the stack using the pre-built GHCR image
+docker compose up -d
 ```
 
 ### 2. Access & Setup
@@ -252,10 +249,10 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## 📄 License
 
-Distributed under the MIT License. See `LICENSE` for more information.
+Distributed under the AGPL-3.0 License. See `LICENSE` for more information.
 
 ---
 
 <div align="center">
-  <small>Made with ❤️ by <a href="https://github.com/danielowenllm">Daniel Owen</a> and the Community</small>
+  <small>Made with ❤️ by the Helm Analytics Community</small>
 </div>
