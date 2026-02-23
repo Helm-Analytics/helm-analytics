@@ -1,0 +1,15 @@
+User-agent: *
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /session-replay
+Disallow: /heatmap
+Disallow: /errors
+Disallow: /funnels
+Disallow: /firewall
+
+User-agent: Googlebot
+Allow: /
+Allow: /login
+Allow: /signup
+
+Sitemap: https://sentinel.getmusterup.com/sitemap.xml

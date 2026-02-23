@@ -1,0 +1,168 @@
+package sentinel
+
+import (
+	"encoding/json"
+	"net/http"
+	"strings"
+)
+
+// Site struct represents a website being tracked in the database.
+type Site struct {
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Domain     string `json:"domain,omitempty"`
+	ShieldMode bool   `json:"shieldMode"`
+}
+
+// SitesApiHandler now routes to different functions based on the request.
+// This is a more robust way to handle RESTful routing.
+func SitesApiHandler(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/api/sites")
+	path = strings.TrimSuffix(path, "/")
+
+	// If the path is empty, it's a request for the whole collection (GET list, POST create)
+	if path == "" {
+		switch r.Method {
+		case "GET":
+			handleListSites(w, r)
+		case "POST":
+			handleCreateSite(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+		return
+	}
+
+	// If the path is not empty, it should be an ID for a specific site
+	// (PUT update, DELETE remove)
+	siteID := path[1:] // remove the leading "/"
+	switch r.Method {
+	case "PUT":
+		handleUpdateSite(w, r, siteID)
+	case "DELETE":
+		handleDeleteSite(w, r, siteID)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// @Summary List sites
+// @Description Get a list of all sites for the authenticated user.
+// @Tags sites
+// @Produce  json
+// @Success 200 {array} Site
+// @Router /api/sites [get]
+func handleListSites(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("userID").(int)
+
+	rows, err := db.Query("SELECT id, name, domain, shield_mode FROM sites WHERE user_id = $1 ORDER BY created_at DESC", userID)
+	if err != nil {
+		http.Error(w, "Failed to fetch sites", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	sites := []Site{}
+	for rows.Next() {
+		var s Site
+		// Handle nullables if necessary, but boolean default false is usually NOT NULL in my schema
+		if err := rows.Scan(&s.ID, &s.Name, &s.Domain, &s.ShieldMode); err != nil {
+			http.Error(w, "Failed to scan site", http.StatusInternalServerError)
+			return
+		}
+		sites = append(sites, s)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(sites)
+}
+
+// @Summary Create a new site
+// @Description Add a new site to be tracked.
+// @Tags sites
+// @Accept  json
+// @Produce  json
+// @Param site body Site true "Site to create"
+// @Success 201 {object} Site
+// @Router /api/sites [post]
+func handleCreateSite(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("userID").(int)
+	var site Site
+	if err := json.NewDecoder(r.Body).Decode(&site); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	var newSiteID string
+	err := db.QueryRow("INSERT INTO sites (user_id, name, domain, shield_mode) VALUES ($1, $2, $3, $4) RETURNING id", userID, site.Name, site.Domain, site.ShieldMode).Scan(&newSiteID)
+	if err != nil {
+		http.Error(w, "Failed to create site", http.StatusInternalServerError)
+		return
+	}
+
+	site.ID = newSiteID
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(site)
+}
+
+// @Summary Update a site
+// @Description Update an existing site.
+// @Tags sites
+// @Accept  json
+// @Produce  json
+// @Param id path string true "Site ID"
+// @Param site body Site true "Site to update"
+// @Success 200 {object} Site
+// @Router /api/sites/{id} [put]
+func handleUpdateSite(w http.ResponseWriter, r *http.Request, siteID string) {
+	userID := r.Context().Value("userID").(int)
+	var site Site
+	if err := json.NewDecoder(r.Body).Decode(&site); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Check for ownership before updating
+	var ownerID int
+	err := db.QueryRow("SELECT user_id FROM sites WHERE id = $1", siteID).Scan(&ownerID)
+	if err != nil || ownerID != userID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	_, err = db.Exec("UPDATE sites SET name = $1, domain = $2, shield_mode = $3 WHERE id = $4 AND user_id = $5", site.Name, site.Domain, site.ShieldMode, siteID, userID)
+	if err != nil {
+		http.Error(w, "Failed to update site", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(site)
+}
+
+// @Summary Delete a site
+// @Description Delete a site.
+// @Tags sites
+// @Param id path string true "Site ID"
+// @Success 204 "No Content"
+// @Router /api/sites/{id} [delete]
+func handleDeleteSite(w http.ResponseWriter, r *http.Request, siteID string) {
+	userID := r.Context().Value("userID").(int)
+
+	// Check for ownership before deleting
+	var ownerID int
+	err := db.QueryRow("SELECT user_id FROM sites WHERE id = $1", siteID).Scan(&ownerID)
+	if err != nil || ownerID != userID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	_, err = db.Exec("DELETE FROM sites WHERE id = $1 AND user_id = $2", siteID, userID)
+	if err != nil {
+		http.Error(w, "Failed to delete site", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+

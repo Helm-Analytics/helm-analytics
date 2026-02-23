@@ -1,0 +1,98 @@
+# --- Helm Analytics - Public Repository Ignore Rules ---
+
+# IDEs & Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+.project
+.settings/
+.classpath
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+dist/
+build/
+.next/
+out/
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Go
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+
+# Docker
+.docker/
+docker-compose.override.yml
+docker-compose.cloud.yml
+# Exclude persistent data from local volumes
+*_data/
+# Specific DB data folders if they exist
+clickhouse_data/
+postgres_data/
+
+# Secrets & Environment
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+cert.db
+*.p12
+
+# Internal Documentation & AI Artifacts
+GEMINI.md
+CURRENT_STATE.md
+differentiators_tasks.md
+implementation_plan.md
+release_assessment.md
+task.md
+walkthrough.md
+GITHUB_SETUP_GUIDE.md
+HELM_TIMELINE.md
+LAUNCH_PREP.md
+RELEASE_GUIDE.md
+INFO.TXT
+error.txt
+# Placeholder for visual assets not ready for release
+image.png
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+bin/
+
+
+# Logs
+*.log
+backend/events.log
+
+# GeoIP databases (should be downloaded during build/deployment)
+backend/GeoLite2-*.mmdb
+.agent/
+# License Server & Internal Tools
+license-server/
+tools/
+cloud-scaffold/
+backup/

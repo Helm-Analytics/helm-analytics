@@ -1,0 +1,313 @@
+package sentinel
+
+import (
+	_ "database/sql"
+	"encoding/json"
+	"net"
+	"net/http"
+	"strconv"
+	"strings"
+	"sync"
+	"time"
+)
+
+type FirewallRule struct {
+	ID       string `json:"id"`
+	SiteID   string `json:"siteId"`
+	RuleType string `json:"rule_type"` // e.g., "ip", "country", "asn"
+	Value    string `json:"value"`     // The actual IP, country code, or ASN
+	Reason   string `json:"reason,omitempty"`
+}
+
+// FirewallApiHandler routes requests to appropriate functions based on HTTP method.
+func FirewallApiHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		handleListFirewallRules(w, r)
+	case "POST":
+		handleCreateFirewallRule(w, r)
+	case "DELETE":
+		handleDeleteFirewallRule(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// TrapHandler handles requests to the honeypot URL.
+func TrapHandler(w http.ResponseWriter, r *http.Request) {
+	siteID := r.URL.Query().Get("siteId")
+	if siteID == "" {
+		// Just ignore
+		return
+	}
+
+	ipStr := getClientIP(r)
+
+	// Check if rule already exists to avoid duplicates
+	var exists bool
+	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM firewall_rules WHERE site_id=$1 AND rule_type='ip' AND value=$2)", siteID, ipStr).Scan(&exists)
+	if err == nil && !exists {
+		_, _ = db.Exec("INSERT INTO firewall_rules (site_id, rule_type, value, reason) VALUES ($1, 'ip', $2, 'Caught by Honey Pot')", siteID, ipStr)
+	}
+
+	// Return a generic success to not alert the bot immediately
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
+}
+
+// @Summary List firewall rules
+// @Description Get a list of all firewall rules for a specific site.
+// @Tags firewall
+// @Produce  json
+// @Param siteId query string true "Site ID"
+// @Success 200 {array} FirewallRule
+// @Router /api/firewall [get]
+func handleListFirewallRules(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("userID").(int)
+	siteID := r.URL.Query().Get("siteId")
+	if siteID == "" {
+		http.Error(w, "siteId query parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	// Verify site ownership
+	var ownerID int
+	err := db.QueryRow("SELECT user_id FROM sites WHERE id = $1", siteID).Scan(&ownerID)
+	if err != nil || ownerID != userID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	rows, err := db.Query("SELECT id, site_id, rule_type, value, COALESCE(reason, '') FROM firewall_rules WHERE site_id = $1 ORDER BY rule_type, value", siteID)
+	if err != nil {
+		http.Error(w, "Failed to fetch firewall rules", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
+
+	rules := []FirewallRule{}
+	for rows.Next() {
+		var rule FirewallRule
+		if err := rows.Scan(&rule.ID, &rule.SiteID, &rule.RuleType, &rule.Value, &rule.Reason); err != nil {
+			http.Error(w, "Failed to scan firewall rule", http.StatusInternalServerError)
+			return
+		}
+		rules = append(rules, rule)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(rules)
+}
+
+// @Summary Create a new firewall rule
+// @Description Add a new firewall rule for a site.
+// @Tags firewall
+// @Accept  json
+// @Produce  json
+// @Param rule body FirewallRule true "Firewall rule to create"
+// @Success 201 {object} FirewallRule
+// @Router /api/firewall [post]
+func handleCreateFirewallRule(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("userID").(int)
+	siteID := r.URL.Query().Get("siteId")
+	if siteID == "" {
+		http.Error(w, "siteId query parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	var rule FirewallRule
+	if err := json.NewDecoder(r.Body).Decode(&rule); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Verify site ownership
+	var ownerID int
+	err := db.QueryRow("SELECT user_id FROM sites WHERE id = $1", siteID).Scan(&ownerID)
+	if err != nil || ownerID != userID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	// Basic validation for rule type and value
+	switch rule.RuleType {
+	case "ip":
+		if net.ParseIP(rule.Value) == nil && !strings.Contains(rule.Value, "/") {
+			http.Error(w, "Invalid IP address or CIDR", http.StatusBadRequest)
+			return
+		}
+	case "country":
+		if len(rule.Value) != 2 {
+			http.Error(w, "Country code must be 2 characters (ISO 3166-1 alpha-2)", http.StatusBadRequest)
+			return
+		}
+	case "asn":
+		// ASN values are typically numbers, but can be prefixed with AS. Simple check for now.
+		if !strings.HasPrefix(strings.ToUpper(rule.Value), "AS") {
+			// Attempt to parse as integer if no AS prefix
+			if _, err := strconv.Atoi(rule.Value); err != nil {
+				http.Error(w, "Invalid ASN value", http.StatusBadRequest)
+				return
+			}
+		}
+	default:
+		http.Error(w, "Invalid rule type. Must be 'ip', 'country', or 'asn'", http.StatusBadRequest)
+		return
+	}
+
+	var newRuleID string
+	err = db.QueryRow("INSERT INTO firewall_rules (site_id, rule_type, value, reason) VALUES ($1, $2, $3, $4) RETURNING id", siteID, rule.RuleType, rule.Value, rule.Reason).Scan(&newRuleID)
+	if err != nil {
+		http.Error(w, "Failed to create firewall rule", http.StatusInternalServerError)
+		return
+	}
+
+	rule.ID = newRuleID
+	rule.SiteID = siteID
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(rule)
+}
+
+// @Summary Delete a firewall rule
+// @Description Delete an existing firewall rule.
+// @Tags firewall
+// @Param id query string true "Rule ID"
+// @Success 204 "No Content"
+// @Router /api/firewall [delete]
+func handleDeleteFirewallRule(w http.ResponseWriter, r *http.Request) {
+	userID := r.Context().Value("userID").(int)
+	ruleID := r.URL.Query().Get("id")
+	if ruleID == "" {
+		http.Error(w, "id query parameter is required", http.StatusBadRequest)
+		return
+	}
+
+	// Verify rule ownership via site ownership
+	var siteID string
+	var ownerID int
+	err := db.QueryRow("SELECT site_id FROM firewall_rules WHERE id = $1", ruleID).Scan(&siteID)
+	if err != nil {
+		http.Error(w, "Firewall rule not found", http.StatusNotFound)
+		return
+	}
+	err = db.QueryRow("SELECT user_id FROM sites WHERE id = $1", siteID).Scan(&ownerID)
+	if err != nil || ownerID != userID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	_, err = db.Exec("DELETE FROM firewall_rules WHERE id = $1", ruleID)
+	if err != nil {
+		http.Error(w, "Failed to delete firewall rule", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+var (
+	rateLimitMap = make(map[string]int)
+	rateLimitMux sync.Mutex
+)
+
+func init() {
+	// Reset rate limits every minute
+	go func() {
+		for range time.Tick(1 * time.Minute) {
+			rateLimitMux.Lock()
+			rateLimitMap = make(map[string]int)
+			rateLimitMux.Unlock()
+		}
+	}()
+}
+
+func isMaliciousPayload(input string) bool {
+	input = strings.ToLower(input)
+	patterns := []string{
+		"<script", "javascript:", "onerror=", "onload=", // XSS
+		"union select", "or 1=1", "drop table",          // SQLi
+		"/etc/passwd", "..",                             // Path Traversal
+	}
+	for _, p := range patterns {
+		if strings.Contains(input, p) {
+			return true
+		}
+	}
+	return false
+}
+
+// CheckAccessHandler checks if a request should be allowed or blocked.
+// It is public (no AuthMiddleware needed) but requires siteID.
+func CheckAccessHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		SiteID    string `json:"siteId"`
+		IP        string `json:"ip"`
+		UserAgent string `json:"userAgent"`
+		URL       string `json:"url"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if req.SiteID == "" || req.IP == "" {
+		http.Error(w, "Missing siteId or ip", http.StatusBadRequest)
+		return
+	}
+	
+	// 0. Check Rate Limit (Brute Force Protection)
+	rateLimitMux.Lock()
+	rateLimitMap[req.IP]++
+	reqCount := rateLimitMap[req.IP]
+	rateLimitMux.Unlock()
+
+	// Threshold: 60 checks per minute (1 per second)
+	if reqCount > 60 { 
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"action": "block", "reason": "rate_limit_exceeded"})
+		return
+	}
+
+	// 1. WAF Checks (XSS, SQLi, Path Traversal)
+	if isMaliciousPayload(req.URL) || isMaliciousPayload(req.UserAgent) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"action": "block", "reason": "waf_payload_detected"})
+		return
+	}
+
+	// 2. Check IP Rules
+	var blocked bool
+	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM firewall_rules WHERE site_id=$1 AND rule_type='ip' AND value=$2)", req.SiteID, req.IP).Scan(&blocked)
+	if err == nil && blocked {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"action": "block", "reason": "ip_ban"})
+		return
+	}
+
+	// 3. Check Country Rules
+	ip := net.ParseIP(req.IP)
+	country := "XX"
+	if geoipDb != nil && ip != nil {
+		if record, err := geoipDb.Country(ip); err == nil {
+			country = record.Country.IsoCode
+		}
+	}
+
+	if country != "XX" {
+		err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM firewall_rules WHERE site_id=$1 AND rule_type='country' AND value=$2)", req.SiteID, country).Scan(&blocked)
+		if err == nil && blocked {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(map[string]string{"action": "block", "reason": "country_ban"})
+			return
+		}
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"action": "allow"})
+}

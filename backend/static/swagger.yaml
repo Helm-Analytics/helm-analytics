@@ -1,0 +1,571 @@
+swagger: "2.0"
+info:
+  title: Sentinel API
+  description: API documentation for the Sentinel Analytics platform.
+  version: "2.1"
+  contact:
+    name: API Support
+    email: support@swagger.io
+    url: http://www.swagger.io/support
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+host: localhost:6060
+basePath: /
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  # --- Authentication ---
+  /auth/signup:
+    post:
+      summary: Register a new user
+      description: Create a new user account with email and password.
+      tags: [auth]
+      parameters:
+        - in: body
+          name: credentials
+          required: true
+          schema:
+            $ref: '#/definitions/Credentials'
+      responses:
+        201:
+          description: User created successfully
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+        400:
+          description: Bad request (missing fields or email taken)
+        500:
+          description: Internal server error
+
+  /auth/login:
+    post:
+      summary: Login
+      description: Authenticate user and set session cookie.
+      tags: [auth]
+      parameters:
+        - in: body
+          name: credentials
+          required: true
+          schema:
+            $ref: '#/definitions/Credentials'
+      responses:
+        200:
+          description: Login successful
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+        401:
+          description: Unauthorized (invalid credentials)
+
+  /logout:
+    get:
+      summary: Logout
+      description: Clear session cookie.
+      tags: [auth]
+      responses:
+        200:
+          description: Logged out successfully
+
+  # --- Users ---
+  /api/users:
+    get:
+      summary: Get all users
+      description: Retrieve a list of all registered users (Admin only).
+      tags: [users]
+      responses:
+        200:
+          description: List of users
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/User'
+        500:
+          description: Internal server error
+
+  # --- Sites ---
+  /api/sites:
+    get:
+      summary: List sites
+      description: Get all sites for the authenticated user.
+      tags: [sites]
+      responses:
+        200:
+          description: List of sites
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Site'
+    post:
+      summary: Create site
+      description: Add a new site to track.
+      tags: [sites]
+      parameters:
+        - in: body
+          name: site
+          required: true
+          schema:
+            $ref: '#/definitions/SiteInput'
+      responses:
+        201:
+          description: Site created
+          schema:
+            $ref: '#/definitions/Site'
+
+  /api/sites/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        type: string
+        format: uuid
+    put:
+      summary: Update site
+      description: Update site details like name or domain.
+      tags: [sites]
+      parameters:
+        - in: body
+          name: site
+          required: true
+          schema:
+            $ref: '#/definitions/SiteInput'
+      responses:
+        200:
+          description: Site updated
+          schema:
+            $ref: '#/definitions/Site'
+    delete:
+      summary: Delete site
+      description: Remove a site and all its data.
+      tags: [sites]
+      responses:
+        204:
+          description: Site deleted
+
+  # --- Analytics (Core) ---
+  /api/dashboard:
+    get:
+      summary: Get dashboard stats
+      description: detailed statistics (views, visitors, etc.) for a site.
+      tags: [analytics]
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          type: string
+        - in: query
+          name: days
+          type: integer
+          default: 7
+      responses:
+        200:
+          description: Dashboard stats
+          schema:
+            $ref: '#/definitions/Stats'
+
+  /api/heatmap:
+    get:
+      summary: Get heatmap data
+      tags: [analytics]
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          type: string
+        - in: query
+          name: path
+          required: true
+          type: string
+      responses:
+        200:
+          description: Heatmap points
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/HeatmapPoint'
+
+  /api/errors:
+    get:
+      summary: Get error statistics
+      tags: [analytics]
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          type: string
+      responses:
+        200:
+          description: Error stats
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ErrorStat'
+
+  /api/sessions:
+    get:
+      summary: List recent sessions
+      tags: [analytics]
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          type: string
+        - in: query
+          name: limit
+          type: integer
+      responses:
+        200:
+          description: Recent sessions
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SessionSummary'
+
+  /api/session/events:
+    get:
+      summary: Get session details
+      tags: [analytics]
+      parameters:
+        - in: query
+          name: sessionId
+          required: true
+          type: string
+        - in: query
+          name: siteId
+          required: true
+          type: string
+      responses:
+        200:
+          description: Session events (replay data)
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Event'
+
+  # --- Firewall ---
+  /api/firewall:
+    get:
+      summary: List firewall rules
+      tags: [firewall]
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          type: string
+      responses:
+        200:
+          description: List of rules
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/FirewallRule'
+    post:
+      summary: Add firewall rule
+      tags: [firewall]
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          type: string
+        - in: body
+          name: rule
+          required: true
+          schema:
+            $ref: '#/definitions/FirewallRuleInput'
+      responses:
+        201:
+          description: Rule created
+          schema:
+            $ref: '#/definitions/FirewallRule'
+    delete:
+      summary: Delete firewall rule
+      tags: [firewall]
+      parameters:
+        - in: query
+          name: id
+          required: true
+          type: string
+      responses:
+        204:
+          description: Rule deleted
+
+  # --- Funnels ---
+  /api/funnels:
+    get:
+      summary: List funnels
+      tags: [funnels]
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          type: string
+      responses:
+        200:
+          description: List of funnels
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Funnel'
+    post:
+      summary: Create funnel
+      tags: [funnels]
+      parameters:
+        - in: body
+          name: funnel
+          required: true
+          schema:
+            $ref: '#/definitions/FunnelInput'
+      responses:
+        201:
+          description: Funnel created
+          schema:
+            $ref: '#/definitions/Funnel'
+    put:
+      summary: Update funnel
+      tags: [funnels]
+      parameters:
+        - in: body
+          name: funnel
+          required: true
+          schema:
+            $ref: '#/definitions/Funnel'
+      responses:
+        200:
+          description: Funnel updated
+    delete:
+      summary: Delete funnel
+      tags: [funnels]
+      parameters:
+        - in: query
+          name: id
+          required: true
+          type: string
+      responses:
+        204:
+          description: Funnel deleted
+
+  # --- AI ---
+  /api/ai/insights:
+    post:
+      summary: Get AI Traffic Insights
+      tags: [ai]
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          type: string
+      responses:
+        200:
+          description: AI analysis
+          schema:
+            type: object
+            properties:
+              insights: { type: array, items: { type: string } }
+              recommendation: { type: string }
+
+  /api/ai/chat:
+    post:
+      summary: Chat with Sentinel AI
+      tags: [ai]
+      parameters:
+        - in: query
+          name: siteId
+          required: true
+          type: string
+        - in: body
+          name: message
+          required: true
+          schema:
+            type: object
+            properties: { message: { type: string } }
+      responses:
+        200:
+          description: Chat reply
+          schema:
+            type: object
+            properties: { reply: { type: string } }
+
+  /api/ai/analyze-error:
+    post:
+      summary: Analyze Error with AI
+      tags: [ai]
+      parameters:
+        - in: body
+          name: error
+          required: true
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+              source: { type: string }
+      responses:
+        200:
+          description: Debugging guide (HTML)
+          schema:
+            type: object
+            properties: { mitigation: { type: string } }
+
+  # --- Tracking (Public) ---
+  /track:
+    post:
+      summary: Track Page View
+      tags: [tracking]
+      parameters:
+        - in: body
+          name: event
+          required: true
+          schema:
+            $ref: '#/definitions/EventInput'
+      responses:
+        200: { description: OK }
+
+  /track/click:
+    post:
+      summary: Track Click
+      tags: [tracking]
+      responses:
+        200: { description: OK }
+
+  /track/error:
+    post:
+      summary: Track Error
+      tags: [tracking]
+      responses:
+        200: { description: OK }
+
+  /api/shield/decision:
+    post:
+      summary: Shield Access Check
+      tags: [tracking]
+      responses:
+        200:
+          description: Allow or Block decision
+          schema:
+            type: object
+            properties:
+              action: { type: string, enum: [allow, block] }
+              reason: { type: string }
+
+definitions:
+  Credentials:
+    type: object
+    properties:
+      email: { type: string }
+      password: { type: string }
+  
+  User:
+    type: object
+    properties:
+      id: { type: integer }
+      email: { type: string }
+      created_at: { type: string, format: date-time }
+
+  Site:
+    type: object
+    properties:
+      id: { type: string, format: uuid }
+      name: { type: string }
+      domain: { type: string }
+      shieldMode: { type: boolean }
+  
+  SiteInput:
+    type: object
+    properties:
+      name: { type: string }
+      domain: { type: string }
+      shieldMode: { type: boolean }
+
+  Stats:
+    type: object
+    properties:
+      totalViews: { type: integer }
+      uniqueVisitors: { type: integer }
+      bounceRate: { type: integer }
+      avgVisitDuration: { type: string }
+      topPages: { type: array, items: { $ref: '#/definitions/CountStat' } }
+      topReferrers: { type: array, items: { $ref: '#/definitions/CountStat' } }
+      topCountries: { type: array, items: { $ref: '#/definitions/CountStat' } }
+
+  CountStat:
+    type: object
+    properties:
+      value: { type: string }
+      count: { type: integer }
+
+  FirewallRule:
+    type: object
+    properties:
+      id: { type: string, format: uuid }
+      siteId: { type: string, format: uuid }
+      rule_type: { type: string, enum: [ip, country, asn] }
+      value: { type: string }
+      reason: { type: string }
+
+  FirewallRuleInput:
+    type: object
+    properties:
+      rule_type: { type: string }
+      value: { type: string }
+      reason: { type: string }
+
+  Funnel:
+    type: object
+    properties:
+      id: { type: string }
+      name: { type: string }
+      steps: { type: array, items: { type: string } }
+      stepCounts: { type: array, items: { type: integer } }
+
+  FunnelInput:
+    type: object
+    properties:
+      siteId: { type: string }
+      name: { type: string }
+      steps: { type: array, items: { type: string } }
+
+  Event:
+    type: object
+    properties:
+      type: { type: string }
+      url: { type: string }
+      timestamp: { type: string }
+      properties: { type: object }
+
+  EventInput:
+    type: object
+    properties:
+      siteId: { type: string }
+      url: { type: string }
+      referrer: { type: string }
+      screenWidth: { type: integer }
+
+  ErrorStat:
+    type: object
+    properties:
+      message: { type: string }
+      source: { type: string }
+      count: { type: integer }
+      lastSeen: { type: string }
+
+  HeatmapPoint:
+    type: object
+    properties:
+      x: { type: integer }
+      y: { type: integer }
+      date_time: { type: string }
+
+  SessionSummary:
+    type: object
+    properties:
+      sessionId: { type: string }
+      startTime: { type: string }
+      duration: { type: integer }
+      pages: { type: integer }
+      country: { type: string }
