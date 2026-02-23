@@ -10,8 +10,7 @@ const FirewallPage = () => {
   const [value, setValue] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [shieldMode, setShieldMode] = useState(false);
-  const [suggestions, setSuggestions] = useState([]);
+
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = (text) => {
@@ -22,46 +21,13 @@ const FirewallPage = () => {
 
   useEffect(() => {
     if (selectedSite) {
-      setShieldMode(selectedSite.shieldMode || false);
+
       fetchRules();
-      fetchSuggestions();
+
     }
   }, [selectedSite]);
 
-  const fetchSuggestions = async () => {
-      try {
-          const data = await api.getFirewallSuggestions(selectedSite.id);
-          setSuggestions(data || []);
-      } catch (err) {
-          console.error("Failed to fetch AI suggestions:", err);
-      }
-  };
 
-  const handleAcceptSuggestion = async (suggestion) => {
-      try {
-          await api.addFirewallRule(selectedSite.id, {
-              rule_type: 'ip',
-              value: suggestion.ip,
-              reason: `AI Block: ${suggestion.reason}`
-          });
-          setSuggestions(prev => prev.filter(s => s.ip !== suggestion.ip));
-          fetchRules();
-      } catch (err) {
-          setError("Failed to apply AI block.");
-      }
-  };
-
-  const toggleShieldMode = async () => {
-      try {
-          const newMode = !shieldMode;
-          setShieldMode(newMode);
-          await api.updateSite(selectedSite.id, { ...selectedSite, shieldMode: newMode });
-      } catch (err) {
-          console.error("Failed to toggle Shield Mode:", err);
-          setShieldMode(!shieldMode);
-          setError("Failed to update Shield Mode settings.");
-      }
-  };
 
   const fetchRules = async () => {
     try {
@@ -142,32 +108,7 @@ const FirewallPage = () => {
           <p className="text-muted-foreground mt-1">Configure automated mitigation and manual blocking rules.</p>
         </div>
         
-        {/* Shield Mode Toggle */}
-        <div 
-          id="tut-shield-toggle" 
-          className={`flex items-center gap-4 px-6 py-4 rounded-2xl border transition-all duration-300 shadow-sm ${
-            shieldMode 
-              ? 'bg-accent/10 border-accent/30 shadow-accent/10' 
-              : 'bg-card border-border'
-          }`}
-        >
-            <div className="flex flex-col">
-                <span className={`text-xs font-bold uppercase tracking-wider ${shieldMode ? 'text-accent' : 'text-muted-foreground'}`}>
-                    Shield Mode
-                </span>
-                <span className="text-[10px] font-medium text-muted-foreground mt-0.5">
-                    {shieldMode ? "Active: Blocking low-trust traffic" : "Inactive: Detection only"}
-                </span>
-            </div>
-            <button 
-                onClick={toggleShieldMode}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background ${
-                  shieldMode ? 'bg-accent' : 'bg-muted'
-                }`}
-            >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow-sm ${shieldMode ? 'translate-x-6' : 'translate-x-1'}`} />
-            </button>
-        </div>
+
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -287,102 +228,9 @@ const FirewallPage = () => {
         {/* Info Column */}
         <div className="space-y-8">
 
-           {/* AI Suggestions */}
-           <div className="relative group overflow-hidden rounded-2xl border border-accent/20 bg-gradient-to-br from-accent/5 to-primary/5 backdrop-blur-xl p-6">
-              <div className="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative z-10">
-                  <div className="flex items-center gap-4 mb-6">
-                      <div className="p-3 bg-accent/20 rounded-xl shadow-lg ring-1 ring-accent/30">
-                          <Cpu className="w-6 h-6 text-accent" />
-                      </div>
-                      <div>
-                          <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">Helm Intelligence</h2>
-                          <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Automated Threat Detection</p>
-                      </div>
-                  </div>
-                  
-                  {suggestions.length > 0 ? (
-                      <div className="space-y-3">
-                          {suggestions.map((suggestion, idx) => (
-                              <div key={idx} className="bg-card/50 border border-border rounded-xl p-3 backdrop-blur-md">
-                                  <div className="flex justify-between items-start mb-2">
-                                      <div>
-                                          <div className="flex items-center gap-2">
-                                              <span className="font-mono text-xs font-bold text-foreground">{suggestion.ip}</span>
-                                              <span className={`text-[9px] px-1.5 py-0.5 rounded uppercase font-bold ${
-                                                suggestion.confidence === 'High' 
-                                                  ? 'bg-destructive/20 text-destructive' 
-                                                  : 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400'
-                                              }`}>
-                                                  {suggestion.confidence} Conf.
-                                              </span>
-                                          </div>
-                                          <p className="text-[10px] text-muted-foreground mt-1">{suggestion.reason} • {suggestion.country}</p>
-                                      </div>
-                                  </div>
-                                  <div className="flex gap-2">
-                                      <button 
-                                          onClick={() => handleAcceptSuggestion(suggestion)}
-                                          className="flex-1 bg-destructive/10 hover:bg-destructive/20 text-destructive text-[10px] font-bold uppercase tracking-wide py-2 rounded-lg transition-colors border border-destructive/20"
-                                      >
-                                          Block IP
-                                      </button>
-                                      <button 
-                                          onClick={() => setSuggestions(prev => prev.filter(s => s.ip !== suggestion.ip))}
-                                          className="flex-1 bg-muted hover:bg-muted/80 text-muted-foreground text-[10px] font-bold uppercase tracking-wide py-2 rounded-lg transition-colors"
-                                      >
-                                          Ignore
-                                      </button>
-                                  </div>
-                              </div>
-                          ))}
-                      </div>
-                  ) : (
-                      <div className="text-center py-8">
-                          <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-emerald-500/20">
-                              <Check className="w-8 h-8 text-emerald-500" />
-                          </div>
-                          <p className="text-sm font-bold text-foreground mb-1">Defense Systems Active</p>
-                          <p className="text-xs text-muted-foreground leading-relaxed max-w-[200px] mx-auto">No abnormal behavior patterns detected in the last 24h cycle.</p>
-                      </div>
-                  )}
-              </div>
-           </div>
 
-           {/* Honey Pot Sidebar */}
-           <div className="relative overflow-hidden rounded-2xl border border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 to-orange-500/5 backdrop-blur-xl p-6">
-              <div className="relative z-10">
-                  <div className="flex items-center gap-4 mb-6">
-                     <div className="p-3 bg-yellow-500/20 rounded-xl shadow-lg ring-1 ring-yellow-500/30">
-                        <Hexagon className="w-6 h-6 text-yellow-500" />
-                     </div>
-                     <div>
-                        <h2 className="text-xl font-heading font-bold text-foreground tracking-tight">Spider Trap</h2>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Honeypot Implementation</p>
-                     </div>
-                  </div>
-                  <p className="text-muted-foreground text-xs leading-relaxed mb-6 font-medium">
-                      Catch automated crawlers by adding this invisible gateway to your site's header. 
-                      Bots that interact with this link will be identified and mitigated instantly.
-                  </p>
-                  <div className="relative group mb-4">
-                      <div className="bg-background border border-border rounded-xl p-4 font-mono text-[10px] text-foreground break-all select-all">
-                        {`<a href="${import.meta.env.VITE_API_URL || 'http://localhost:6060'}/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`}
-                      </div>
-                      <button 
-                            onClick={() => copyToClipboard(`<a href="${import.meta.env.VITE_API_URL || 'http://localhost:6060'}/trap?siteId=${selectedSite.id}" style="display:none" aria-hidden="true">Admin Navigation</a>`)}
-                            className="absolute top-2 right-2 p-2 bg-muted hover:bg-muted/80 rounded-lg transition-all border border-border text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100"
-                            title="Copy Snippet"
-                        >
-                            {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3" />}
-                      </button>
-                  </div>
-                  <div className="flex items-center gap-2 text-emerald-500 text-[10px] uppercase font-bold tracking-widest bg-emerald-500/10 w-fit px-3 py-1 rounded-full border border-emerald-500/20">
-                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                     <span>Module Ready</span>
-                  </div>
-              </div>
-           </div>
+
+
 
            {/* Info Card */}
            <div className="p-6 rounded-2xl border border-border bg-card">

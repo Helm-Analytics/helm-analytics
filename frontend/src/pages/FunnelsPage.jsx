@@ -1,334 +1,326 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../api';
-import { GitMerge, Plus, Trash2, ArrowDown, Settings } from 'lucide-react';
+import { Plus, Trash2, ArrowRight, ChevronDown } from 'lucide-react';
+import { FeatureGate } from '../components/FeatureGate';
+
 const FunnelsPageContent = () => {
-    const { selectedSite } = useOutletContext();
-    const [funnels, setFunnels] = useState([]);
-    const [newFunnelName, setNewFunnelName] = useState('');
-    const [newFunnelSteps, setNewFunnelSteps] = useState(['', '']);
-    const [isCreating, setIsCreating] = useState(false);
+  const { selectedSite } = useOutletContext();
+  const [funnels, setFunnels] = useState([]);
+  const [newFunnelName, setNewFunnelName] = useState('');
+  const [newFunnelSteps, setNewFunnelSteps] = useState(['', '']);
+  const [isCreating, setIsCreating] = useState(false);
 
-    useEffect(() => {
-        if (selectedSite) fetchFunnels();
-    }, [selectedSite]);
+  useEffect(() => {
+    if (selectedSite) fetchFunnels();
+  }, [selectedSite]);
 
-    const fetchFunnels = async () => {
-        try {
-            const data = await api.listFunnels(selectedSite.id);
-            setFunnels(data || []);
-        } catch (error) {
-            console.error("Failed to fetch funnels:", error);
-        }
-    };
-
-    const handleCreateFunnel = async (e) => {
-        e.preventDefault();
-        
-        if (!newFunnelName.trim()) {
-            alert("Please provide a name for your funnel.");
-            return;
-        }
-        
-        if (newFunnelSteps.some(s => !s.trim())) {
-            alert("All funnel steps must have a URL path.");
-            return;
-        }
-        
-        try {
-            await api.createFunnel({
-                siteId: selectedSite.id,
-                name: newFunnelName,
-                steps: newFunnelSteps,
-            });
-            setNewFunnelName('');
-            setNewFunnelSteps(['', '']);
-            setIsCreating(false);
-            fetchFunnels();
-        } catch (error) {
-            console.error("Failed to create funnel:", error);
-        }
-    };
-
-    if (!selectedSite) {
-      return (
-        <div className="flex items-center justify-center h-96 helm-bg">
-          <div className="premium-card text-center max-w-md">
-            <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-border/50">
-              <GitMerge className="w-8 h-8 text-accent/50" />
-            </div>
-            <h2 className="text-xl font-heading font-extrabold text-foreground mb-2">No site selected</h2>
-            <p className="text-muted-foreground text-sm">Select a website from the sidebar to visualize conversion funnels and drop-offs.</p>
-          </div>
-        </div>
-      );
+  const fetchFunnels = async () => {
+    try {
+      const data = await api.listFunnels(selectedSite.id);
+      setFunnels(data || []);
+    } catch (error) {
+      console.error("Failed to fetch funnels:", error);
     }
+  };
 
+  const handleCreateFunnel = async (e) => {
+    e.preventDefault();
+    
+    if (!newFunnelName.trim()) {
+      alert("Please provide a name for your funnel.");
+      return;
+    }
+    
+    if (newFunnelSteps.some(s => !s.trim())) {
+      alert("All funnel steps must have a URL path.");
+      return;
+    }
+    
+    try {
+      await api.createFunnel({
+        siteId: selectedSite.id,
+        name: newFunnelName,
+        steps: newFunnelSteps,
+      });
+      setNewFunnelName('');
+      setNewFunnelSteps(['', '']);
+      setIsCreating(false);
+      fetchFunnels();
+    } catch (error) {
+      console.error("Failed to create funnel:", error);
+    }
+  };
+
+  if (!selectedSite) {
     return (
-        <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-border/50">
-                <div>
-                   <div className="flex items-center space-x-2 text-accent font-bold text-xs uppercase tracking-widest mb-2">
-                        <GitMerge className="w-4 h-4" />
-                        <span>Conversion Intelligence</span>
-                    </div>
-                    <h1 className="text-4xl font-heading font-extrabold text-foreground tracking-tight">
-                        Traffic Funnels
-                    </h1>
-                    <p className="text-muted-foreground mt-1 text-sm">Visualize user progression and identify friction points.</p>
-                </div>
-                <button 
-                    onClick={() => setIsCreating(!isCreating)}
-                    className="flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 rounded-xl transition-all active:scale-95 shadow-lg shadow-primary/10 font-bold text-xs uppercase tracking-widest"
-                >
-                    <Plus className="w-4 h-4" />
-                    {isCreating ? 'Cancel' : 'Create Funnel'}
-                </button>
-            </div>
-
-            {/* Creation Form */}
-            {isCreating && (
-                <div className="premium-card bg-secondary/30 animate-in slide-in-from-top-4 duration-300">
-                    <h3 className="text-lg font-heading font-extrabold text-foreground mb-6">Build a User Journey</h3>
-                    <form onSubmit={handleCreateFunnel} className="space-y-8">
-                        <div>
-                            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Funnel Name</label>
-                            <input
-                                type="text"
-                                value={newFunnelName}
-                                onChange={(e) => setNewFunnelName(e.target.value)}
-                                placeholder="e.g. E-commerce Conversion"
-                                className="w-full px-5 py-3 bg-white dark:bg-black/20 border border-border/60 rounded-xl text-foreground focus:ring-2 focus:ring-accent outline-none shadow-sm transition-all"
-                            />
-                        </div>
-                        
-                        <div className="space-y-4">
-                            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">Sequence Steps (URLs)</label>
-                            <div className="space-y-3">
-                                {newFunnelSteps.map((step, idx) => (
-                                    <div key={idx} className="flex items-center gap-4 group animate-in slide-in-from-left-2 transition-all">
-                                        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-primary/5 dark:bg-accent/10 flex items-center justify-center text-accent font-extrabold text-sm border border-accent/20">
-                                            {idx + 1}
-                                        </div>
-                                        <input
-                                            type="text"
-                                            value={step}
-                                            onChange={(e) => {
-                                                const newSteps = [...newFunnelSteps];
-                                                newSteps[idx] = e.target.value;
-                                                setNewFunnelSteps(newSteps);
-                                            }}
-                                            placeholder={idx === 0 ? "/pricing" : "/checkout"}
-                                            className="flex-1 px-5 py-3 bg-white dark:bg-black/20 border border-border/60 rounded-xl text-foreground focus:ring-2 focus:ring-accent outline-none shadow-sm transition-all font-mono text-sm"
-                                        />
-                                        {newFunnelSteps.length > 2 && (
-                                            <button 
-                                                type="button" 
-                                                onClick={() => {
-                                                    const newSteps = [...newFunnelSteps];
-                                                    newSteps.splice(idx, 1);
-                                                    setNewFunnelSteps(newSteps);
-                                                }}
-                                                className="p-3 text-muted-foreground hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                            <button 
-                                type="button" 
-                                onClick={() => setNewFunnelSteps([...newFunnelSteps, ''])}
-                                className="text-xs text-accent hover:text-accent/80 font-bold uppercase tracking-widest flex items-center gap-2 ml-14 mt-4 transition-colors"
-                            >
-                                <Plus className="w-4 h-4" /> Add Next Step
-                            </button>
-                        </div>
-                        
-                        <div className="pt-6 border-t border-border/50 flex justify-end gap-4">
-                            <button 
-                                type="button"
-                                onClick={() => setIsCreating(false)}
-                                className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
-                            >
-                              Cancel
-                            </button>
-                            <button 
-                                type="submit" 
-                                className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95"
-                            >
-                                Launch Funnel
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
-
-            {/* Info Box */}
-            <div className="premium-card bg-accent text-white border-transparent flex gap-6 items-start">
-                <div className="p-3 bg-white/20 rounded-2xl shadow-inner flex-shrink-0">
-                    <Settings className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                    <h3 className="text-lg font-heading font-extrabold text-white mb-1">Funnel Engine</h3>
-                    <p className="text-white/80 text-sm leading-relaxed max-w-3xl">
-                        Tracking follows a strict sequence. Define steps using relative URL paths 
-                        (e.g., <code className="bg-black/20 px-1.5 py-0.5 rounded-md font-mono text-xs">/signup</code>). 
-                        Helm will monitor unique session transitions across these touchpoints.
-                    </p>
-                </div>
-            </div>
-
-            {/* Funnels List */}
-            <div className="space-y-6">
-                {funnels.length > 0 ? (
-                    funnels.map(funnel => (
-                        <div key={funnel.id} className="premium-card !p-0 overflow-hidden group">
-                            <div className="p-6 border-b border-border/50 flex justify-between items-center bg-secondary/10">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-2.5 bg-accent/10 dark:bg-accent/20 rounded-xl text-accent">
-                                        <GitMerge className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                       <h3 className="text-lg font-heading font-extrabold text-foreground">{funnel.name}</h3>
-                                       <div className="flex items-center gap-2 mt-0.5">
-                                          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Collecting High-Res Data</span>
-                                       </div>
-                                    </div>
-                                </div>
-                                <button 
-                                    onClick={async () => {
-                                        if (confirm("Permanently delete this funnel?")) {
-                                            await api.deleteFunnel(funnel.id);
-                                            fetchFunnels();
-                                        }
-                                    }}
-                                    className="text-muted-foreground hover:text-rose-500 p-2.5 hover:bg-rose-50 rounded-xl transition-all opacity-0 group-hover:opacity-100"
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
-                            
-                            <div className="p-8">
-                                {(() => {
-                                    const hasData = funnel.stepCounts && funnel.stepCounts.some(c => c > 0);
-                                    
-                                    return (
-                                        <>
-                                            <div className="flex flex-col lg:flex-row items-center justify-start gap-8 overflow-x-auto pb-8">
-                                                {funnel.steps.map((step, idx) => {
-                                                    const count = funnel.stepCounts ? funnel.stepCounts[idx] : 0;
-                                                    const prevCount = idx > 0 && funnel.stepCounts ? funnel.stepCounts[idx - 1] : 0;
-                                                    
-                                                    // Conversion from PREVIOUS step
-                                                    const conversionRate = prevCount > 0 ? ((count / prevCount) * 100) : (idx === 0 ? 100 : 0);
-                                                    
-                                                    // Dropoff from THIS step to NEXT
-                                                    const nextCount = (idx < funnel.steps.length - 1 && funnel.stepCounts) ? funnel.stepCounts[idx + 1] : 0;
-                                                    const dropoffCount = count - nextCount;
-                                                    const dropoffRate = count > 0 ? ((dropoffCount / count) * 100) : 0;
-                                                    
-                                                    const isLast = idx === funnel.steps.length - 1;
-
-                                                    return (
-                                                        <React.Fragment key={idx}>
-                                                            {/* Step Card */}
-                                                            <div className="relative flex flex-col items-center group/card w-full lg:w-64 flex-shrink-0">
-                                                                <div className="w-full bg-white dark:bg-black/20 border border-border/60 rounded-2xl p-5 shadow-sm transition-all hover:shadow-md hover:border-accent/40 relative overflow-hidden">
-                                                                    <div className="absolute top-0 right-0 p-3 opacity-10">
-                                                                        <div className="text-4xl font-extrabold text-foreground">{idx + 1}</div>
-                                                                    </div>
-                                                                    
-                                                                    <div className="flex items-center gap-3 mb-4">
-                                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${hasData ? 'bg-primary/10 text-primary dark:text-white' : 'bg-secondary text-muted-foreground'}`}>
-                                                                            {idx + 1}
-                                                                        </div>
-                                                                        <div className="text-xs font-mono text-muted-foreground truncate w-full" title={step}>
-                                                                            {step}
-                                                                        </div>
-                                                                    </div>
-                                                                    
-                                                                    <div className="text-center py-2">
-                                                                        <div className={`text-3xl font-heading font-extrabold ${hasData ? 'text-foreground' : 'text-muted-foreground/30'}`}>
-                                                                            {count?.toLocaleString()}
-                                                                        </div>
-                                                                        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-1">Visitors</div>
-                                                                    </div>
-
-                                                                    {/* Conversion Badge */}
-                                                                    {idx > 0 && hasData && (
-                                                                        <div className={`mt-4 flex items-center justify-center gap-1.5 text-xs font-bold py-1.5 rounded-lg bg-secondary/50 ${conversionRate >= 50 ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                                                             {conversionRate >= 50 ? '↑' : '↓'} {conversionRate.toFixed(1)}% Conv.
-                                                                        </div>
-                                                                    )}
-                                                                </div>
-
-                                                                {/* Dropoff Indicator */}
-                                                                {hasData && !isLast && dropoffCount > 0 && (
-                                                                    <div className="mt-4 flex flex-col items-center text-rose-500/80 animate-in slide-in-from-top-2">
-                                                                        <ArrowDown className="w-4 h-4 mb-1" />
-                                                                        <div className="text-xs font-bold">-{dropoffCount} ({dropoffRate.toFixed(1)}%)</div>
-                                                                        <div className="text-[9px] uppercase tracking-wider opacity-70">Loss</div>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-
-                                                            {/* Connector Arrow */}
-                                                            {!isLast && (
-                                                                <div className="hidden lg:flex items-center justify-center -mx-4 z-10 text-muted-foreground/30">
-                                                                    <ArrowDown className="lg:-rotate-90 w-6 h-6" />
-                                                                </div>
-                                                            )}
-                                                            {!isLast && (
-                                                                <div className="lg:hidden my-2 text-muted-foreground/30">
-                                                                    <ArrowDown className="w-6 h-6" />
-                                                                </div>
-                                                            )}
-                                                        </React.Fragment>
-                                                    );
-                                                })}
-                                            </div>
-                                            
-                                            {!hasData && (
-                                                <div className="mt-12 bg-secondary/20 rounded-2xl p-8 text-center border border-border/40 border-dashed">
-                                                    <div className="w-10 h-10 bg-white dark:bg-card rounded-full flex items-center justify-center mx-auto mb-4 border border-border/50 text-muted-foreground/40">
-                                                      <Settings className="w-5 h-5 animate-spin-slow" />
-                                                    </div>
-                                                    <p className="text-muted-foreground font-bold text-xs uppercase tracking-widest mb-1">Awaiting Traffic Flow</p>
-                                                    <p className="text-muted-foreground/50 text-[10px] max-w-md mx-auto">
-                                                        Intelligence engine is processing visits. Real-time conversion percentages will calibrate as users interact with these touchpoints.
-                                                    </p>
-                                                </div>
-                                            )}
-                                        </>
-                                    );
-                                })()}
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <div className="premium-card p-20 text-center border-2 border-dashed border-border/50">
-                        <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center mx-auto mb-8 opacity-40">
-                          <GitMerge className="w-10 h-10 text-muted-foreground" />
-                        </div>
-                        <h3 className="text-2xl font-heading font-extrabold text-foreground mb-3">No Funnels Established</h3>
-                        <p className="text-muted-foreground text-sm mb-10 max-w-sm mx-auto leading-relaxed">Map your first user journey to start tracking drop-offs and ROI throughout your application.</p>
-                        <button 
-                            onClick={() => setIsCreating(true)}
-                            className="bg-primary text-primary-foreground px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95 shadow-xl shadow-primary/10"
-                        >
-                            Build First Funnel
-                        </button>
-                    </div>
-                )}
-            </div>
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center max-w-md">
+          <h2 className="text-xl font-semibold text-foreground mb-2">No site selected</h2>
+          <p className="text-muted-foreground text-sm">Select a website to view conversion funnels.</p>
         </div>
+      </div>
     );
+  }
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6 max-w-5xl"
+    >
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-border">
+        <div>
+          <h1 className="text-2xl font-semibold text-foreground">Conversion Funnels</h1>
+          <p className="text-muted-foreground text-sm mt-1">Track user progression through your conversion paths</p>
+        </div>
+        <button 
+          onClick={() => setIsCreating(!isCreating)}
+          className="flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-sm font-medium"
+        >
+          <Plus className="w-4 h-4" />
+          {isCreating ? 'Cancel' : 'New Funnel'}
+        </button>
+      </div>
+
+      {/* Creation Modal */}
+      <AnimatePresence>
+        {isCreating && (
+          <>
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsCreating(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            />
+            
+            {/* Modal */}
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div 
+                className="bg-card border border-border rounded-xl shadow-2xl w-full max-w-md p-6"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-lg font-semibold text-foreground mb-5">Create New Funnel</h3>
+                <form onSubmit={handleCreateFunnel} className="space-y-5">
+                  <div>
+                    <label className="block text-xs text-muted-foreground mb-2">Funnel Name</label>
+                    <input
+                      type="text"
+                      value={newFunnelName}
+                      onChange={(e) => setNewFunnelName(e.target.value)}
+                      placeholder="e.g. Checkout Flow"
+                      className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      autoFocus
+                    />
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <label className="block text-xs text-muted-foreground">Steps (URL paths)</label>
+                    <div className="max-h-[200px] overflow-y-auto space-y-2">
+                      {newFunnelSteps.map((step, idx) => (
+                        <motion.div 
+                          key={idx}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex items-center gap-3"
+                        >
+                          <span className="w-6 h-6 rounded bg-muted flex items-center justify-center text-xs text-muted-foreground flex-shrink-0">
+                            {idx + 1}
+                          </span>
+                          <input
+                            type="text"
+                            value={step}
+                            onChange={(e) => {
+                              const newSteps = [...newFunnelSteps];
+                              newSteps[idx] = e.target.value;
+                              setNewFunnelSteps(newSteps);
+                            }}
+                            placeholder={idx === 0 ? "/pricing" : "/checkout"}
+                            className="flex-1 px-4 py-2.5 bg-background border border-border rounded-lg text-sm font-mono text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          />
+                          {newFunnelSteps.length > 2 && (
+                            <button 
+                              type="button" 
+                              onClick={() => {
+                                const newSteps = [...newFunnelSteps];
+                                newSteps.splice(idx, 1);
+                                setNewFunnelSteps(newSteps);
+                              }}
+                              className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </motion.div>
+                      ))}
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => setNewFunnelSteps([...newFunnelSteps, ''])}
+                      className="text-xs text-primary hover:text-primary/80 font-medium flex items-center gap-1 ml-9 mt-2"
+                    >
+                      <Plus className="w-3 h-3" /> Add Step
+                    </button>
+                  </div>
+                  
+                  <div className="pt-4 border-t border-border flex justify-end gap-3">
+                    <button 
+                      type="button"
+                      onClick={() => setIsCreating(false)}
+                      className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="bg-primary text-primary-foreground px-5 py-2 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+                    >
+                      Create Funnel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Info Note */}
+      <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+        <p className="text-sm text-blue-800 dark:text-blue-200">
+          <strong>How it works:</strong> Define URL paths in sequence. Helm tracks unique sessions that visit these paths in order within a 7-day window.
+        </p>
+      </div>
+
+      {/* Funnels List */}
+      <div className="space-y-4">
+        <AnimatePresence>
+          {funnels.length > 0 ? (
+            funnels.map((funnel, funnelIdx) => {
+              const hasData = funnel.stepCounts && funnel.stepCounts.some(c => c > 0);
+              
+              return (
+                <motion.div 
+                  key={funnel.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: funnelIdx * 0.05 }}
+                  className="bg-card border border-border rounded-lg overflow-hidden"
+                >
+                  <div className="px-5 py-4 border-b border-border flex justify-between items-center">
+                    <div>
+                      <h3 className="text-sm font-medium text-foreground">{funnel.name}</h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {funnel.steps.length} steps · {hasData ? 'Active' : 'Awaiting data'}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={async () => {
+                        if (confirm("Delete this funnel?")) {
+                          await api.deleteFunnel(funnel.id);
+                          fetchFunnels();
+                        }
+                      }}
+                      className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-all"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  <div className="p-5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {funnel.steps.map((step, idx) => {
+                        const count = funnel.stepCounts ? funnel.stepCounts[idx] : 0;
+                        const prevCount = idx > 0 && funnel.stepCounts ? funnel.stepCounts[idx - 1] : 0;
+                        const conversionRate = prevCount > 0 ? ((count / prevCount) * 100) : (idx === 0 ? 100 : 0);
+                        const isLast = idx === funnel.steps.length - 1;
+
+                        return (
+                          <React.Fragment key={idx}>
+                            {/* Step */}
+                            <motion.div 
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ delay: idx * 0.05 }}
+                              className="bg-background border border-border rounded-lg p-4 min-w-[140px] flex-1 max-w-[200px]"
+                            >
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="w-5 h-5 rounded bg-muted flex items-center justify-center text-[10px] text-muted-foreground">
+                                  {idx + 1}
+                                </span>
+                                <span className="text-xs font-mono text-muted-foreground truncate" title={step}>
+                                  {step}
+                                </span>
+                              </div>
+                              <div className={`text-2xl font-semibold ${hasData ? 'text-foreground' : 'text-muted-foreground/30'}`}>
+                                {count?.toLocaleString() || 0}
+                              </div>
+                              <div className="text-[10px] text-muted-foreground mt-1">visitors</div>
+                              
+                              {idx > 0 && hasData && (
+                                <div className={`mt-2 text-xs font-medium ${conversionRate >= 50 ? 'text-green-600' : 'text-red-500'}`}>
+                                  {conversionRate.toFixed(1)}% from prev
+                                </div>
+                              )}
+                            </motion.div>
+
+                            {/* Arrow */}
+                            {!isLast && (
+                              <div className="text-muted-foreground/30 flex-shrink-0">
+                                <ArrowRight className="w-4 h-4" />
+                              </div>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </div>
+                    
+                    {!hasData && (
+                      <div className="mt-6 text-center py-4 bg-muted/30 rounded-lg">
+                        <p className="text-xs text-muted-foreground">Waiting for traffic data...</p>
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="border-2 border-dashed border-border rounded-lg p-12 text-center"
+            >
+              <h3 className="text-lg font-medium text-foreground mb-2">No funnels yet</h3>
+              <p className="text-sm text-muted-foreground mb-6">Create your first funnel to start tracking conversions</p>
+              <button 
+                onClick={() => setIsCreating(true)}
+                className="bg-primary text-primary-foreground px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                Create Funnel
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
 };
 
-// FunnelsPage no longer gated for Community
-const FunnelsPage = () => <FunnelsPageContent />;
+const FunnelsPage = () => (
+  <FeatureGate feature="custom_events">
+    <FunnelsPageContent />
+  </FeatureGate>
+);
 
 export default FunnelsPage;

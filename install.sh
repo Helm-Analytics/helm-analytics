@@ -42,14 +42,61 @@ cd $INSTALL_DIR
 echo -e "\n${BLUE}⬇️ Cloning Helm Analytics repository...${NC}"
 sudo git clone https://github.com/Helm-Analytics/sentinel-mvp.git .
 
-# 4. Pull and Start the Application
+# 4. Optional SSL Setup
+echo -e "\n${BLUE}🔒 Do you want to configure automatic HTTPS with a custom domain? (y/N): ${NC}\c"
+read -r SETUP_SSL
+
+if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
+    echo -e "\n${YELLOW}Ensure you have already pointed your domain's A Record to this server's IP address!${NC}"
+    echo -e "${BLUE}➤ Enter your Domain Name (e.g. analytics.company.com): ${NC}\c"
+    read -r DOMAIN
+    
+    echo -e "${BLUE}➤ Enter your Email (for Let's Encrypt expiration alerts): ${NC}\c"
+    read -r EMAIL
+
+    echo -e "\n${BLUE}⚙️ Generating Caddyfile...${NC}"
+    cat <<EOF > Caddyfile
+$DOMAIN {
+    tls $EMAIL
+    reverse_proxy frontend:80
+}
+EOF
+
+    echo -e "${BLUE}⚙️ Integrating Caddy into Docker Compose...${NC}"
+    cat <<EOF > docker-compose.override.yml
+services:
+  caddy:
+    image: caddy:alpine
+    container_name: helm-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+
+volumes:
+  caddy_data:
+  caddy_config:
+EOF
+    echo -e "${GREEN}✅ SSL Configuration ready.${NC}"
+    DASHBOARD_URL="https://$DOMAIN"
+else
+    DASHBOARD_URL="http://$(curl -s ifconfig.me):8012"
+fi
+
+# 5. Pull and Start the Application
 echo -e "\n${BLUE}⚡ Building images and starting Helm Analytics...${NC}"
 sudo docker compose up -d --build
 
-# 5. Done
+# 6. Done
 echo -e "\n${GREEN}=======================================================${NC}"
 echo -e "${GREEN}🎉 Helm Analytics has been successfully installed!${NC}"
 echo -e "${GREEN}=======================================================${NC}"
-echo -e "👉 Access your dashboard at: ${BLUE}http://$(curl -s ifconfig.me):8012${NC} (or your server's IP)"
+echo -e "👉 Access your dashboard at: ${BLUE}$DASHBOARD_URL${NC}"
 echo -e "👉 Default Login: Register a new account on the dashboard."
 echo -e "To manage your instance, run: cd $INSTALL_DIR && sudo docker compose <up|down|logs>"
