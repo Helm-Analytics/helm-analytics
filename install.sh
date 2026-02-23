@@ -8,6 +8,7 @@ set -e
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}"
@@ -54,8 +55,42 @@ echo -e "\n${BLUE}🔒 Do you want to configure automatic HTTPS with a custom do
 read -r SETUP_SSL < /dev/tty
 
 if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
-    echo -e "\n${YELLOW}Ensure you have already pointed your domain's A Record to this server's IP address!${NC}"
-    echo -e "${BLUE}➤ Enter your Domain Name (e.g. analytics.company.com): ${NC}\c"
+    echo -e "\n${YELLOW}⚠️ Ensure you have already pointed your domain's A Record to this server's IP address!${NC}"
+    
+    # Ensure lsof is installed for port checking
+    if ! command -v lsof &> /dev/null; then
+        sudo apt-get update -yqq && sudo apt-get install -y lsof >/dev/null 2>&1 || true
+    fi
+
+    echo -e "\n${BLUE}🔎 Checking for port 80/443 availability...${NC}"
+    if sudo lsof -i :80 -i :443 -sTCP:LISTEN -t >/dev/null 2>&1; then
+        echo -e "${RED}⚠️  WARNING: Port 80 or 443 is already in use by another service!${NC}"
+        echo -e "The following processes are currently using these ports:"
+        sudo lsof -i :80 -i :443 -sTCP:LISTEN | awk 'NR>1 {print "  - " $1 " (PID: " $2 ")"}' | sort -u
+        
+        echo -e "\n${YELLOW}Caddy (our auto-SSL engine) requires these ports to be completely free to acquire certificates.${NC}"
+        echo -e "${BLUE}➤ Do you want Helm Analytics to automatically STOP these services for you? (y/N): ${NC}\c"
+        read -r STOP_SERVICES < /dev/tty
+        
+        if [[ "$STOP_SERVICES" =~ ^[Yy]$ ]]; then
+            echo -e "${BLUE}⚙️ Stopping conflicting services...${NC}"
+            sudo systemctl stop nginx apache2 traefik caddy 2>/dev/null || true
+            sudo systemctl disable nginx apache2 traefik caddy 2>/dev/null || true
+            
+            PIDS=$(sudo lsof -i :80 -i :443 -sTCP:LISTEN -t 2>/dev/null) || true
+            if [ -n "$PIDS" ]; then
+                sudo kill -9 $PIDS 2>/dev/null || true
+            fi
+            echo -e "${GREEN}✅ Conflicting services stopped and disabled.${NC}"
+        else
+            echo -e "\n${RED}❌ Installation cannot continue with ports 80/443 occupied. Aborting.${NC}"
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}✅ Ports 80 and 443 are free.${NC}"
+    fi
+
+    echo -e "\n${BLUE}➤ Enter your Domain Name (e.g. analytics.company.com): ${NC}\c"
     read -r DOMAIN < /dev/tty
     
     echo -e "${BLUE}➤ Enter your Email (for Let's Encrypt expiration alerts): ${NC}\c"
