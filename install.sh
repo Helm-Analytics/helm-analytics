@@ -39,8 +39,15 @@ sudo mkdir -p $INSTALL_DIR
 cd $INSTALL_DIR
 
 # 3. Download Source Code
-echo -e "\n${BLUE}⬇️ Cloning Helm Analytics repository...${NC}"
-sudo git clone https://github.com/Helm-Analytics/sentinel-mvp.git .
+if [ -d ".git" ]; then
+    echo -e "\n${BLUE}⬇️ Updating Helm Analytics repository...${NC}"
+    sudo git fetch --all
+    sudo git reset --hard origin/master
+    sudo git pull
+else
+    echo -e "\n${BLUE}⬇️ Cloning Helm Analytics repository...${NC}"
+    sudo git clone https://github.com/Helm-Analytics/helm-analytics.git .
+fi
 
 # 4. Optional SSL Setup
 echo -e "\n${BLUE}🔒 Do you want to configure automatic HTTPS with a custom domain? (y/N): ${NC}\c"
