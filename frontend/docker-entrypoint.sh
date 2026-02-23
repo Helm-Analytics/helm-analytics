@@ -3,7 +3,7 @@
 
 cat > /usr/share/nginx/html/config.js << EOF
 window.HELM_CONFIG = {
-  API_URL: "${API_URL:-http://localhost:6060}"
+  API_URL: "${API_URL:-}"
 };
 EOF
 

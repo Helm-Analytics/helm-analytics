@@ -73,7 +73,7 @@ services:
     build: ./frontend
     container_name: helm-frontend
     environment:
-      - VITE_API_URL=http://localhost:6060
+      - NODE_ENV=production
     ports:
       - "8012:80"
     depends_on:
