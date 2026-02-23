@@ -80,7 +80,7 @@ services:
       retries: 5
     restart: unless-stopped
 
-  sentinel:
+  helm:
     image: ghcr.io/helm-analytics/helm-analytics:latest
     container_name: helm-analytics-core
     environment:
