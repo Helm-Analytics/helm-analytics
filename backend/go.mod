@@ -1,4 +1,4 @@
-module sentinel-backend
+module helm-analytics
 
 go 1.24.5
 

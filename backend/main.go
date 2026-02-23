@@ -4,8 +4,8 @@ import (
 	"log"
 	"net/http"
 
-	//	_ "sentinel-backend/docs"
-	sentinel "sentinel-backend/src"
+	//	_ "helm-analytics/docs"
+	sentinel "helm-analytics/src"
 
 	"github.com/rs/cors"
 	httpSwagger "github.com/swaggo/http-swagger"

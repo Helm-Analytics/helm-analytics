@@ -1283,3 +1283,13 @@ func hashIP(ip string) string {
 	hasher.Write([]byte(ip + salt))
 	return hex.EncodeToString(hasher.Sum(nil))
 }
+
+// HealthCheckHandler returns service health status
+func HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"status":  "healthy",
+		"version": "1.0",
+	})
+}

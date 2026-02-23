@@ -4,7 +4,7 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:14-alpine
-    container_name: helm-postgres
+    container_name: helm-analytics-postgres
     environment:
       POSTGRES_USER: helm
       POSTGRES_PASSWORD: helmpass
@@ -23,7 +23,7 @@ services:
   # ClickHouse Analytics Database
   clickhouse:
     image: clickhouse/clickhouse-server
-    container_name: helm-clickhouse
+    container_name: helm-analytics-clickhouse
     environment:
       CLICKHOUSE_DB: helm_events
       CLICKHOUSE_USER: helm
@@ -47,7 +47,7 @@ services:
   # Backend API Server
   backend:
     build: ./backend
-    container_name: helm-backend
+    container_name: helm-analytics-backend
     environment:
       - DATABASE_URL=postgres://helm:helmpass@postgres:5432/helm_analytics?sslmode=disable
       - CLICKHOUSE_URL=tcp://clickhouse:9000
@@ -59,6 +59,8 @@ services:
       - ADMIN_SECRET=change-this-secret-key
       # Optional: Add Gemini API key for AI features
       # - GEMINI_API_KEY=your-api-key-here
+      # Optional: Control how long analytics data is kept in ClickHouse (default: 90 days)
+      # - CLICKHOUSE_RETENTION_DAYS=90
     ports:
       - "6060:6060"
     depends_on:
@@ -71,7 +73,7 @@ services:
   # Frontend Dashboard
   frontend:
     build: ./frontend
-    container_name: helm-frontend
+    container_name: helm-analytics-frontend
     environment:
       - NODE_ENV=production
     ports:

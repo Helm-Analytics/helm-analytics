@@ -72,6 +72,12 @@ func InitClickHouse() {
 
 func runMigrations(ctx context.Context) {
 	fmt.Printf("Running migrations for database: %s\n", dbName)
+
+	retentionDays := os.Getenv("CLICKHOUSE_RETENTION_DAYS")
+	if retentionDays == "" {
+		retentionDays = "90" // Default to 90 days if not specified
+	}
+
 	queries := []string{
 		fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", dbName),
 		
@@ -92,7 +98,7 @@ func runMigrations(ctx context.Context) {
 			FID Nullable(Float64)
 		) ENGINE = MergeTree()
 		ORDER BY (SiteID, Timestamp)
-		TTL Timestamp + INTERVAL 30 DAY`, dbName),
+		TTL Timestamp + INTERVAL %s DAY`, dbName, retentionDays),
 		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS TrustScore UInt8", dbName),
 		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS PageTitle String DEFAULT ''", dbName),
 		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS EventType String DEFAULT 'pageview'", dbName),
@@ -107,7 +113,7 @@ func runMigrations(ctx context.Context) {
 		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS UtmTerm String DEFAULT ''", dbName),
 		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS UtmContent String DEFAULT ''", dbName),
 		fmt.Sprintf("ALTER TABLE %s.events ADD COLUMN IF NOT EXISTS Channel String DEFAULT ''", dbName),
-		fmt.Sprintf("ALTER TABLE %s.events MODIFY TTL Timestamp + INTERVAL 30 DAY", dbName),
+		fmt.Sprintf("ALTER TABLE %s.events MODIFY TTL Timestamp + INTERVAL %s DAY", dbName, retentionDays),
 
 		// Session Events Table (Retention: 2 Days - Aggressive cleanup)
 		fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s.session_events (
@@ -132,8 +138,8 @@ func runMigrations(ctx context.Context) {
 			Country String
 		) ENGINE = MergeTree()
 		ORDER BY (SiteID, Timestamp)
-		TTL Timestamp + INTERVAL 7 DAY`, dbName),
-		fmt.Sprintf("ALTER TABLE %s.clicks MODIFY TTL Timestamp + INTERVAL 7 DAY", dbName),
+		TTL Timestamp + INTERVAL %s DAY`, dbName, retentionDays),
+		fmt.Sprintf("ALTER TABLE %s.clicks MODIFY TTL Timestamp + INTERVAL %s DAY", dbName, retentionDays),
 
 		// Errors Table (Retention: 7 Days)
 		fmt.Sprintf(`CREATE TABLE IF NOT EXISTS %s.errors (
@@ -148,10 +154,10 @@ func runMigrations(ctx context.Context) {
 			ErrorObj String
 		) ENGINE = MergeTree()
 		ORDER BY (SiteID, Timestamp)
-		TTL Timestamp + INTERVAL 7 DAY`, dbName),
+		TTL Timestamp + INTERVAL %s DAY`, dbName, retentionDays),
 		fmt.Sprintf("ALTER TABLE %s.errors ADD COLUMN IF NOT EXISTS Severity String DEFAULT 'Error'", dbName),
 		fmt.Sprintf("ALTER TABLE %s.errors ADD COLUMN IF NOT EXISTS Mitigation String DEFAULT ''", dbName),
-		fmt.Sprintf("ALTER TABLE %s.errors MODIFY TTL Timestamp + INTERVAL 7 DAY", dbName),
+		fmt.Sprintf("ALTER TABLE %s.errors MODIFY TTL Timestamp + INTERVAL %s DAY", dbName, retentionDays),
 	}
 
 	for _, query := range queries {

@@ -20,7 +20,7 @@ RUN /go/bin/swag init
 
 # Build the Go app
 # -ldflags="-s -w" is used to make the binary smaller
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o sentinel-backend .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o helm-backend .
 
 # Use a minimal image to run the application.
 FROM alpine:latest
@@ -32,7 +32,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /app
 
 # Copy the pre-built binary file from the previous stage
-COPY --from=builder /app/sentinel-backend .
+COPY --from=builder /app/helm-backend .
 COPY --from=builder /app/docs ./docs
 COPY GeoLite2-Country.mmdb .
 COPY GeoLite2-ASN.mmdb .
@@ -42,4 +42,4 @@ COPY static ./static
 EXPOSE 6060
 
 # Command to run the executable
-CMD ["./sentinel-backend"]
+CMD ["./helm-backend"]
