@@ -19,8 +19,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../api';
-import { FeatureGate } from '../components/FeatureGate';
-import { isDemo, DEMO_CUSTOM_EVENTS } from '../api/demoData';
 
 function CustomEventsPageContent() {
   const { selectedSite, darkMode } = useOutletContext();
@@ -42,16 +40,7 @@ function CustomEventsPageContent() {
     setLoading(true);
     try {
       // Demo mode: return demo custom events data
-      if (isDemo()) {
-        const demoEvents = DEMO_CUSTOM_EVENTS.events.map((e, index) => ({
-          event_name: e.name,
-          count: e.count,
-          timestamp: new Date(Date.now() - (index * 3600000)).toISOString(),
-          properties: { uniqueUsers: e.uniqueUsers }
-        }));
-        setEvents(demoEvents);
-        return;
-      }
+      
       
       const response = await api.getCustomEvents(selectedSite.id, {
         timeRange,
@@ -450,10 +439,4 @@ helm.trackEvent('purchase', {
   );
 }
 
-export default function CustomEventsPage() {
-  return (
-    <FeatureGate feature="custom_events">
-      <CustomEventsPageContent />
-    </FeatureGate>
-  );
-}
+export default CustomEventsPageContent;

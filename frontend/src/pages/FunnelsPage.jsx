@@ -3,7 +3,6 @@ import { useOutletContext } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '../api';
 import { Plus, Trash2, ArrowRight, ChevronDown } from 'lucide-react';
-import { FeatureGate } from '../components/FeatureGate';
 
 const FunnelsPageContent = () => {
   const { selectedSite } = useOutletContext();
@@ -317,10 +316,4 @@ const FunnelsPageContent = () => {
   );
 };
 
-const FunnelsPage = () => (
-  <FeatureGate feature="custom_events">
-    <FunnelsPageContent />
-  </FeatureGate>
-);
-
-export default FunnelsPage;
+export default FunnelsPageContent;

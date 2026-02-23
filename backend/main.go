@@ -38,6 +38,9 @@ func main() {
 
 	mux := http.NewServeMux()
 
+	// Health check endpoint (public, no auth)
+	mux.HandleFunc("/health", sentinel.HealthCheckHandler)
+
 	// The file server now needs to look inside the 'static' folder
 	// which will be created in the Docker container.
 	fs := http.FileServer(http.Dir("./static"))
