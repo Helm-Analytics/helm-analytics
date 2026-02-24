@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	//	_ "helm-analytics/docs"
 	sentinel "helm-analytics/src"
@@ -42,19 +43,29 @@ func main() {
 	// Health check endpoint (public, no auth)
 	mux.HandleFunc("/health", sentinel.HealthCheckHandler)
 
-	// Serve static assets (JS, CSS, Images)
-	fs := http.FileServer(http.Dir("./static"))
-	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+	// --- FRONTEND & STATIC ASSETS ---
+	// Serve the React app and assets from the ./static folder
+	rootFs := http.FileServer(http.Dir("./static"))
 
-	// Serve the React app index.html for the root route
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// If it's the root, serve index.html
-		if r.URL.Path == "/" {
+		// Clean the path to prevent directory traversal
+		cleanPath := filepath.Clean(r.URL.Path)
+
+		// 1. If it's the root, serve index.html
+		if cleanPath == "/" {
 			http.ServeFile(w, r, "./static/index.html")
 			return
 		}
-		// Otherwise, serve from static or 404
-		// (For an SPA, we might want to serve index.html for all non-matched routes)
+
+		// 2. Check if the file exists in the static directory
+		fpath := filepath.Join("./static", cleanPath)
+		if info, err := os.Stat(fpath); err == nil && !info.IsDir() {
+			rootFs.ServeHTTP(w, r)
+			return
+		}
+
+		// 3. Fallback: serve index.html for SPA routes (e.g., /dashboard, /login)
+		// but ONLY if it doesn't look like an API or static asset request
 		http.ServeFile(w, r, "./static/index.html")
 	})
 
