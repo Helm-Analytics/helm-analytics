@@ -1,5 +1,6 @@
 # --- Stage 1: Build the React Frontend ---
-FROM node:20-alpine AS frontend-builder
+# Use the native build platform to avoid QEMU emulation overhead for frontend
+FROM --platform=$BUILDPLATFORM node:20-alpine AS frontend-builder
 WORKDIR /app
 # Note the updated paths, relative to the root context
 COPY frontend/package*.json ./
@@ -8,7 +9,10 @@ COPY frontend/ ./
 RUN npm run build
 
 # --- Stage 2: Build the Go Backend ---
-FROM golang:1.24-alpine AS backend-builder
+# Use native build platform for compilation speed, then cross-compile
+FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS backend-builder
+ARG TARGETOS
+ARG TARGETARCH
 WORKDIR /app
 # Copy module files first
 COPY backend/go.mod backend/go.sum ./
@@ -19,7 +23,8 @@ COPY backend/src/ ./src
 WORKDIR /app/src
 # This is the corrected build command. It builds the current directory
 # and places the output binary in the parent /app directory.
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o /app/sentinel .
+# Cross-compiling using TARGETOS and TARGETARCH from Buildx
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build -v -o /app/sentinel .
 
 # --- Stage 3: Create the Final Production Image ---
 FROM alpine:latest
