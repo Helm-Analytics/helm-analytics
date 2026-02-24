@@ -60,7 +60,8 @@ COPY backend/GeoLite2-ASN.mmdb .
 # Ensure the binary is executable
 RUN chmod +x ./helm-analytics
 
-EXPOSE 6060
+ENV PORT=8012
+EXPOSE 8012
 
 # Entry point for the application
 ENTRYPOINT ["./helm-analytics"]

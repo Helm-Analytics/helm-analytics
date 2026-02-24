@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 
 	//	_ "helm-analytics/docs"
 	sentinel "helm-analytics/src"
@@ -41,10 +42,21 @@ func main() {
 	// Health check endpoint (public, no auth)
 	mux.HandleFunc("/health", sentinel.HealthCheckHandler)
 
-	// The file server now needs to look inside the 'static' folder
-	// which will be created in the Docker container.
+	// Serve static assets (JS, CSS, Images)
 	fs := http.FileServer(http.Dir("./static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", fs))
+
+	// Serve the React app index.html for the root route
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// If it's the root, serve index.html
+		if r.URL.Path == "/" {
+			http.ServeFile(w, r, "./static/index.html")
+			return
+		}
+		// Otherwise, serve from static or 404
+		// (For an SPA, we might want to serve index.html for all non-matched routes)
+		http.ServeFile(w, r, "./static/index.html")
+	})
 
 	// FIX: CORS spec forbids AllowedOrigins=["*"] with AllowCredentials=true.
 	// Use AllowOriginFunc to dynamically allow any origin while supporting cookies.
@@ -110,8 +122,13 @@ func main() {
 		httpSwagger.URL("/static/swagger.yaml"), // The url pointing to API definition
 	))
 
-	log.Println("HELM BACKEND: Analytics Fixes Applied (v2.1) - Starting server on :6060")
-	if err := http.ListenAndServe(":6060", mux); err != nil {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "6060"
+	}
+
+	log.Printf("HELM BACKEND: Analytics Fixes Applied (v2.1) - Starting server on :%s\n", port)
+	if err := http.ListenAndServe(":"+port, mux); err != nil {
 		log.Fatalf("Could not start server: %s\n", err)
 	}
 }
