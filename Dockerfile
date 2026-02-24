@@ -1,36 +1,55 @@
-# Globally define build args
-ARG TARGETOS
-ARG TARGETARCH
+# ----------------------------------------------------
+# Stage 1 — Build
+# ----------------------------------------------------
+FROM golang:1.24-alpine AS builder
 
-# --- Stage 1: Build the React Frontend ---
-FROM --platform=$BUILDPLATFORM node:20-alpine AS frontend-builder
+# Set working directory
 WORKDIR /app
-COPY frontend/package*.json ./
-RUN npm ci --legacy-peer-deps
-COPY frontend/ ./
-RUN npm run build
 
-# --- Stage 2: Build the Go Backend for Linux ---
-FROM --platform=$BUILDPLATFORM golang:1.24-alpine AS backend-builder
-ARG TARGETOS
-ARG TARGETARCH
-WORKDIR /app
-COPY backend/go.mod backend/go.sum ./
+# Install git (needed for some Go modules)
+RUN apk add --no-cache git
+
+# Cache dependencies first
+COPY go.mod go.sum ./
 RUN go mod download
-COPY backend/src/ ./src
-WORKDIR /app/src
-# Build a Linux binary regardless of host platform
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o /app/helm-analytics .
 
-# --- Stage 3: Create the Final Production Image ---
+# Copy application source
+COPY . .
+
+# Install swag CLI
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
+# Generate swagger documentation
+RUN /go/bin/swag init
+
+# 🔥 Force linux/amd64 build (NO buildx variables)
+RUN CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    go build -ldflags="-s -w" -o helm-backend .
+
+
+# ----------------------------------------------------
+# Stage 2 — Runtime
+# ----------------------------------------------------
 FROM alpine:latest
-WORKDIR /app
-COPY --from=frontend-builder /app/dist ./static
-COPY --from=backend-builder /app/helm-analytics ./
-COPY backend/GeoLite2-Country.mmdb ./
 
-RUN chmod +x ./helm-analytics
+# Install certificates for HTTPS
 RUN apk --no-cache add ca-certificates
 
-EXPOSE 7070
-ENTRYPOINT ["./helm-analytics"]
+WORKDIR /app
+
+# Copy binary from builder
+COPY --from=builder /app/helm-backend .
+
+# Copy runtime assets
+COPY --from=builder /app/docs ./docs
+COPY GeoLite2-Country.mmdb .
+COPY GeoLite2-ASN.mmdb .
+COPY static ./static
+
+# Expose application port
+EXPOSE 6060
+
+# Run application
+CMD ["./helm-backend"]
