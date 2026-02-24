@@ -1,45 +1,60 @@
-# Use the official Golang image to create a build artifact.
-# This is a multi-stage build, so we'll use a temporary image for building.
+# ----------------------------------------------------
+# Stage 1 — Build
+# ----------------------------------------------------
 FROM golang:1.24-alpine AS builder
 
-# Set the Current Working Directory inside the container
+# Accept buildx architecture arguments
+ARG TARGETOS
+ARG TARGETARCH
+
+# Set working directory
 WORKDIR /app
 
-# We want to populate the module cache based on the go.mod file.
+# Install git (required for some Go modules)
+RUN apk add --no-cache git
+
+# Cache dependencies first
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the source code into the container
+# Copy application source
 COPY . .
 
 # Install swag CLI
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 
-# Generate swagger docs
+# Generate swagger documentation
 RUN /go/bin/swag init
 
-# Build the Go app
-# -ldflags="-s -w" is used to make the binary smaller
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o helm-backend .
+# Build the application for the correct architecture
+RUN CGO_ENABLED=0 \
+    GOOS=$TARGETOS \
+    GOARCH=$TARGETARCH \
+    go build -ldflags="-s -w" -o helm-backend .
 
-# Use a minimal image to run the application.
+
+
+# ----------------------------------------------------
+# Stage 2 — Runtime
+# ----------------------------------------------------
 FROM alpine:latest
 
-# Add ca-certificates to make SSL calls
+# Install certificates for HTTPS
 RUN apk --no-cache add ca-certificates
 
-# Set the Current Working Directory inside the container
 WORKDIR /app
 
-# Copy the pre-built binary file from the previous stage
+# Copy binary from builder
 COPY --from=builder /app/helm-backend .
+
+# Copy required runtime assets
 COPY --from=builder /app/docs ./docs
 COPY GeoLite2-Country.mmdb .
 COPY GeoLite2-ASN.mmdb .
 COPY static ./static
 
-# This port will be exposed to the outside world
+# Expose application port
 EXPOSE 6060
 
-# Command to run the executable
+# Run application
 CMD ["./helm-backend"]
