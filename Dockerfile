@@ -1,3 +1,7 @@
+# Globally define predefined build args so BuildKit passes them to all stages
+ARG TARGETOS
+ARG TARGETARCH
+
 # --- Stage 1: Build the React Frontend ---
 # Use the native build platform to avoid QEMU emulation overhead for frontend
 FROM --platform=$BUILDPLATFORM node:20-alpine AS frontend-builder
