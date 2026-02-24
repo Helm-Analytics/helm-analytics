@@ -81,7 +81,7 @@ services:
     restart: unless-stopped
 
   helm:
-    image: ghcr.io/helm-analytics/helm-analytics-cloud:latest
+    image: ghcr.io/helm-analytics/helm-analytics:latest
     container_name: helm-analytics-core
     environment:
       - DATABASE_URL=postgres://helm:helmpass@postgres:5432/helm_analytics?sslmode=disable
