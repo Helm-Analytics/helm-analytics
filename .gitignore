@@ -95,4 +95,3 @@ backend/GeoLite2-*.mmdb
 license-server/
 tools/
 cloud-scaffold/
-backup/
