@@ -1,0 +1,310 @@
+{
+  "meta": {
+    "instanceId": "99e293a7810a79f1ee0e601c52f535055b45d0b11a39f49e1e80a702ed477c5b"
+  },
+  "name": "Helm Analytics - Advanced Campaign (Images, OSS, X Search)",
+  "nodes": [
+    {
+      "id": "1",
+      "name": "Every 4.8 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [-1184, 32],
+      "parameters": { "rule": { "interval": [ { "field": "minutes", "minutes": 288 } ] } },
+      "typeVersion": 1.3
+    },
+    {
+      "id": "2",
+      "name": "Google Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [-992, 224],
+      "parameters": { "options": { "topP": 0.8 } },
+      "credentials": { "googlePalmApi": { "id": "HguTQIWY1C9qT3eH", "name": "Google Gemini Api account" } },
+      "typeVersion": 1
+    },
+    {
+      "id": "3",
+      "name": "Generate Posts",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [-992, 32],
+      "parameters": {
+        "text": "Generate exactly 5 highly engaging marketing posts for Twitter/X.\n\n### EXHAUSTIVE CONTEXT:\n{\n  \"product_name\": \"Helm Analytics\",\n  \"formerly_known_as\": \"Sentinel\",\n  \"product_website\": \"https://helm-analytics.com\",\n  \"core_value_proposition\": \"A privacy-first, ultra-fast website intelligence and security platform. We don't just provide analytics; we provide *Traffic Quality* insights to help businesses stop ad-fraud, block bots, and see exactly how real humans interact with their sites.\",\n  \"key_features_and_differentiators\": {\n    \"traffic_quality_score\": \"Our signature 0-100 KPI. instantly detects health of website traffic by identifying bot attacks, data center noise.\",\n    \"sentinel_firewall\": \"Built-in security layer allowing 1-click active blocking of malicious traffic (ASNs, countries, CIDR ranges).\",\n    \"session_replay\": \"Zero-latency user session recording. Clients watch mouse movements, clicks, and scrolls to identify UI friction.\",\n    \"cookieless_privacy\": \"100% GDPR, CCPA, and HIPAA compliant out of the box. No invasive cookies.\",\n    \"clickhouse_performance\": \"Backend powered by ClickHouse, enabling lightning-fast, sub-second ingestion of millions of events.\",\n    \"conversion_funnels\": \"Deep multi-step user journey tracking without needing complex tag managers.\"\n  },\n  \"target_audience_pain_points\": [\n    \"Marketers wasting Google Ads budget on bot clicks and invisible data-center scrapers.\",\n    \"Founders needing to understand exactly why users aren't converting on pricing page.\",\n    \"Developers frustrated by slow, bloated analytics trackers.\"\n  ],\n  \"brand_voice\": \"Informative, technical but highly accessible, bold, empathetic to developer pain points, slightly playful.\"\n}\n\n### REQUIREMENTS:\n5 distinct posts spanning:\n1. EDUCATION (e.g. GA4 vs Cookieless)\n2. FEATURE (e.g. Traffic Quality Score)\n3. PROMOTION (Helm Cloud or OSS)\n4. ENGAGEMENT (Poll/Question)\n5. VALUE (Data sovereignty)\n\n### IMAGE LOGIC:\nFor each post, decide if an AI-generated image would enhance it (set `needs_image` to true for max 2 posts). If true, provide a highly descriptive `image_prompt`.\n\nFormat:\nReturn ONLY a valid JSON array of objects with keys: `text`, `needs_image` (boolean), `image_prompt` (string).",
+        "promptType": "define"
+      },
+      "typeVersion": 1.7
+    },
+    {
+      "id": "4",
+      "name": "Parse JSON",
+      "type": "n8n-nodes-base.function",
+      "position": [-624, 32],
+      "parameters": {
+        "functionCode": "let output = items[0].json.text;\noutput = output.replace(/```json\\s*|\\s*```/g, '').trim();\nconst posts = JSON.parse(output);\nreturn posts.map(p => ({ json: p }));"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "5",
+      "name": "Loop Over Posts",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [-350, 32],
+      "parameters": { "options": {} },
+      "typeVersion": 3
+    },
+    {
+      "id": "6",
+      "name": "Wait (Spacing)",
+      "type": "n8n-nodes-base.wait",
+      "position": [-100, 32],
+      "parameters": { "amount": 5, "unit": "minutes" },
+      "typeVersion": 1
+    },
+    {
+      "id": "7",
+      "name": "Needs Image?",
+      "type": "n8n-nodes-base.if",
+      "position": [100, 32],
+      "parameters": {
+        "conditions": { "boolean": [ { "value1": "={{$json.needs_image}}", "value2": true } ] }
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "8",
+      "name": "Post Text Only",
+      "type": "n8n-nodes-base.twitter",
+      "position": [400, -100],
+      "parameters": { "text": "={{$json.text}}" },
+      "credentials": { "twitterOAuth2Api": { "id": "TLRbFnxRHgwLFuHu", "name": "X account" } },
+      "typeVersion": 2
+    },
+    {
+      "id": "9",
+      "name": "Generate Image API",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [400, 150],
+      "parameters": { 
+        "url": "https://api.openai.com/v1/images/generations",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+           "parameters": [
+             {"name": "prompt", "value": "={{$json.image_prompt}}"},
+             {"name": "n", "value": 1},
+             {"name": "size", "value": "1024x1024"}
+           ]
+        }
+      },
+      "typeVersion": 4.1
+    },
+    {
+      "id": "10",
+      "name": "Add Helm Logo",
+      "type": "n8n-nodes-base.editImage",
+      "position": [600, 150],
+      "parameters": { "operation": "composite", "compositeImageProperty": "logo" },
+      "typeVersion": 1
+    },
+    {
+      "id": "11",
+      "name": "Post with Image",
+      "type": "n8n-nodes-base.twitter",
+      "position": [800, 150],
+      "parameters": { "text": "={{$json.text}}", "attachments": "data" },
+      "credentials": { "twitterOAuth2Api": { "id": "TLRbFnxRHgwLFuHu", "name": "X account" } },
+      "typeVersion": 2
+    },
+    {
+      "id": "12",
+      "name": "Every 12 Hours (OSS)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [-1184, 500],
+      "parameters": { "rule": { "interval": [ { "field": "hours", "hours": 12 } ] } },
+      "typeVersion": 1.3
+    },
+    {
+      "id": "13",
+      "name": "HackerNews 10",
+      "type": "n8n-nodes-base.hackerNews",
+      "position": [-950, 500],
+      "parameters": { "operation": "getAll", "returnAll": false, "limit": 10 },
+      "typeVersion": 1
+    },
+    {
+      "id": "14",
+      "name": "Filter OSS/Analytics",
+      "type": "n8n-nodes-base.function",
+      "position": [-750, 500],
+      "parameters": {
+        "functionCode": "return items.filter(i => {\n  const title = (i.json.title || '').toLowerCase();\n  return title.includes('open source') || title.includes('analytics');\n});"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "15",
+      "name": "Limit OSS to 1",
+      "type": "n8n-nodes-base.itemLists",
+      "position": [-550, 500],
+      "parameters": { "operation": "limit", "limit": 1 },
+      "typeVersion": 2
+    },
+    {
+      "id": "16",
+      "name": "Draft OSS Reply",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [-350, 500],
+      "parameters": {
+        "text": "A trending Open Source article dropped on HackerNews:\nTitle: {{$json.title}}\nLink: {{$json.url}}\n\nWrite a 1-sentence quote-tweet as the Helm Analytics account. Be supportive of the OSS community, non-salesy. Include the link.\nDo not use quotes or markdown.",
+        "promptType": "define"
+      },
+      "typeVersion": 1.7
+    },
+    {
+      "id": "17",
+      "name": "Post OSS Reply",
+      "type": "n8n-nodes-base.twitter",
+      "position": [-100, 500],
+      "parameters": { "text": "={{$json.text}}", "additionalFields": {} },
+      "credentials": { "twitterOAuth2Api": { "id": "TLRbFnxRHgwLFuHu", "name": "X account" } },
+      "typeVersion": 2
+    },
+    {
+      "id": "18",
+      "name": "Google Gemini (OSS)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [-350, 700],
+      "parameters": { "options": { "topP": 0.8 } },
+      "credentials": { "googlePalmApi": { "id": "HguTQIWY1C9qT3eH", "name": "Google Gemini Api account" } },
+      "typeVersion": 1
+    },
+    {
+      "id": "19",
+      "name": "Every 45 Mins (X Search)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [-1184, 900],
+      "parameters": { "rule": { "interval": [ { "field": "minutes", "minutes": 45 } ] } },
+      "typeVersion": 1.3
+    },
+    {
+      "id": "20",
+      "name": "Search X for Pain Points",
+      "type": "n8n-nodes-base.twitter",
+      "position": [-950, 900],
+      "parameters": {
+        "operation": "search",
+        "searchText": "\"GA4 alternative\" OR \"website analytics\" OR \"bot traffic\" -filter:retweets",
+        "limit": 5
+      },
+      "credentials": { "twitterOAuth2Api": { "id": "TLRbFnxRHgwLFuHu", "name": "X account" } },
+      "typeVersion": 2
+    },
+    {
+      "id": "21",
+      "name": "Limit Search to 1",
+      "type": "n8n-nodes-base.itemLists",
+      "position": [-750, 900],
+      "parameters": { "operation": "limit", "limit": 1 },
+      "typeVersion": 2
+    },
+    {
+      "id": "22",
+      "name": "Draft Contextual Reply",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [-550, 900],
+      "parameters": {
+        "text": "A user on Twitter just posted this:\n\"{{$json.text}}\"\n\nWrite a helpful, empathetic, non-spammy reply from 'Helm Analytics' (A privacy-first, ultra-fast website intelligence platform built on ClickHouse. Features: Cookieless, Session Replay, Traffic Quality Score to block bots, Firewall). Answer their question or validate their pain point *first*, then subtly mention how a tool like Helm helps. Keep it under 280 characters.",
+        "promptType": "define"
+      },
+      "typeVersion": 1.7
+    },
+    {
+      "id": "23",
+      "name": "Reply to Tweet",
+      "type": "n8n-nodes-base.twitter",
+      "position": [-300, 900],
+      "parameters": {
+        "operation": "create",
+        "text": "={{$json.text}}",
+        "additionalFields": { "in_reply_to_tweet_id": "={{$('Limit Search to 1').item.json.id}}" }
+      },
+      "credentials": { "twitterOAuth2Api": { "id": "TLRbFnxRHgwLFuHu", "name": "X account" } },
+      "typeVersion": 2
+    },
+    {
+      "id": "24",
+      "name": "Google Gemini (Reply)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "position": [-550, 1100],
+      "parameters": { "options": { "topP": 0.8 } },
+      "credentials": { "googlePalmApi": { "id": "HguTQIWY1C9qT3eH", "name": "Google Gemini Api account" } },
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Every 4.8 Hours": {
+      "main": [ [ { "node": "Generate Posts", "type": "main", "index": 0 } ] ]
+    },
+    "Google Gemini": {
+      "ai_languageModel": [ [ { "node": "Generate Posts", "type": "ai_languageModel", "index": 0 } ] ]
+    },
+    "Generate Posts": {
+      "main": [ [ { "node": "Parse JSON", "type": "main", "index": 0 } ] ]
+    },
+    "Parse JSON": {
+      "main": [ [ { "node": "Loop Over Posts", "type": "main", "index": 0 } ] ]
+    },
+    "Loop Over Posts": {
+      "main": [
+        [],
+        [ { "node": "Wait (Spacing)", "type": "main", "index": 0 } ]
+      ]
+    },
+    "Wait (Spacing)": {
+      "main": [ [ { "node": "Needs Image?", "type": "main", "index": 0 } ] ]
+    },
+    "Needs Image?": {
+      "main": [
+        [ { "node": "Generate Image API", "type": "main", "index": 0 } ],
+        [ { "node": "Post Text Only", "type": "main", "index": 0 } ]
+      ]
+    },
+    "Generate Image API": {
+      "main": [ [ { "node": "Add Helm Logo", "type": "main", "index": 0 } ] ]
+    },
+    "Add Helm Logo": {
+      "main": [ [ { "node": "Post with Image", "type": "main", "index": 0 } ] ]
+    },
+    "Every 12 Hours (OSS)": {
+      "main": [ [ { "node": "HackerNews 10", "type": "main", "index": 0 } ] ]
+    },
+    "HackerNews 10": {
+      "main": [ [ { "node": "Filter OSS/Analytics", "type": "main", "index": 0 } ] ]
+    },
+    "Filter OSS/Analytics": {
+      "main": [ [ { "node": "Limit OSS to 1", "type": "main", "index": 0 } ] ]
+    },
+    "Limit OSS to 1": {
+      "main": [ [ { "node": "Draft OSS Reply", "type": "main", "index": 0 } ] ]
+    },
+    "Google Gemini (OSS)": {
+      "ai_languageModel": [ [ { "node": "Draft OSS Reply", "type": "ai_languageModel", "index": 0 } ] ]
+    },
+    "Draft OSS Reply": {
+      "main": [ [ { "node": "Post OSS Reply", "type": "main", "index": 0 } ] ]
+    },
+    "Every 45 Mins (X Search)": {
+      "main": [ [ { "node": "Search X for Pain Points", "type": "main", "index": 0 } ] ]
+    },
+    "Search X for Pain Points": {
+      "main": [ [ { "node": "Limit Search to 1", "type": "main", "index": 0 } ] ]
+    },
+    "Limit Search to 1": {
+      "main": [ [ { "node": "Draft Contextual Reply", "type": "main", "index": 0 } ] ]
+    },
+    "Google Gemini (Reply)": {
+      "ai_languageModel": [ [ { "node": "Draft Contextual Reply", "type": "ai_languageModel", "index": 0 } ] ]
+    },
+    "Draft Contextual Reply": {
+      "main": [ [ { "node": "Reply to Tweet", "type": "main", "index": 0 } ] ]
+    }
+  }
+}

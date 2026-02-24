@@ -145,10 +145,10 @@ helm.trackEvent('purchase', {
                     </p>
                     <div className="relative group/code">
                       <pre className="bg-background border border-border rounded-2xl p-5 text-xs font-mono text-foreground/80 overflow-x-auto">
-                        {`<script defer \n  data-site-id="${selectedSite?.id || 'PROJECT_ID'}" \n  src="https://app.helm-analytics.com/static/tracker-v5.js">\n</script>`}
+                        {`<script defer \n  data-site-id="${selectedSite?.id || 'PROJECT_ID'}" \n  src="${(import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/') ? import.meta.env.VITE_API_URL : window.location.origin}/static/tracker-v5.js">\n</script>`}
                       </pre>
                       <button 
-                        onClick={() => copyCode(`<script defer data-site-id="${selectedSite?.id || 'PROJECT_ID'}" src="https://app.helm-analytics.com/static/tracker-v5.js"></script>`)}
+                        onClick={() => copyCode(`<script defer data-site-id="${selectedSite?.id || 'PROJECT_ID'}" src="${(import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/') ? import.meta.env.VITE_API_URL : window.location.origin}/static/tracker-v5.js"></script>`)}
                         className="absolute top-3 right-3 p-2 bg-secondary/80 hover:bg-accent hover:text-white rounded-lg transition-all opacity-0 group-hover/code:opacity-100 border border-border"
                       >
                         {copied ? <Check size={14} /> : <Copy size={14} />}

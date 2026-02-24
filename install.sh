@@ -89,11 +89,11 @@ services:
       - CLICKHOUSE_DB=helm_events
       - CLICKHOUSE_USER=helm
       - CLICKHOUSE_PASSWORD=helmpass
-      - PORT=7070
+      - PORT=8012
       - DEPLOYMENT_MODE=community
       - ADMIN_SECRET=change-this-secret-key
     ports:
-      - "7070:7070"
+      - "8012:8012"
     depends_on:
       postgres:
         condition: service_healthy
@@ -156,7 +156,7 @@ if [[ "$SETUP_SSL" =~ ^[Yy]$ ]]; then
     cat <<EOF > Caddyfile
 $DOMAIN {
     tls $EMAIL
-    reverse_proxy frontend:80
+    reverse_proxy helm:8012
 }
 EOF
 
@@ -175,7 +175,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
-      - frontend
+      - helm
 
 volumes:
   caddy_data:
