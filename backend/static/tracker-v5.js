@@ -27,6 +27,7 @@
     const rrwebScript = document.createElement('script');
     rrwebScript.src = 'https://cdn.jsdelivr.net/npm/rrweb@latest/dist/rrweb.min.js';
     document.head.appendChild(rrwebScript);
+    rrwebScript.onerror = function() {};
 
     const webVitalsScript = document.createElement('script');
     webVitalsScript.src = 'https://unpkg.com/web-vitals@3/dist/web-vitals.iife.js';
@@ -272,7 +273,7 @@
                 emit(event) {
                     // Debug: Log first few events to check for snapshot
                     if (events.length < 5) {
-                        console.log('[Sentinel v5] Event type:', event.type, 'Total events:', events.length);
+                        // console.log('[Sentinel v5] Event type:', event.type, 'Total events:', events.length);
                     }
                     events.push(event);
                     // Batch optimization: Send every 50 events or via 5s interval
@@ -385,19 +386,19 @@
 
         function sendEvents(isUnload = false) {
             if (events.length === 0) return;
-            console.log('[Sentinel v5] Sending', events.length, 'events. First event type:', events[0]?.type);
+            // console.log('[Sentinel v5] Sending', events.length, 'events. First event type:', events[0]?.type);
             const body = JSON.stringify({ 
                 siteId: siteId,
                 sessionId: sessionId, 
                 events: events 
             });
-            events = [];
+            events.length = 0;
             fetch(sessionEndpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain' },
                 body: body,
                 keepalive: isUnload
-            }).catch(err => console.error('Session replay error:', err));
+            }).catch(() => {});
         }
 
         setInterval(sendEvents, 5000);
@@ -411,7 +412,7 @@
 
             fetch(clickEndpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify({
                     siteId,
                     sessionId,
@@ -419,14 +420,14 @@
                     x, y, target, text
                 }),
                 keepalive: true
-            }).catch(err => console.error('Click tracking error:', err));
+            }).catch(() => {});
         });
 
         // Error tracking
         window.addEventListener('error', function(event) {
             fetch(errorEndpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'text/plain' },
                 body: JSON.stringify({
                     siteId,
                     sessionId,
@@ -438,7 +439,7 @@
                     stack: event.error ? event.error.stack : null
                 }),
                 keepalive: true
-            }).catch(err => console.error('Error tracking failed:', err));
+            }).catch(() => {});
         });
 
         // Web Vitals tracking - wait for script to load

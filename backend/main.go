@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	//	_ "helm-analytics/docs"
 	sentinel "helm-analytics/src"
@@ -31,6 +32,9 @@ func main() {
 	// All functions from your library are now prefixed with 'sentinel.'
 	sentinel.InitDB()
 	sentinel.InitAnalyticsEngine()
+	
+	// Initialize rate limiter: 12000 requests per minute per IP for tracking (accommodates high-volume heatmaps/sessions)
+	trackLimiter := sentinel.NewRateLimiter(12000, time.Minute)
 	
 	// Initialize license system
 	if err := sentinel.InitLicense(); err != nil {

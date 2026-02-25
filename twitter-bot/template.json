@@ -143,6 +143,7 @@
     {
       "parameters": {
         "resource": "image",
+        "operation": "generate",
         "modelId": {
           "__rl": true,
           "value": "models/gemini-3-pro-image-preview",
@@ -182,18 +183,31 @@
     },
     {
       "parameters": {
-        "operation": "composite",
-        "options": {},
-        "compositeImageProperty": "logo"
+        "resource": "image",
+        "operation": "edit",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-pro-image-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-pro-image-preview (Nano Banana Pro)"
+        },
+        "prompt": "Subtly edit this image to watermark the provided Helm Analytics logo securely into the bottom right corner. Ensure it fits naturally.",
+        "options": {}
       },
       "id": "780bcb7a-be4f-4045-870b-000eb5ec31ce",
       "name": "Add Helm Logo",
-      "type": "n8n-nodes-base.editImage",
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
       "position": [
         -700,
         960
       ],
-      "typeVersion": 1
+      "typeVersion": 1.1,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "MApsqVZfj70Mvodd",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     },
     {
       "parameters": {

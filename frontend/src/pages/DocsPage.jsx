@@ -87,7 +87,9 @@ const DocsPage = () => {
         }
     ];
 
-    const quickStartCode = `<script defer data-site-id="YOUR_SITE_ID" src="${(import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/') ? import.meta.env.VITE_API_URL : window.location.origin}/static/tracker-v5.js"></script>`;
+    const envUrl = import.meta.env.VITE_API_URL;
+    const apiUrl = (envUrl && envUrl !== '/') ? envUrl : window.location.origin;
+    const quickStartCode = `<script defer data-site-id="YOUR_SITE_ID" src="${apiUrl}/static/tracker-v5.js?v=6"></script>`;
     const spiderTrapCode = `<a href="/track/trap?siteId=YOUR_SITE_ID" style="display:none" aria-hidden="true">Health Check</a>`;
 
     return (

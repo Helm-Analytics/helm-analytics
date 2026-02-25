@@ -38,7 +38,7 @@ const Dashboard = () => {
 
     const envUrl = import.meta.env.VITE_API_URL;
     const apiUrl = (envUrl && envUrl !== '/') ? envUrl : window.location.origin;
-    const trackingScript = `<script src="${apiUrl}/static/tracker-v5.js" data-site-id="${selectedSite.id}"></script>`
+    const trackingScript = `<script src="${apiUrl}/static/tracker-v5.js?v=6" data-site-id="${selectedSite.id}"></script>`
 
     try {
       if (navigator.clipboard && window.isSecureContext) {
@@ -352,7 +352,7 @@ const Dashboard = () => {
             </p>
             <div className="space-y-4">
               <div className="bg-secondary rounded-xl p-4 font-mono text-[10px] break-all border border-border text-foreground">
-                {`<script src="${(import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/') ? import.meta.env.VITE_API_URL : window.location.origin}/static/tracker-v5.js" data-site-id="${selectedSite.id}"></script>`}
+                {`<script src="${(import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/') ? import.meta.env.VITE_API_URL : window.location.origin}/static/tracker-v5.js?v=6" data-site-id="${selectedSite.id}"></script>`}
               </div>
               <button
                 onClick={copyTrackingScript}

@@ -166,10 +166,12 @@ helm.trackEvent('purchase', {
                     </p>
                     <div className="relative group/code">
                       <pre className="bg-background border border-border rounded-2xl p-5 text-xs font-mono text-foreground/80 overflow-x-auto">
-                        {`<script defer \n  data-site-id="${selectedSite?.id || 'PROJECT_ID'}" \n  src="${(import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/') ? import.meta.env.VITE_API_URL : window.location.origin}/static/tracker-v5.js">\n</script>`}
+                            <code className="text-gray-300">
+                              {`<script src="${(import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/') ? import.meta.env.VITE_API_URL : window.location.origin}/static/tracker-v5.js?v=6" data-site-id="YOUR_SITE_ID"></script>`}
+                            </code>
                       </pre>
                       <button 
-                        onClick={() => copyCode(`<script defer data-site-id="${selectedSite?.id || 'PROJECT_ID'}" src="${(import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/') ? import.meta.env.VITE_API_URL : window.location.origin}/static/tracker-v5.js"></script>`)}
+                        onClick={() => copyCode(`<script defer data-site-id="${selectedSite?.id || 'PROJECT_ID'}" src="${(import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '/') ? import.meta.env.VITE_API_URL : window.location.origin}/static/tracker-v5.js?v=6"></script>`)}
                         className="absolute top-3 right-3 p-2 bg-secondary/80 hover:bg-accent hover:text-white rounded-lg transition-all opacity-0 group-hover/code:opacity-100 border border-border"
                       >
                         {copied ? <Check size={14} /> : <Copy size={14} />}
