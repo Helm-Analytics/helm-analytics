@@ -1,7 +1,6 @@
 (function() {
     const scriptTag = document.querySelector('script[data-site-id]');
     if (!scriptTag) {
-        console.error('Helm: data-site-id attribute not found on script tag.');
         return;
     }
     
@@ -14,8 +13,7 @@
             const scriptUrl = new URL(scriptTag.src);
             apiBase = `${scriptUrl.protocol}//${scriptUrl.host}`;
         } catch (e) {
-            // No fallback - must be specified or auto-detected
-            console.error('Helm: Unable to detect API URL from script source');
+            // Silently fail
         }
     }
     
@@ -78,21 +76,16 @@
                 method: 'POST',
                 body: JSON.stringify(data),
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'text/plain'
                 },
                 keepalive: true
-            }).then(response => {
-                if (!response.ok) {
-                    console.error('[Helm Tracker] Server error:', response.status, response.statusText);
-                }
-            }).catch(err => console.error('[Helm Tracker] Network error:', err));
+            }).catch(() => {});
         }
 
         // Custom event tracking - PUBLIC API
         window.helm = window.helm || {};
         window.helm.trackEvent = function(eventName, properties = {}) {
             if (!eventName) {
-                console.error('Helm: eventName is required');
                 return;
             }
 
@@ -110,14 +103,10 @@
                 method: 'POST',
                 body: JSON.stringify(data),
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'text/plain'
                 },
                 keepalive: true
-            }).then(response => {
-                if (!response.ok) {
-                    console.error('[Helm Tracker] Custom event server error:', response.status, response.statusText);
-                }
-            }).catch(err => console.error('Helm event tracking error:', err));
+            }).catch(() => {});
         };
 
         // Auto-track outbound links
