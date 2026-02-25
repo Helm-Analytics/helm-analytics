@@ -48,14 +48,20 @@ Helm Analytics is designed from the ground up for horizontal scalability and hig
 
 ```mermaid
 graph TD
-    User["Visitor Browser"] -->|HTTP POST /track| LoadBalancer
-    LoadBalancer -->|Traffic| API["Ingestion API (Go)"]
-    API -->|Write (Batch)| ClickHouse[("ClickHouse DB")]
-    API -->|Metadata| PostgreSQL[("PostgreSQL DB")]
-    API -->|Read (Aggregates)| ClickHouse
-    Admin["Dashboard User"] -->|View Stats| API
-```
+    User["Visitor Browser"]
+    LoadBalancer["Load Balancer"]
+    API["Ingestion API - Go"]
+    ClickHouse["ClickHouse DB"]
+    PostgreSQL["PostgreSQL DB"]
+    Admin["Dashboard User"]
 
+    User -->|HTTP POST track| LoadBalancer
+    LoadBalancer -->|Traffic| API
+    API -->|Batch Write| ClickHouse
+    API -->|Store Metadata| PostgreSQL
+    API -->|Read Aggregates| ClickHouse
+    Admin -->|View Stats| API
+```
 - **Ingestion API (Go):** Capable of handling thousands of requests per second with a minimal CPU footprint.
 - **Storage (ClickHouse):** Highly optimized analytical database for rapid OLAP querying.
 - **Metadata (PostgreSQL):** Relational storage for user accounts, domain configurations, and settings.
