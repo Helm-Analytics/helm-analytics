@@ -11,7 +11,7 @@
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![GitHub Container Registry](https://img.shields.io/badge/Docker-ghcr.io-blue?logo=docker)](https://github.com/orgs/Helm-Analytics/packages?repo_name=helm-analytics)
 
-[Live Demo](https://helm-analytics.com/demo) · [Documentation](https://helm-analytics.com/docs) · [Community](https://discord.gg/helm-analytics)
+[Live Demo](https://helm-analytics.com/demo) · [Documentation](https://helm-analytics.com/docs) · [Follow us on X](https://x.com/helm_analytics)
 
 </div>
 
@@ -21,7 +21,7 @@
 
 Helm Analytics is a self-hosted, open-source alternative to traditional analytics platforms, engineered for speed, privacy, and absolute data ownership.
 
-Unlike older analytics tools that bloat websites with heavy tracking scripts and monetize user data, Helm utilizes a lightweight tracker (< 2KB) and stores all telemetry on your own infrastructure. The core engine leverages ClickHouse (Columnar Database) and Go to achieve sub-second query performance across massive, high-volume datasets.
+Unlike older analytics tools that bloat websites with heavy tracking scripts and monetize user data, Helm Analytics utilizes a lightweight tracker (< 2KB) and stores all telemetry on your own infrastructure. The core engine leverages ClickHouse (Columnar Database) and Go to achieve sub-second query performance across massive, high-volume datasets.
 
 ## Core Features
 
@@ -36,16 +36,15 @@ Unlike older analytics tools that bloat websites with heavy tracking scripts and
 - **Heatmaps:** Generate precise visual overlays of click and scroll data to optimize page layouts.
 - **Conversion Funnels:** Construct multi-step user journey paths to pinpoint drop-off rates.
 
-### Application Security
-- **Aegis Firewall:** Built-in Web Application Firewall (WAF) protection against XSS, SQLi, and path traversal attacks directly at the ingestion layer.
-- **Traffic Quality Score:** Automatically block destructive bot traffic and data-center scrapers.
-- **Rate Limiting:** IP-based rate limiting to mitigate abuse.
+### Application Security & Performance
+- **High-Throughput Ingestion:** Go-based API handles thousands of tracking events per second silently and securely.
+- **Rate Limiting:** IP-based rate limiting to mitigate abuse and protect ingestion endpoints.
 
 ---
 
 ## Architecture
 
-Helm is designed from the ground up for horizontal scalability and high throughput.
+Helm Analytics is designed from the ground up for horizontal scalability and high throughput.
 
 ```mermaid
 graph TD
@@ -106,11 +105,11 @@ After the containers are running, navigate to your domain (or `http://<your-serv
 
 ## SDK Integration
 
-Helm offers high-performance server-side SDKs for developers who wish to integrate tracking directly into their application backend logic.
+Helm Analytics offers high-performance server-side SDKs for developers who wish to integrate tracking directly into their application backend logic.
 
 Configure your SDKs via Environment Variables for zero-code configuration:
 - `HELM_SITE_ID`: Your unique site identifier (found in the dashboard).
-- `HELM_API_URL`: Your self-hosted Helm URL (e.g., `https://analytics.your-domain.com`).
+- `HELM_API_URL`: Your self-hosted Helm Analytics URL (e.g., `https://analytics.your-domain.com`).
 
 ### Go SDK
 
@@ -150,11 +149,12 @@ await helm.track(req, 'pageview', {
 
 ## Support & Community
 
-We actively monitor our community channels and provide assistance for self-hosted instances.
+We actively monitor our community channels and provide assistance for self-hosted instances. 
 
-- **X (Twitter):** [@helm_analytics](https://x.com/helm_analytics)
+We don't have a Discord server yet, but we'd love for you to follow along with our journey:
+
+- **Follow us on X (Twitter):** [@helm_analytics](https://x.com/helm_analytics)
 - **Direct Support:** [support@helm-analytics.com](mailto:support@helm-analytics.com)
-- **Discord:** [Join the Community](https://discord.gg/helm-analytics)
 
 ---
 
