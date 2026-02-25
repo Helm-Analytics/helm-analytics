@@ -41,7 +41,25 @@ const Dashboard = () => {
     const trackingScript = `<script src="${apiUrl}/static/tracker-v5.js" data-site-id="${selectedSite.id}"></script>`
 
     try {
-      await navigator.clipboard.writeText(trackingScript)
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(trackingScript)
+      } else {
+        // Fallback for non-HTTPS (like self-hosted IP addresses)
+        const textArea = document.createElement("textarea");
+        textArea.value = trackingScript;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+          document.execCommand('copy');
+        } catch (err) {
+          console.error("Fallback copy failed", err)
+        }
+        document.body.removeChild(textArea);
+      }
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch (error) {
