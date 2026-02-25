@@ -11,56 +11,41 @@
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![GitHub Container Registry](https://img.shields.io/badge/Docker-ghcr.io-blue?logo=docker)](https://github.com/orgs/Helm-Analytics/packages?repo_name=helm-analytics)
 
-[Live Demo](https://helm-analytics.com/demo) · [Documentation](https://helm-analytics.com/docs/guide/getting-started.html) · [Community](https://discord.gg/helm-analytics)
+[Live Demo](https://helm-analytics.com/demo) · [Documentation](https://helm-analytics.com/docs) · [Community](https://discord.gg/helm-analytics)
 
 </div>
 
 ---
 
-## 📖 Introduction
+## Introduction
 
-Helm Analytics is a self-hosted, open-source alternative to Google Analytics, designed for those who care about speed, privacy, and data ownership. 
+Helm Analytics is a self-hosted, open-source alternative to traditional analytics platforms, engineered for speed, privacy, and absolute data ownership.
 
-Unlike traditional analytics tools that bloat your website with heavy scripts and sell your user data, Helm uses a **< 2KB lightweight tracker** and stores all data on your own infrastructure (or our private cloud). We utilize **ClickHouse** for sub-second query performance on massive datasets.
+Unlike older analytics tools that bloat websites with heavy tracking scripts and monetize user data, Helm utilizes a lightweight tracker (< 2KB) and stores all telemetry on your own infrastructure. The core engine leverages ClickHouse (Columnar Database) and Go to achieve sub-second query performance across massive, high-volume datasets.
 
-## 🚀 Why Helm? (Comparison)
+## Core Features
 
-| Feature | Helm Analytics | Google Analytics 4 | Plausible / Fathom |
-| :--- | :--- | :--- | :--- |
-| **Privacy Law Compliance** | ✅ GDPR/CCPA Ready | ❌ Complex / Grey Area | ✅ Yes |
-| **Data Ownership** | ✅ 100% Yours | ❌ Google's Data | ✅ Yours |
-| **Script Weight** | ⚡ **< 2 KB** | 🐢 ~45 KB | ~1 KB |
-| **Cookies** | 🍪 **Cookie-Free** | 🍪 Heavy Usage | Cookie-Free |
-| **Session Replay** | ✅ **Included** | ❌ No | ❌ No (Usually separate) |
-| **Security/WAF** | ✅ **Built-in Shield** | ❌ No | ❌ No |
-| **Self-Hosted Option** | ✅ AGPLv3 License | ❌ No | ✅ / ❌ (Varies) |
+### Web Analytics & Telemetry
+- **Real-Time Traffic Monitoring:** View concurrent active visitors on your platform with zero latency.
+- **Privacy-Centric Tracking:** Perform unique visitor attribution without relying on persistent cookies or IP logging.
+- **Geospatial & Device Data:** Comprehensive breakdowns by Browser, Operating System, Country, and City.
+- **UTM Campaign Tracking:** Automatic attribution and grouping for marketing campaigns.
 
----
+### Session Intelligence
+- **High-Fidelity Session Replay:** Record and watch user sessions to identify UX friction points. Privacy controls allow automatic masking of sensitive text inputs.
+- **Heatmaps:** Generate precise visual overlays of click and scroll data to optimize page layouts.
+- **Conversion Funnels:** Construct multi-step user journey paths to pinpoint drop-off rates.
 
-## ✨ Key Features
-
-### 📊 Core Analytics
-- **Real-Time Traffic:** See visitors on your site *right now*.
-- **Privacy-First Tracking:** Unique visitor counting without persistent cookies or IP logging.
-- **Device & Geo Data:** Breakdown by Browser, OS, Country, and City.
-- **UTM Campaign Tracking:** Automatic attribution for marketing campaigns.
-
-### 🎭 Session Intelligence
-- **Session Replay:** Watch high-fidelity replays of user sessions to understand behavior. 
-  - *Privacy Note:* All inputs and text can be masked automatically.
-- **Heatmaps:** Visualize Click and Scroll data to optimize landing pages.
-- **Conversion Funnels:** Define multi-step paths and spot where users drop off.
-
-### 🛡️ Security & Performance
-- **Application WAF:** Built-in protection against XSS, SQLi, and path traversal attacks directly in the ingestion layer.
-- **Rate Limiting:** Automatic IP-based rate limiting to prevent abuse.
-- **Zero-Dependency Tracker:** No external requests, no ad-blocker triggers (when self-hosted).
+### Application Security
+- **Aegis Firewall:** Built-in Web Application Firewall (WAF) protection against XSS, SQLi, and path traversal attacks directly at the ingestion layer.
+- **Traffic Quality Score:** Automatically block destructive bot traffic and data-center scrapers.
+- **Rate Limiting:** IP-based rate limiting to mitigate abuse.
 
 ---
 
-## 🛠️ Architecture
+## Architecture
 
-Helm is designed for horizontal scalability and high throughput.
+Helm is designed from the ground up for horizontal scalability and high throughput.
 
 ```mermaid
 graph TD
@@ -72,187 +57,121 @@ graph TD
     Admin["Dashboard User"] -->|View Stats| API
 ```
 
-- **Ingestion API (Go):** Handles thousands of requests per second with minimal CPU footprint.
-- **Storage (ClickHouse):** Columnar database optimized for analytical queries (OLAP).
-- **Metadata (PostgreSQL):** Stores user accounts, site configurations, and saved reports.
-- **Frontend (React/Vite):** A fast Single Page Application (SPA) for the dashboard.
+- **Ingestion API (Go):** Capable of handling thousands of requests per second with a minimal CPU footprint.
+- **Storage (ClickHouse):** Highly optimized analytical database for rapid OLAP querying.
+- **Metadata (PostgreSQL):** Relational storage for user accounts, domain configurations, and settings.
+- **Frontend (React/Vite):** A responsive, fast loading Single Page Application (SPA).
 
 ---
 
-## ⚡ Quick Start (Community Edition)
+## Getting Started
 
-The fastest way to run Helm Analytics in production is using our automated installation script.
+### 1. Installation script
 
-### 1-Click Installer (Recommended)
+The recommended way to deploy Helm Analytics in a production environment is using the automated installation script. 
 
-Run this command on a fresh Ubuntu 20.04+ or Debian VPS. It will install Docker, pull the latest release, optionally configure automatic SSL via Caddy, and start the platform.
+Run the following command on a fresh Ubuntu 20.04+ or Debian VPS:
 
 ```bash
 curl -sSL https://helm-analytics.com/install.sh | bash
 ```
 
-### Manual Installation (Advanced)
+This script will install Docker, pull the required images, configure the local environment, and start the Helm Analytics platform.
 
-If you prefer to set up your own reverse proxy (like Nginx, Traefik, or Cloudflare Tunnels), you can run Helm manually using Docker Compose.
+### 2. Manual Installation (Alternative)
 
-If you prefer to set up your own reverse proxy (like Nginx, Traefik, or Cloudflare Tunnels), you can run Helm manually by copying the raw docker-compose file.
+If you prefer to manage your own reverse proxy infrastructure, you can deploy the stack manually.
 
 ```bash
-# Download the production compose file
 curl -o docker-compose.yml https://raw.githubusercontent.com/Helm-Analytics/helm-analytics/master/docker-compose.yml
-
-# Start the stack using the pre-built GHCR image
 docker compose up -d
 ```
 
-### 2. Access & Setup
+### 3. Configure SSL (Caddy)
 
-1.  **With Installer SSL:** Open `https://your-domain.com`.
-2.  **Without SSL/Local:** Open `http://<your-server-ip>:8012` (or `localhost:8012`).
-3.  Register a new account (the first account created becomes the Admin).
+If you use the automated script and choose to enable SSL, Caddy will automatically provision a Let's Encrypt certificate.
+Ensure ports `80` and `443` are open on your firewall and point your DNS A Record to your server's IP address beforehand.
 
-### 3. Add Your Website
+### 4. Application Setup
 
-1.  Click **"Add Site"** in the dashboard.
-2.  Enter your domain name (e.g., `example.com`).
-3.  Copy the generated Tracking Snippet and paste it into the `<head>` of your website.
+After the containers are running, navigate to your domain (or `http://<your-server-ip>:8012` if running locally without SSL).
+
+1. Register an administrator account. The first account created assumes the Admin role.
+2. Navigate to the "Websites" section and click "Add Site".
+3. Enter your target domain name.
+4. The system will generate a lightweight JavaScript tracking snippet.
+5. Copy and paste this snippet into the `<head>` section of your website.
 
 ---
 
-## 🔌 Integration Guide (SDKs)
+## SDK Integration
 
-Helm offers high-performance server-side SDKs to track events, performance, and protect your API.
+Helm offers high-performance server-side SDKs for developers who wish to integrate tracking directly into their application backend logic.
 
-### ⚙️ Global Configuration
 Configure your SDKs via Environment Variables for zero-code configuration:
-- `HELM_SITE_ID`: Your unique site identifier.
-- `HELM_API_URL`: Set this if you are self-hosting Helm (e.g., `https://analytics.your-domain.com`).
+- `HELM_SITE_ID`: Your unique site identifier (found in the dashboard).
+- `HELM_API_URL`: Your self-hosted Helm URL (e.g., `https://analytics.your-domain.com`).
 
-### 🐍 Python SDK
-**Features**: Automatic UTM extraction, Flask/FastAPI middleware, blocking firewall protection.
+### Go SDK
+
+```go
+import "github.com/helm-analytics/helm-go"
+
+h := helm.New(helm.Config{})
+
+func handler(w http.ResponseWriter, r *http.Request) {
+    if !h.Track(r, "pageview", nil, true) {
+        return // Blocked by firewall
+    }
+}
+```
+
+### Python SDK
 
 ```python
 from helm_analytics import HelmAnalytics
 
-# Configured automatically via HELM_SITE_ID & HELM_API_URL env vars
 helm = HelmAnalytics()
-
-# Manual Tracking with Web Vitals
-helm.track(request, page_title="Checkout", lcp=1.2, cls=0.01)
-
-# Middleware (FastAPI)
-app.add_middleware(BaseHTTPMiddleware, dispatch=helm.fastapi_middleware(shield=True))
+helm.track(request, page_title="Checkout", lcp=1.2)
 ```
 
-### 🟢 Node.js SDK
-**Features**: Express/Koa support, auto-UTM parsing, non-blocking ingestion.
+### Node.js SDK
 
 ```javascript
 const HelmAnalytics = require('helm-analytics');
 const helm = new HelmAnalytics();
 
-// Track pageview with custom metadata
 await helm.track(req, 'pageview', { 
-  options: { pageTitle: 'Pricing', screenWidth: 1920 } 
+  options: { pageTitle: 'Pricing' } 
 });
-
-// Express Middleware with Aegis Shield (Firewall)
-app.use(helm.middleware({ shield: true }));
 ```
-
-### 💙 Go SDK
-**Features**: Sub-millisecond overhead, raw HTTP handler support, type-safe tracking.
-
-```go
-import "github.com/helm-analytics/helm-go"
-
-h := helm.New(helm.Config{}) // Pulls from ENV
-
-func handler(w http.ResponseWriter, r *http.Request) {
-    // track returns false if blocked by firewall
-    if !h.Track(r, "pageview", nil, true) {
-        return 
-    }
-}
-```
-
-### 🧪 Advanced Tracking
-All SDKs support:
-- **UTM Attribution**: Automatically parsed from query strings.
-- **Custom Events**: `trackEvent(req, 'button_click', { color: 'blue' })`.
-- **Aegis Shield**: Real-time blocking of malicious IPs and bots before your app processes the request.
-- **Web Vitals**: Capture LCP, CLS, and FID directly from the server.
 
 ---
 
-## ⚙️ Configuration Reference
+## Support & Community
 
-Helm is configured via environment variables in `.env` or `docker-compose.yml`.
+We actively monitor our community channels and provide assistance for self-hosted instances.
 
-### Essential Config
-
-| Variable | Description | Default |
-| :--- | :--- | :--- |
-| `DATABASE_URL` | PostgreSQL connection string | `postgres://user:pass@db:5432/helm` |
-| `CLICKHOUSE_URL` | ClickHouse TCP connection | `tcp://clickhouse:9000` |
-| `ADMIN_SECRET` | Secret key for session signing | **CHANGE_THIS** |
-| `PORT` | API Server Port | `6060` |
-
-### Feature Flags
-
-| Variable | Description | Default |
-| :--- | :--- | :--- |
-| `ENABLE_REGISTRATION` | Allow public signups | `false` |
-| `SESSION_REPLAY_ENABLED` | Enable recording features | `true` |
-| `RETENTION_DAYS` | Data retention period | `365` |
+- **X (Twitter):** [@helm_analytics](https://x.com/helm_analytics)
+- **Direct Support:** [support@helm-analytics.com](mailto:support@helm-analytics.com)
+- **Discord:** [Join the Community](https://discord.gg/helm-analytics)
 
 ---
 
-## 🔧 Troubleshooting
+## Contributing
 
-### "Port is already allocated" (Caddy 443 / 80 Error)
-If you opted for the automated SSL configuration, Caddy needs ports 80 and 443. Most VPS providers pre-install Apache or Nginx which blocks these ports. Stop and disable them:
-```bash
-sudo systemctl stop nginx apache2
-sudo systemctl disable nginx apache2
-# Then restart Helm:
-cd /opt/helm-analytics && sudo docker compose up -d
-```
+We welcome code contributions, bug reports, and feature requests. 
 
-### "Tracker script returns 404"
-Ensure your `docker-compose` volumes are mounted correctly and the `static` directory exists in the backend container. Our community compose file handles this automatically.
+1. Fork the repository.
+2. Create your feature branch (`git checkout -b feature/Optimization`).
+3. Commit your changes.
+4. Push to the branch (`git push origin feature/Optimization`).
+5. Open a Pull Request.
 
-### "ClickHouse Connection Refused"
-ClickHouse takes a few seconds to start. The backend container usually retries automatically, but you may need to restart the backend manually if it times out:
-```bash
-docker compose restart backend
-```
+Please read our `CONTRIBUTING.md` guidelines before making large structural changes.
 
-### "Data not showing in dashboard"
-1. Check your browser console for network errors (is an ad-blocker or strict CSP blocking the script?).
-2. Ensure `data-api` points to the correct URL (e.g., `https://analytics.yourdomain.com`).
-3. Check backend logs: `docker compose logs -f backend`.
+## License
 
----
+Helm Analytics is strictly distributed under the terms of the **AGPL 3.0 License**. 
 
-## 🤝 Contributing
-
-We welcome contributions from the community!
-
-1.  **Fork** the project.
-2.  **Create** your feature branch (`git checkout -b feature/AmazingFeature`).
-3.  **Commit** your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  **Push** to the branch (`git push origin feature/AmazingFeature`).
-5.  **Open** a Pull Request.
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and development process.
-
-## 📄 License
-
-Distributed under the AGPL-3.0 License. See `LICENSE` for more information.
-
----
-
-<div align="center">
-  <small>Made with ❤️ by the Helm Analytics Community</small>
-</div>
+By using, modifying, or distributing this software, you agree to the conditions outlined in the `LICENSE` file. This ensures that any modifications made to the core platform must be contributed back to the open-source community.
