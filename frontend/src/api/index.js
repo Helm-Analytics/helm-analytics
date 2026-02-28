@@ -161,8 +161,15 @@ export const api = {
     }),
 
   // --- Data Export ---
-  exportData: (siteId, type, format = 'csv', days = 30) => {
-    const url = `${API_URL}/api/export?siteId=${siteId}&type=${type}&format=${format}&days=${days}`;
+  exportData: (siteId, type, format = 'csv', options = {}) => {
+    const { days = 30, from, to } = options;
+    let url = `${API_URL}/api/export?siteId=${siteId}&type=${type}&format=${format}`;
+    if (from && to) {
+      url += `&from=${from}&to=${to}`;
+    } else {
+      url += `&days=${days}`;
+    }
+    
     // Trigger browser download via anchor tag (relying on cookies)
     const link = document.createElement('a');
     link.href = url;
