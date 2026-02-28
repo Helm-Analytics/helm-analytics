@@ -1,0 +1,81 @@
+﻿
+C:\Users\USER\sentinel-mvp\frontend\src\components\ActivityFeed.jsx
+  15:6  warning  React Hook useEffect has a missing dependency: 'fetchActivities'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\USER\sentinel-mvp\frontend\src\components\ConfirmModal.jsx
+  8:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\USER\sentinel-mvp\frontend\src\components\DoughnutChart.jsx
+  6:26  error  'title' is defined but never used  no-unused-vars
+
+C:\Users\USER\sentinel-mvp\frontend\src\components\InsightsCard.jsx
+  77:28  error  'node' is defined but never used  no-unused-vars
+  98:30  error  'node' is defined but never used  no-unused-vars
+
+C:\Users\USER\sentinel-mvp\frontend\src\components\StatCard.jsx
+   3:41  error  'CardIcon' is defined but never used                                                        no-unused-vars
+  13:9   error  'changeType' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\USER\sentinel-mvp\frontend\src\components\Toast.jsx
+  7:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\USER\sentinel-mvp\frontend\src\components\Tutorial.jsx
+  10:12  error  'isVisible' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  10:23  error  'setIsVisible' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\ActivityPage.jsx
+  19:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                       no-unused-vars
+  35:6   warning  React Hook useEffect has a missing dependency: 'fetchActivities'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\CampaignsPage.jsx
+   24:10   error    'error' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                          no-unused-vars
+   52:6    warning  React Hook useEffect has a missing dependency: 'fetchStats'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  281:44   error    'labelField' is defined but never used                                                                         no-unused-vars
+  329:110  error    'stats' is not defined                                                                                         no-undef
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\CustomEventsPage.jsx
+  20:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                   no-unused-vars
+  24:25  error    'darkMode' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                        no-unused-vars
+  37:6   warning  React Hook useEffect has a missing dependency: 'fetchEvents'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\Dashboard.jsx
+  100:6  warning  React Hook useEffect has missing dependencies: 'fetchDashboardStats' and 'fetchEngagementStats'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\DemoLogin.jsx
+  3:10  error  'api' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\DocsPage.jsx
+  4:28  error  'language' is assigned a value but never used  no-unused-vars
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\ErrorsPage.jsx
+  16:6  warning  React Hook useEffect has a missing dependency: 'fetchErrors'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\FirewallPage.jsx
+  14:10  error    'copied' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                         no-unused-vars
+  16:9   error    'copyToClipboard' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                no-unused-vars
+  28:6   warning  React Hook useEffect has a missing dependency: 'fetchRules'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\FunnelsPage.jsx
+   3:10  error    'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                    no-unused-vars
+  16:6   warning  React Hook useEffect has a missing dependency: 'fetchFunnels'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\HeatmapPage.jsx
+   18:6   warning  React Hook useEffect has a missing dependency: 'fetchPages'. Either include it or remove the dependency array        react-hooks/exhaustive-deps
+   36:6   warning  React Hook useEffect has a missing dependency: 'fetchHeatmapData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  207:42  error    'err' is defined but never used                                                                                      no-unused-vars
+  207:47  error    Empty block statement                                                                                                no-empty
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\SessionReplay.jsx
+    5:10  error  'unpack' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  112:26  error  'err' is defined but never used                                                no-unused-vars
+  112:31  error  Empty block statement                                                          no-empty
+
+C:\Users\USER\sentinel-mvp\frontend\src\pages\UserFlowPage.jsx
+    1:38  error    'useCallback' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                no-unused-vars
+  106:6   warning  React Hook useEffect has a missing dependency: 'fetchFlowData'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\USER\sentinel-mvp\frontend\tailwind.config.js
+  33:5  error  'require' is not defined  no-undef
+
+Γ£û 38 problems (27 errors, 11 warnings)
+

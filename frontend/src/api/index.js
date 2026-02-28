@@ -159,4 +159,16 @@ export const api = {
     request({
       url: `/api/campaigns?siteId=${siteId}&days=${days}`,
     }),
+
+  // --- Data Export ---
+  exportData: (siteId, type, format = 'csv', days = 30) => {
+    const url = `${API_URL}/api/export?siteId=${siteId}&type=${type}&format=${format}&days=${days}`;
+    // Trigger browser download via anchor tag (relying on cookies)
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', '');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  },
 };

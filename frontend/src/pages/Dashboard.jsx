@@ -2,23 +2,23 @@
 
 import { useState, useEffect } from "react"
 import { useOutletContext } from "react-router-dom"
-import { ScanEye, Users, ArrowDownRight, Timer, Copy, Check, Fingerprint, Laptop, MousePointer2, Activity } from "lucide-react"
+import { ScanEye, Users, ArrowDownRight, Timer, Copy, Check, Fingerprint, Laptop, MousePointer2, Activity, Download } from "lucide-react"
 import { useDashboardStore } from "../store/useDashboardStore"
 import StatCard from "../components/StatCard"
 import InsightsCard from "../components/InsightsCard"
 import BarChart from "../components/BarChart"
 import LineChart from "../components/LineChart"
 import DoughnutChart from "../components/DoughnutChart"
+import ExportModal from "../components/ExportModal"
+import { api } from "../api"
 
 const Dashboard = () => {
   const { selectedSite } = useOutletContext()
   const { 
     dashboardData, 
-    isLoadingStats, 
     fetchDashboardStats, 
     fetchEngagementStats,
-    engagementData,
-    isLoadingEngagement
+    engagementData
   } = useDashboardStore()
   
   const [copied, setCopied] = useState(false)
@@ -32,6 +32,14 @@ const Dashboard = () => {
   useEffect(() => {
     localStorage.setItem('dashboard_dateRange', dateRange)
   }, [dateRange])
+
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false)
+
+  const handleExport = (type, format) => {
+    if (selectedSite) {
+      api.exportData(selectedSite.id, type, format, dateRange)
+    }
+  }
 
   const copyTrackingScript = async () => {
     if (!selectedSite) return
@@ -138,7 +146,22 @@ const Dashboard = () => {
              </button>
            ))}
         </div>
+        
+        <button
+          onClick={() => setIsExportModalOpen(true)}
+          className="flex items-center space-x-2 px-4 py-2 bg-secondary/50 hover:bg-secondary text-foreground rounded-xl transition-all border border-border/50 text-sm font-bold shadow-sm"
+        >
+          <Download className="w-4 h-4" />
+          <span className="hidden sm:inline">Export</span>
+        </button>
       </div>
+
+      <ExportModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        onExport={handleExport}
+        dateRange={dateRange}
+      />
 
       {/* Hero Stats Section */}
       {dashboardData && (
@@ -406,7 +429,7 @@ const Dashboard = () => {
   )
 }
 
-const PlausibleStyleTable = ({ data, total, label, isReferrer = false }) => {
+const PlausibleStyleTable = ({ data, label, isReferrer = false }) => {
   const max = Math.max(...(data?.map(d => d.count) || [1]));
   
   return (

@@ -113,6 +113,9 @@ func main() {
 	mux.Handle("/api/sessions", trackCors.Handler(sentinel.AuthMiddleware(sentinel.ListSessionsHandler)))
 	mux.Handle("/api/funnels/", trackCors.Handler(sentinel.AuthMiddleware(sentinel.FunnelsApiHandler)))
 	
+	// Data Export API (Protected)
+	mux.Handle("/api/export", trackCors.Handler(sentinel.AuthMiddleware(http.HandlerFunc(sentinel.ExportHandler))))
+	
 	// Custom Events API
 	mux.Handle("/api/custom-events", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler)))
 	mux.Handle("/api/events/stats", trackCors.Handler(sentinel.AuthMiddleware(sentinel.GetCustomEventsHandler)))
