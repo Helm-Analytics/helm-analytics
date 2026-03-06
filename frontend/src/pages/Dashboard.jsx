@@ -97,7 +97,7 @@ const Dashboard = () => {
         // clearInterval(aiInterval)
       }
     }
-  }, [selectedSite, dateRange])
+  }, [selectedSite, dateRange, fetchDashboardStats, fetchEngagementStats])
 
   if (!selectedSite) {
     return (

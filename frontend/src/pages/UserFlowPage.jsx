@@ -21,7 +21,7 @@ const UserFlowPage = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const fetchFlowData = async () => {
+  const fetchFlowData = useCallback(async () => {
     if (!selectedSite?.id) return;
     setLoading(true);
     try {
@@ -37,8 +37,6 @@ const UserFlowPage = () => {
       const { nodes: rawNodes, edges: rawEdges } = data;
 
       // Improved Layout Logic: Layered approach
-      // We'll group nodes by their 'depth' if we had it, but for now we'll do 
-      // a more balanced grid that centers things better.
       const processedNodes = (rawNodes || []).map((node, index) => {
         const row = Math.floor(index / 3);
         const col = index % 3;
@@ -99,11 +97,11 @@ const UserFlowPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSite?.id, days, darkMode, setNodes, setEdges]);
 
   useEffect(() => {
     fetchFlowData();
-  }, [selectedSite?.id, days, darkMode]); // Re-run on darkMode change to update node styles
+  }, [fetchFlowData]);
 
   if (!selectedSite) {
     return (

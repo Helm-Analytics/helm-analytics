@@ -21,11 +21,11 @@ const (
 
 // ExportOverviewRow represents a row of dashboard overview data
 type ExportOverviewRow struct {
-	Date           string `json:"date"`
-	TotalViews     uint64 `json:"total_views"`
-	UniqueVisitors uint64 `json:"unique_visitors"`
-	BounceRate     string `json:"bounce_rate"`
-	AvgVisitTime   string `json:"avg_visit_time"`
+	Date           string  `json:"date"`
+	TotalViews     uint64  `json:"total_views"`
+	UniqueVisitors uint64  `json:"unique_visitors"`
+	BounceRate     float64 `json:"bounce_rate"`
+	AvgVisitTime   float64 `json:"avg_visit_time"`
 }
 
 // ExportPageviewRow represents a raw pageview event
@@ -84,53 +84,98 @@ func ExportHandler(w http.ResponseWriter, r *http.Request) {
 		format = FormatCSV
 	}
 
-	daysStr := r.URL.Query().Get("days")
-	days := 30
-	if daysStr != "" {
-		if d, err := strconv.Atoi(daysStr); err == nil && d > 0 && d <= 365 {
-			days = d
+	fromStr := r.URL.Query().Get("from")
+	toStr := r.URL.Query().Get("to")
+	var startTime, endTime time.Time
+
+	if fromStr != "" && toStr != "" {
+		// Try parsing from/to dates (expecting YYYY-MM-DD or RFC3339)
+		if t, err := time.Parse("2006-01-02", fromStr); err == nil {
+			startTime = t
+		} else if t, err := time.Parse(time.RFC3339, fromStr); err == nil {
+			startTime = t
 		}
+
+		if t, err := time.Parse("2006-01-02", toStr); err == nil {
+			endTime = t.Add(23*time.Hour + 59*time.Minute + 59*time.Second) // End of day
+		} else if t, err := time.Parse(time.RFC3339, toStr); err == nil {
+			endTime = t
+		}
+	}
+
+	// Fallback to days if dates are not valid
+	if startTime.IsZero() {
+		daysStr := r.URL.Query().Get("days")
+		days := 30
+		if daysStr != "" {
+			if d, err := strconv.Atoi(daysStr); err == nil && d > 0 && d <= 365 {
+				days = d
+			}
+		}
+		startTime = time.Now().AddDate(0, 0, -days)
+		endTime = time.Now()
 	}
 
 	switch exportType {
 	case "overview":
-		exportOverview(w, siteID, days, format)
+		exportOverview(w, siteID, startTime, endTime, format)
 	case "pageviews":
-		exportPageviews(w, siteID, days, format)
+		exportPageviews(w, siteID, startTime, endTime, format)
 	case "events":
-		exportCustomEvents(w, siteID, days, format)
+		exportCustomEvents(w, siteID, startTime, endTime, format)
 	case "campaigns":
-		exportCampaigns(w, siteID, days, format)
+		exportCampaigns(w, siteID, startTime, endTime, format)
+	case "referrers":
+		exportReferrers(w, siteID, startTime, endTime, format)
+	case "locations":
+		exportLocations(w, siteID, startTime, endTime, format)
+	case "devices":
+		exportDevices(w, siteID, startTime, endTime, format)
+	case "browsers":
+		exportBrowsers(w, siteID, startTime, endTime, format)
+	case "os":
+		exportOS(w, siteID, startTime, endTime, format)
 	case "errors":
-		exportErrors(w, siteID, days, format)
+		exportErrors(w, siteID, startTime, endTime, format)
 	default:
-		writeJSONError(w, http.StatusBadRequest, "Invalid export type. Use: overview, pageviews, events, campaigns, errors")
+		writeJSONError(w, http.StatusBadRequest, "Invalid export type. Use: overview, pageviews, events, campaigns, referrers, locations, devices, browsers, os, errors")
 	}
 }
 
-func exportOverview(w http.ResponseWriter, siteID string, days int, format ExportFormat) {
+func exportOverview(w http.ResponseWriter, siteID string, startTime, endTime time.Time, format ExportFormat) {
 	if chConn == nil {
 		writeJSONError(w, http.StatusInternalServerError, "Analytics engine not available")
 		return
 	}
 
+	// Complex query for daily metrics including bounce rate and duration
 	query := fmt.Sprintf(`
+		WITH session_stats AS (
+			SELECT
+				toDate(Timestamp) as d,
+				SessionID,
+				count() as event_count,
+				max(Timestamp) - min(Timestamp) as duration
+			FROM %s.events
+			WHERE SiteID = ?
+			  AND Timestamp >= ? AND Timestamp <= ?
+			  AND ClientIP NOT IN ('127.0.0.1', '::1')
+			GROUP BY d, SessionID
+		)
 		SELECT
-			toDate(Timestamp) as date,
-			count() as total_views,
-			uniq(ClientIP) as unique_visitors
-		FROM %s.events
-		WHERE SiteID = ?
-		  AND EventType = 'pageview'
-		  AND Timestamp >= now() - INTERVAL ? DAY
-		  AND ClientIP NOT IN ('127.0.0.1', '::1')
-		GROUP BY date
-		ORDER BY date DESC
+			d,
+			countIf(event_count > 0) as total_views, -- Approximate views from event count
+			uniq(SessionID) as unique_sessions,
+			round(countIf(event_count = 1) / count() * 100, 2) as bounce_rate,
+			round(avg(duration), 2) as avg_duration
+		FROM session_stats
+		GROUP BY d
+		ORDER BY d DESC
 	`, dbName)
 
 	ctx, cancel := r_ctx()
 	defer cancel()
-	rows, err := chConn.Query(ctx, query, siteID, days)
+	rows, err := chConn.Query(ctx, query, siteID, startTime, endTime)
 	if err != nil {
 		log.Printf("[EXPORT] Overview query error: %v", err)
 		writeJSONError(w, http.StatusInternalServerError, "Failed to query data")
@@ -142,33 +187,39 @@ func exportOverview(w http.ResponseWriter, siteID string, days int, format Expor
 	for rows.Next() {
 		var date time.Time
 		var views, visitors uint64
-		if err := rows.Scan(&date, &views, &visitors); err != nil {
+		var bounce, duration float64
+		if err := rows.Scan(&date, &views, &visitors, &bounce, &duration); err != nil {
+			log.Printf("[EXPORT] Scan error: %v", err)
 			continue
 		}
 		results = append(results, ExportOverviewRow{
 			Date:           date.Format("2006-01-02"),
 			TotalViews:     views,
 			UniqueVisitors: visitors,
+			BounceRate:     bounce,
+			AvgVisitTime:   duration,
 		})
 	}
 
 	if format == FormatJSON {
 		writeJSONExport(w, "overview", results)
 	} else {
-		headers := []string{"Date", "Total Views", "Unique Visitors"}
+		headers := []string{"Date", "Total Views", "Unique Visitors", "Bounce Rate (%)", "Avg Duration (s)"}
 		var csvRows [][]string
 		for _, r := range results {
 			csvRows = append(csvRows, []string{
 				r.Date,
 				strconv.FormatUint(r.TotalViews, 10),
 				strconv.FormatUint(r.UniqueVisitors, 10),
+				fmt.Sprintf("%.2f", r.BounceRate),
+				fmt.Sprintf("%.2f", r.AvgVisitTime),
 			})
 		}
 		writeCSVExport(w, "overview", headers, csvRows)
 	}
 }
 
-func exportPageviews(w http.ResponseWriter, siteID string, days int, format ExportFormat) {
+func exportPageviews(w http.ResponseWriter, siteID string, startTime, endTime time.Time, format ExportFormat) {
 	if chConn == nil {
 		writeJSONError(w, http.StatusInternalServerError, "Analytics engine not available")
 		return
@@ -186,15 +237,15 @@ func exportPageviews(w http.ResponseWriter, siteID string, days int, format Expo
 		FROM %s.events
 		WHERE SiteID = ?
 		  AND EventType = 'pageview'
-		  AND Timestamp >= now() - INTERVAL ? DAY
+		  AND Timestamp >= ? AND Timestamp <= ?
 		  AND ClientIP NOT IN ('127.0.0.1', '::1')
 		ORDER BY Timestamp DESC
-		LIMIT 10000
+		LIMIT 100000
 	`, dbName)
 
 	ctx, cancel := r_ctx()
 	defer cancel()
-	rows, err := chConn.Query(ctx, query, siteID, days)
+	rows, err := chConn.Query(ctx, query, siteID, startTime, endTime)
 	if err != nil {
 		log.Printf("[EXPORT] Pageviews query error: %v", err)
 		writeJSONError(w, http.StatusInternalServerError, "Failed to query data")
@@ -232,7 +283,7 @@ func exportPageviews(w http.ResponseWriter, siteID string, days int, format Expo
 	}
 }
 
-func exportCustomEvents(w http.ResponseWriter, siteID string, days int, format ExportFormat) {
+func exportCustomEvents(w http.ResponseWriter, siteID string, startTime, endTime time.Time, format ExportFormat) {
 	if chConn == nil {
 		writeJSONError(w, http.StatusInternalServerError, "Analytics engine not available")
 		return
@@ -247,14 +298,14 @@ func exportCustomEvents(w http.ResponseWriter, siteID string, days int, format E
 		FROM %s.events
 		WHERE SiteID = ?
 		  AND EventType NOT IN ('pageview', 'heartbeat', 'click', 'error', 'scroll')
-		  AND Timestamp >= now() - INTERVAL ? DAY
+		  AND Timestamp >= ? AND Timestamp <= ?
 		ORDER BY Timestamp DESC
-		LIMIT 10000
+		LIMIT 100000
 	`, dbName)
 
 	ctx, cancel := r_ctx()
 	defer cancel()
-	rows, err := chConn.Query(ctx, query, siteID, days)
+	rows, err := chConn.Query(ctx, query, siteID, startTime, endTime)
 	if err != nil {
 		log.Printf("[EXPORT] Events query error: %v", err)
 		writeJSONError(w, http.StatusInternalServerError, "Failed to query data")
@@ -289,7 +340,7 @@ func exportCustomEvents(w http.ResponseWriter, siteID string, days int, format E
 	}
 }
 
-func exportCampaigns(w http.ResponseWriter, siteID string, days int, format ExportFormat) {
+func exportCampaigns(w http.ResponseWriter, siteID string, startTime, endTime time.Time, format ExportFormat) {
 	if chConn == nil {
 		writeJSONError(w, http.StatusInternalServerError, "Analytics engine not available")
 		return
@@ -305,16 +356,16 @@ func exportCampaigns(w http.ResponseWriter, siteID string, days int, format Expo
 		FROM %s.events
 		WHERE SiteID = ?
 		  AND EventType = 'pageview'
-		  AND Timestamp >= now() - INTERVAL ? DAY
+		  AND Timestamp >= ? AND Timestamp <= ?
 		  AND UtmSource != ''
 		GROUP BY UtmSource, UtmMedium, UtmCampaign
 		ORDER BY visitors DESC
-		LIMIT 500
+		LIMIT 5000
 	`, dbName)
 
 	ctx, cancel := r_ctx()
 	defer cancel()
-	rows, err := chConn.Query(ctx, query, siteID, days)
+	rows, err := chConn.Query(ctx, query, siteID, startTime, endTime)
 	if err != nil {
 		log.Printf("[EXPORT] Campaigns query error: %v", err)
 		writeJSONError(w, http.StatusInternalServerError, "Failed to query data")
@@ -350,7 +401,7 @@ func exportCampaigns(w http.ResponseWriter, siteID string, days int, format Expo
 	}
 }
 
-func exportErrors(w http.ResponseWriter, siteID string, days int, format ExportFormat) {
+func exportErrors(w http.ResponseWriter, siteID string, startTime, endTime time.Time, format ExportFormat) {
 	if chConn == nil {
 		writeJSONError(w, http.StatusInternalServerError, "Analytics engine not available")
 		return
@@ -365,15 +416,15 @@ func exportErrors(w http.ResponseWriter, siteID string, days int, format ExportF
 		FROM %s.events
 		WHERE SiteID = ?
 		  AND EventType = 'error'
-		  AND Timestamp >= now() - INTERVAL ? DAY
+		  AND Timestamp >= ? AND Timestamp <= ?
 		GROUP BY message, source
 		ORDER BY occurrences DESC
-		LIMIT 500
+		LIMIT 5000
 	`, dbName)
 
 	ctx, cancel := r_ctx()
 	defer cancel()
-	rows, err := chConn.Query(ctx, query, siteID, days)
+	rows, err := chConn.Query(ctx, query, siteID, startTime, endTime)
 	if err != nil {
 		log.Printf("[EXPORT] Errors query error: %v", err)
 		writeJSONError(w, http.StatusInternalServerError, "Failed to query data")
@@ -406,6 +457,102 @@ func exportErrors(w http.ResponseWriter, siteID string, days int, format ExportF
 			csvRows = append(csvRows, []string{r.Timestamp, r.Message, r.Source, strconv.FormatUint(r.Count, 10)})
 		}
 		writeCSVExport(w, "errors", headers, csvRows)
+	}
+}
+
+func exportReferrers(w http.ResponseWriter, siteID string, startTime, endTime time.Time, format ExportFormat) {
+	query := fmt.Sprintf(`
+		SELECT Referrer, uniq(ClientIP) as visitors, count() as views
+		FROM %s.events
+		WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp >= ? AND Timestamp <= ? AND Referrer != ''
+		GROUP BY Referrer ORDER BY visitors DESC LIMIT 5000
+	`, dbName)
+	exportSimpleMap(w, "referrers", siteID, startTime, endTime, format, query, []string{"Referrer", "Visitors", "Views"})
+}
+
+func exportLocations(w http.ResponseWriter, siteID string, startTime, endTime time.Time, format ExportFormat) {
+	query := fmt.Sprintf(`
+		SELECT Country, uniq(ClientIP) as visitors, count() as views
+		FROM %s.events
+		WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp >= ? AND Timestamp <= ? AND Country != ''
+		GROUP BY Country ORDER BY visitors DESC LIMIT 1000
+	`, dbName)
+	exportSimpleMap(w, "locations", siteID, startTime, endTime, format, query, []string{"Country", "Visitors", "Views"})
+}
+
+func exportDevices(w http.ResponseWriter, siteID string, startTime, endTime time.Time, format ExportFormat) {
+	query := fmt.Sprintf(`
+		SELECT if(ScreenWidth < 768, 'Mobile', if(ScreenWidth < 1024, 'Tablet', 'Desktop')) as Device, uniq(ClientIP) as visitors
+		FROM %s.events
+		WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp >= ? AND Timestamp <= ?
+		GROUP BY Device ORDER BY visitors DESC
+	`, dbName)
+	exportSimpleMap(w, "devices", siteID, startTime, endTime, format, query, []string{"Device", "Visitors"})
+}
+
+func exportBrowsers(w http.ResponseWriter, siteID string, startTime, endTime time.Time, format ExportFormat) {
+	query := fmt.Sprintf(`
+		SELECT Browser, uniq(ClientIP) as visitors
+		FROM %s.events
+		WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp >= ? AND Timestamp <= ? AND Browser != ''
+		GROUP BY Browser ORDER BY visitors DESC
+	`, dbName)
+	exportSimpleMap(w, "browsers", siteID, startTime, endTime, format, query, []string{"Browser", "Visitors"})
+}
+
+func exportOS(w http.ResponseWriter, siteID string, startTime, endTime time.Time, format ExportFormat) {
+	query := fmt.Sprintf(`
+		SELECT OS, uniq(ClientIP) as visitors
+		FROM %s.events
+		WHERE SiteID = ? AND EventType = 'pageview' AND Timestamp >= ? AND Timestamp <= ? AND OS != ''
+		GROUP BY OS ORDER BY visitors DESC
+	`, dbName)
+	exportSimpleMap(w, "os", siteID, startTime, endTime, format, query, []string{"OS", "Visitors"})
+}
+
+func exportSimpleMap(w http.ResponseWriter, name, siteID string, startTime, endTime time.Time, format ExportFormat, query string, headers []string) {
+	if chConn == nil {
+		writeJSONError(w, http.StatusInternalServerError, "Analytics engine not available")
+		return
+	}
+	ctx, cancel := r_ctx()
+	defer cancel()
+	rows, err := chConn.Query(ctx, query, siteID, startTime, endTime)
+	if err != nil {
+		log.Printf("[EXPORT] %s query error: %v", name, err)
+		writeJSONError(w, http.StatusInternalServerError, "Failed to query data")
+		return
+	}
+	defer rows.Close()
+
+	var csvRows [][]string
+	var jsonResults []map[string]interface{}
+
+	for rows.Next() {
+		vals := make([]interface{}, len(headers))
+		valPtrs := make([]interface{}, len(headers))
+		for i := range vals {
+			valPtrs[i] = &vals[i]
+		}
+		if err := rows.Scan(valPtrs...); err != nil {
+			continue
+		}
+
+		row := make([]string, len(headers))
+		jsonRow := make(map[string]interface{})
+		for i, v := range vals {
+			str := fmt.Sprintf("%v", v)
+			row[i] = str
+			jsonRow[headers[i]] = v
+		}
+		csvRows = append(csvRows, row)
+		jsonResults = append(jsonResults, jsonRow)
+	}
+
+	if format == FormatJSON {
+		writeJSONExport(w, name, jsonResults)
+	} else {
+		writeCSVExport(w, name, headers, csvRows)
 	}
 }
 

@@ -1,57 +1,25 @@
 import { X, AlertTriangle } from 'lucide-react';
 import { useState, useEffect } from 'react';
-
-let confirmResolver = null;
-let currentConfirm = null;
-let confirmListener = null;
-
-export const confirm = {
-  show: (title, message, options = {}) => {
-    return new Promise((resolve) => {
-      confirmResolver = resolve;
-      currentConfirm = {
-        title,
-        message,
-        confirmText: options.confirmText || 'Confirm',
-        cancelText: options.cancelText || 'Cancel',
-        variant: options.variant || 'danger', // 'danger' or 'default'
-      };
-      if (confirmListener) {
-        confirmListener(currentConfirm);
-      }
-    });
-  },
-};
-
-const closeConfirm = (result) => {
-  if (confirmResolver) {
-    confirmResolver(result);
-    confirmResolver = null;
-  }
-  currentConfirm = null;
-  if (confirmListener) {
-    confirmListener(null);
-  }
-};
+import { _closeConfirm, _setConfirmListener, _getConfirmData } from '../lib/confirm';
 
 export default function ConfirmModal() {
-  const [confirmData, setConfirmData] = useState(null);
+  const [confirmData, setConfirmData] = useState(_getConfirmData());
 
   useEffect(() => {
-    confirmListener = setConfirmData;
+    _setConfirmListener(setConfirmData);
     return () => {
-      confirmListener = null;
+      _setConfirmListener(null);
     };
   }, []);
 
   if (!confirmData) return null;
 
   const handleConfirm = () => {
-    closeConfirm(true);
+    _closeConfirm(true);
   };
 
   const handleCancel = () => {
-    closeConfirm(false);
+    _closeConfirm(false);
   };
 
   const handleBackdropClick = (e) => {

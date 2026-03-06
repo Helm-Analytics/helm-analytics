@@ -74,6 +74,7 @@ const InsightsCard = () => {
                   <ReactMarkdown 
                     className="prose dark:prose-invert max-w-none text-[13.5px] prose-p:my-0 prose-p:leading-relaxed prose-strong:text-accent font-medium"
                     components={{
+                      // eslint-disable-next-line no-unused-vars
                       p: ({node, ...props}) => <p className="mb-0" {...props} />
                     }}
                   >
@@ -95,6 +96,7 @@ const InsightsCard = () => {
                   <ReactMarkdown 
                      className="prose dark:prose-invert max-w-none text-[13px] prose-p:my-0"
                      components={{
+                        // eslint-disable-next-line no-unused-vars
                         p: ({node, ...props}) => <p className="mb-0" {...props} />
                      }}
                   >

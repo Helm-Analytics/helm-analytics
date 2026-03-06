@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../api';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const DemoLogin = () => {

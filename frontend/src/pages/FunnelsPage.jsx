@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { api } from '../api';
 import { Plus, Trash2, ArrowRight, ChevronDown } from 'lucide-react';
 
@@ -11,18 +11,18 @@ const FunnelsPageContent = () => {
   const [newFunnelSteps, setNewFunnelSteps] = useState(['', '']);
   const [isCreating, setIsCreating] = useState(false);
 
-  useEffect(() => {
-    if (selectedSite) fetchFunnels();
-  }, [selectedSite]);
-
-  const fetchFunnels = async () => {
+  const fetchFunnels = useCallback(async () => {
     try {
       const data = await api.listFunnels(selectedSite.id);
       setFunnels(data || []);
     } catch (error) {
       console.error("Failed to fetch funnels:", error);
     }
-  };
+  }, [selectedSite]);
+
+  useEffect(() => {
+    if (selectedSite) fetchFunnels();
+  }, [selectedSite, fetchFunnels]);
 
   const handleCreateFunnel = async (e) => {
     e.preventDefault();

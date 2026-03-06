@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Library, Terminal, Code2, Shield, Activity, BrainCircuit, Copy, Check, BarChart3, Timer, Plus, Fingerprint, Laptop, CheckCircle2, Zap, MousePointerClick } from 'lucide-react';
 
-const CodeBlock = ({ code, language = 'javascript', label = 'Code' }) => {
+const CodeBlock = ({ code, label = 'Code' }) => {
     const [copied, setCopied] = useState(false);
 
     const handleCopy = async () => {

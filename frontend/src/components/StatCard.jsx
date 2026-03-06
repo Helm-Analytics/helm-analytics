@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StatCard = ({ title, value, icon: CardIcon, change, inverse = false, isQualityScore = false }) => {
+const StatCard = ({ title, value, icon: Icon, change, inverse = false, isQualityScore = false }) => {
   // Parse numeric value for logic (assuming value might be "123", "45%", "2.5s")
   const numericValue = parseFloat(String(value).replace(/[^0-9.-]/g, ''));
   
@@ -10,7 +10,6 @@ const StatCard = ({ title, value, icon: CardIcon, change, inverse = false, isQua
   let isChangeGood = change >= 0;
   if (inverse) isChangeGood = !isChangeGood;
 
-  const changeType = change >= 0 ? "positive" : "negative";
     const changeColor = isChangeGood ? "text-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.1)]" : "text-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.1)]";
     const changeIcon = change >= 0 ? "↑" : "↓";
   
@@ -52,7 +51,7 @@ const StatCard = ({ title, value, icon: CardIcon, change, inverse = false, isQua
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center space-x-3">
             <div className={`p-2 rounded-xl border border-border/50 ${isQualityScore ? 'bg-secondary' : 'bg-primary/5 dark:bg-accent/10'}`}>
-              <CardIcon className={`w-5 h-5 ${isQualityScore ? qualityColor : 'text-accent'}`} />
+              {React.createElement(Icon, { className: `w-5 h-5 ${isQualityScore ? qualityColor : 'text-accent'}` })}
             </div>
             <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">{title}</p>
           </div>

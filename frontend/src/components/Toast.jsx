@@ -1,46 +1,14 @@
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
-
-let toastQueue = [];
-let toastListener = null;
-
-export const toast = {
-  success: (message, description = '') => {
-    addToast({ type: 'success', message, description });
-  },
-  error: (message, description = '') => {
-    addToast({ type: 'error', message, description });
-  },
-  info: (message, description = '') => {
-    addToast({ type: 'info', message, description });
-  },
-  warning: (message, description = '') => {
-    addToast({ type: 'warning', message, description });
-  },
-};
-
-const addToast = (toast) => {
-  const id = Date.now() + Math.random();
-  toastQueue.push({ ...toast, id });
-  if (toastListener) {
-    toastListener([...toastQueue]);
-  }
-};
-
-const removeToast = (id) => {
-  toastQueue = toastQueue.filter(t => t.id !== id);
-  if (toastListener) {
-    toastListener([...toastQueue]);
-  }
-};
+import { _removeToast, _setToastListener, _getToastQueue } from '../lib/toast';
 
 export default function Toast() {
-  const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts] = useState(_getToastQueue());
 
   useEffect(() => {
-    toastListener = setToasts;
+    _setToastListener(setToasts);
     return () => {
-      toastListener = null;
+      _setToastListener(null);
     };
   }, []);
 
@@ -78,7 +46,7 @@ export default function Toast() {
         <ToastItem
           key={toast.id}
           toast={toast}
-          onRemove={() => removeToast(toast.id)}
+          onRemove={() => _removeToast(toast.id)}
           icon={getIcon(toast.type)}
           borderColor={getBorderColor(toast.type)}
         />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { Shield, Plus, Trash2, AlertTriangle, Globe, Hash, Server, Copy, Check, Cpu, Hexagon } from 'lucide-react';
@@ -11,25 +11,16 @@ const FirewallPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const [copied, setCopied] = useState(false);
-
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   useEffect(() => {
-    if (selectedSite) {
-
+    if (selectedSite?.id) {
       fetchRules();
-
     }
-  }, [selectedSite]);
+  }, [selectedSite?.id, fetchRules]);
 
 
 
-  const fetchRules = async () => {
+  const fetchRules = useCallback(async () => {
     try {
       setLoading(true);
       const fetchedRules = await api.getFirewallRules(selectedSite.id);
@@ -42,7 +33,7 @@ const FirewallPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSite?.id]);
 
   const handleAddRule = async (e) => {
     e.preventDefault();

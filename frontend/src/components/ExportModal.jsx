@@ -12,7 +12,7 @@ import {
   ArrowRight,
   CheckCircle2
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { Button } from './ui/Button';
 
 const ExportModal = ({ isOpen, onClose, onExport, dateRange: currentRange }) => {

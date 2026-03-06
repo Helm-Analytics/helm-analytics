@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Activity, Eye, MousePointerClick, Shield, AlertCircle, Clock } from 'lucide-react';
 
 const ActivityFeed = ({ siteId }) => {
@@ -12,9 +12,9 @@ const ActivityFeed = ({ siteId }) => {
       const interval = setInterval(fetchActivities, 5000); // Refresh every 5 seconds
       return () => clearInterval(interval);
     }
-  }, [siteId, filter]);
+  }, [siteId, filter, fetchActivities]);
 
-  const fetchActivities = async () => {
+  const fetchActivities = useCallback(async () => {
     try {
       const response = await fetch(
         `/api/activity?siteId=${siteId}&filter=${filter}&limit=50`
@@ -26,7 +26,7 @@ const ActivityFeed = ({ siteId }) => {
       console.error('Failed to fetch activities:', error);
       setLoading(false);
     }
-  };
+  }, [siteId, filter]);
 
   const getIcon = (type) => {
     switch (type) {

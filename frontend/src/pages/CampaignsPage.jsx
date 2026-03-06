@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { 
@@ -21,10 +21,9 @@ const CampaignsPage = () => {
   const [days, setDays] = useState(30);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
-  const [error, setError] = useState(null);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     if (!selectedSite?.id) return;
     setLoading(true);
     try {
@@ -38,18 +37,16 @@ const CampaignsPage = () => {
         topChannels: data.topChannels || []
       };
       setStats(sanitizedData);
-      setError(null);
     } catch (err) {
       console.error('Error fetching campaign stats:', err);
-      setError('Failed to load campaign data');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSite?.id, days]);
 
   useEffect(() => {
     fetchStats();
-  }, [selectedSite?.id, days]);
+  }, [selectedSite?.id, days, fetchStats]);
 
   if (!selectedSite) {
     return (
@@ -199,6 +196,7 @@ const CampaignsPage = () => {
               data={stats.topSources}
               labelField="utm_source"
               darkMode={darkMode}
+              totalViews={stats.totalViews}
             />
             <TableSection 
               title="Top Mediums" 
@@ -206,6 +204,7 @@ const CampaignsPage = () => {
               data={stats.topMediums}
               labelField="utm_medium"
               darkMode={darkMode}
+              totalViews={stats.totalViews}
             />
             <TableSection 
               title="Top Channels" 
@@ -213,6 +212,7 @@ const CampaignsPage = () => {
               data={stats.topChannels}
               labelField="channel"
               darkMode={darkMode}
+              totalViews={stats.totalViews}
             />
             <TableSection 
               title="Top Campaigns" 
@@ -220,6 +220,7 @@ const CampaignsPage = () => {
               data={stats.topCampaigns}
               labelField="utm_campaign"
               darkMode={darkMode}
+              totalViews={stats.totalViews}
             />
           </div>
         </>
@@ -278,7 +279,7 @@ const StatCard = ({ label, value, icon, subLabel, darkMode }) => (
   </div>
 );
 
-const TableSection = ({ title, icon, data, labelField, darkMode }) => (
+const TableSection = ({ title, icon, data, labelField, darkMode, totalViews }) => (
   <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-xl shadow-black/5 relative group">
     <div className={`px-6 py-5 border-b border-border flex items-center justify-between ${darkMode ? 'bg-slate-800/40' : 'bg-secondary/20'} backdrop-blur-sm`}>
       <div className="flex items-center gap-3">
@@ -312,7 +313,7 @@ const TableSection = ({ title, icon, data, labelField, darkMode }) => (
                 <tr key={idx} className="hover:bg-accent/5 transition-all group/row">
                   <td className="px-5 py-4">
                     <div className="text-sm text-foreground font-semibold group-hover/row:text-sky-500 transition-colors truncate max-w-[180px]">
-                      {item.value || '(not set)'}
+                      {item[labelField] || '(not set)'}
                     </div>
                   </td>
                   <td className="px-5 py-4 text-right">
@@ -326,7 +327,7 @@ const TableSection = ({ title, icon, data, labelField, darkMode }) => (
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>
-                      <span className="text-[9px] font-bold text-muted-foreground">{Math.round((item.count / stats.totalViews) * 100) || 0}% share</span>
+                      <span className="text-[9px] font-bold text-muted-foreground">{Math.round((item.count / (totalViews || 1)) * 100) || 0}% share</span>
                     </div>
                   </td>
                 </tr>

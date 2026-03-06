@@ -7,7 +7,6 @@ const Tutorial = ({ onComplete }) => {
     const location = useLocation();
     const [step, setStep] = useState(0);
     const [rect, setRect] = useState(null);
-    const [isVisible, setIsVisible] = useState(false);
 
     const steps = [
         {

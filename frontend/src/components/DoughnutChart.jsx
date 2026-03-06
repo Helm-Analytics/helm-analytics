@@ -3,7 +3,7 @@ import { Doughnut } from "react-chartjs-2"
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
-const DoughnutChart = ({ title, data, labels }) => {
+const DoughnutChart = ({ data, labels }) => {
   const colors = [
     "#0ea5e9", // Ocean Teal
     "#6366f1", // Indigo

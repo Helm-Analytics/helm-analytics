@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { PlayCircle, Film, AlertCircle } from 'lucide-react';
-import { unpack } from 'rrweb';
 
 const SessionReplay = () => {
     const { selectedSite } = useOutletContext();
@@ -14,22 +13,23 @@ const SessionReplay = () => {
     const [playerLoaded, setPlayerLoaded] = useState(false);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchSessions = async () => {
-            if (selectedSite) {
-                try {
-                    const sessionIDs = await api.listSessions(selectedSite.id);
-                    setSessions(sessionIDs || []);
-                    setSelectedSession(sessionIDs && sessionIDs.length > 0 ? sessionIDs[0] : null);
-                } catch (error) {
-                    console.error("Failed to fetch sessions:", error);
-                    setSessions([]);
-                    setSelectedSession(null);
-                }
+    const fetchSessions = useCallback(async () => {
+        if (selectedSite) {
+            try {
+                const sessionIDs = await api.listSessions(selectedSite.id);
+                setSessions(sessionIDs || []);
+                setSelectedSession(sessionIDs && sessionIDs.length > 0 ? sessionIDs[0] : null);
+            } catch (error) {
+                console.error("Failed to fetch sessions:", error);
+                setSessions([]);
+                setSelectedSession(null);
             }
-        };
-        fetchSessions();
+        }
     }, [selectedSite]);
+
+    useEffect(() => {
+        fetchSessions();
+    }, [fetchSessions]);
 
     useEffect(() => {
         const loadRrwebPlayer = () => {
@@ -57,29 +57,29 @@ const SessionReplay = () => {
         loadRrwebPlayer();
     }, []);
 
-    useEffect(() => {
-        const fetchEvents = async () => {
-            if (!selectedSite || !selectedSession) return;
-            
-            setLoadingEvents(true);
-            setError(null);
-            setEvents([]); 
+    const fetchEvents = useCallback(async () => {
+        if (!selectedSite || !selectedSession) return;
+        
+        setLoadingEvents(true);
+        setError(null);
+        setEvents([]); 
 
-            try {
-                const fetchedEvents = await api.getSessionEvents(selectedSite.id, selectedSession);
-                let eventList = Array.isArray(fetchedEvents) ? fetchedEvents : [];
-                eventList.sort((a, b) => a.timestamp - b.timestamp);
-                setEvents(eventList);
-            } catch (error) {
-                console.error("Failed to fetch session events:", error);
-                setError(`Fetch Error: ${error.message || "Unknown error"}`);
-            } finally {
-                setLoadingEvents(false);
-            }
-        };
-
-        fetchEvents();
+        try {
+            const fetchedEvents = await api.getSessionEvents(selectedSite.id, selectedSession);
+            let eventList = Array.isArray(fetchedEvents) ? fetchedEvents : [];
+            eventList.sort((a, b) => a.timestamp - b.timestamp);
+            setEvents(eventList);
+        } catch (error) {
+            console.error("Failed to fetch session events:", error);
+            setError(`Fetch Error: ${error.message || "Unknown error"}`);
+        } finally {
+            setLoadingEvents(false);
+        }
     }, [selectedSite, selectedSession]);
+
+    useEffect(() => {
+        fetchEvents();
+    }, [fetchEvents]);
 
     useEffect(() => {
         if (!playerLoaded || !window.rrwebPlayer || events.length < 2 || !playerRef.current) return;
@@ -109,7 +109,7 @@ const SessionReplay = () => {
                     if (playerInstance && typeof playerInstance.pause === 'function') {
                         playerInstance.pause();
                     }
-                } catch (err) {}
+                } catch { /* Ignore pause errors */ }
             };
         } catch (playerError) {
             console.error("rrwebPlayer instantiation failed:", playerError);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { Activity, MousePointer2, ExternalLink } from 'lucide-react';
@@ -11,13 +11,7 @@ const HeatmapPage = () => {
   const [loading, setLoading] = useState(false);
   const canvasRef = useRef(null);
 
-  useEffect(() => {
-    if (selectedSite) {
-      fetchPages();
-    }
-  }, [selectedSite]);
-
-  const fetchPages = async () => {
+  const fetchPages = useCallback(async () => {
     try {
       const data = await api.getHeatmapData(selectedSite.id);
       setPages(data || []);
@@ -27,15 +21,15 @@ const HeatmapPage = () => {
     } catch (error) {
       console.error("Failed to fetch pages:", error);
     }
-  };
+  }, [selectedSite]);
 
   useEffect(() => {
-    if (selectedSite && selectedPage) {
-      fetchHeatmapData();
+    if (selectedSite) {
+      fetchPages();
     }
-  }, [selectedSite, selectedPage]);
+  }, [selectedSite, fetchPages]);
 
-  const fetchHeatmapData = async () => {
+  const fetchHeatmapData = useCallback(async () => {
     setLoading(true);
     try {
       const points = await api.getHeatmapData(selectedSite.id, selectedPage);
@@ -45,7 +39,13 @@ const HeatmapPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSite, selectedPage]);
+
+  useEffect(() => {
+    if (selectedSite && selectedPage) {
+      fetchHeatmapData();
+    }
+  }, [selectedSite, selectedPage, fetchHeatmapData]);
 
   useEffect(() => {
     if (!canvasRef.current || heatmapData.length === 0) {
@@ -204,7 +204,7 @@ const HeatmapPage = () => {
                                     if (height && height > 0) {
                                         iframe.style.height = `${height}px`;
                                     }
-                                } catch (err) {}
+                                } catch { /* Ignore height calculation errors */ }
                             }}
                             onError={() => setIframeBlocked(true)}
                             title="Heatmap Context"

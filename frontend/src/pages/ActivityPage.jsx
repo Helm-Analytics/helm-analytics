@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { 
   Activity, 
@@ -16,7 +16,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { api } from '../api';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
 export default function ActivityPage() {
   const { selectedSite } = useOutletContext();
@@ -32,9 +32,9 @@ export default function ActivityPage() {
       const interval = setInterval(fetchActivities, 5000);
       return () => clearInterval(interval);
     }
-  }, [selectedSite, filter]);
+  }, [selectedSite?.id, fetchActivities]);
 
-  const fetchActivities = async () => {
+  const fetchActivities = useCallback(async () => {
     try {
       const response = await api.getActivityLog(selectedSite.id, filter);
       setActivities(response?.activities || []);
@@ -44,7 +44,7 @@ export default function ActivityPage() {
       console.error('Failed to fetch activities:', error);
       setLoading(false);
     }
-  };
+  }, [selectedSite?.id, filter]);
 
   const filteredActivities = useMemo(() => {
     if (!searchQuery) return activities;

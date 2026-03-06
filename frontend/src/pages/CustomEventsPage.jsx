@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { 
   Copy, 
@@ -17,11 +17,11 @@ import {
   ExternalLink,
   Plus
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { api } from '../api';
 
 function CustomEventsPageContent() {
-  const { selectedSite, darkMode } = useOutletContext();
+  const { selectedSite } = useOutletContext();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -34,9 +34,9 @@ function CustomEventsPageContent() {
     if (selectedSite?.id) {
       fetchEvents();
     }
-  }, [selectedSite, filter, timeRange]);
+  }, [selectedSite?.id, filter, timeRange, fetchEvents]);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     try {
       // Demo mode: return demo custom events data
@@ -52,7 +52,7 @@ function CustomEventsPageContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSite?.id, timeRange, filter]);
 
   const copyCode = async (text) => {
     try {

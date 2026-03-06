@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { api } from '../api';
 import { AlertTriangle, AlertOctagon, Terminal, Clock, ChevronDown, ChevronRight, Play, Sparkles } from 'lucide-react';
@@ -10,12 +10,12 @@ const ErrorsPage = () => {
   const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
-    if (selectedSite) {
+    if (selectedSite?.id) {
       fetchErrors();
     }
-  }, [selectedSite]);
+  }, [selectedSite?.id, fetchErrors]);
 
-  const fetchErrors = async () => {
+  const fetchErrors = useCallback(async () => {
     setLoading(true);
     try {
       const data = await api.getErrorStats(selectedSite.id);
@@ -25,7 +25,7 @@ const ErrorsPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedSite?.id]);
 
   const handleExpand = async (idx) => {
     const isExpanding = expandedId !== idx;
